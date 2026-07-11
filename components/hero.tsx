@@ -1,0 +1,56 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
+
+export function Hero() {
+  return (
+    <section className="relative min-h-screen overflow-hidden bg-charcoal text-paper">
+      <div
+        className="absolute inset-0 scale-105 bg-cover bg-center"
+        style={{
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=2200&q=80')"
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/75" />
+      <div className="relative z-10 flex min-h-screen items-end px-5 pb-16 pt-32 md:px-8 md:pb-24">
+        <div className="mx-auto w-full max-w-7xl">
+          <motion.p
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="mb-6 text-xs uppercase tracking-[0.32em] text-white/70"
+          >
+            Architecture / Interiors / Landscape
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 42 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.95, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+            className="max-w-5xl font-serif text-6xl leading-[0.95] text-balance md:text-8xl lg:text-9xl"
+          >
+            Formal spaces for a changing climate.
+          </motion.h1>
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            className="mt-10 flex flex-col gap-5 md:flex-row md:items-center md:justify-between"
+          >
+            <p className="max-w-xl text-base leading-8 text-white/72 md:text-lg">
+              A client-facing studio prototype for architecture, interiors, exteriors, and landscape portfolios.
+            </p>
+            <Link
+              href="/projects"
+              className="inline-flex w-fit items-center gap-3 border border-white/40 px-6 py-4 text-xs uppercase tracking-[0.22em] transition hover:bg-white hover:text-ink"
+            >
+              View projects <ArrowUpRight size={16} />
+            </Link>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
