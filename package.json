@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@studio-freight/lenis": "^1.0.42",
     "clsx": "^2.1.1",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.468.0",

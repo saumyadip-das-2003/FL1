@@ -20,6 +20,7 @@ export default function ProjectDetailPage({ params }: { params: { slug: string }
   }
 
   const nextProject = getNextProject(project.slug);
+  const placeholderVideoId = "OP_fVIUTr9Y";
 
   return (
     <main className="bg-paper pt-20 transition-colors dark:bg-charcoal">
@@ -62,25 +63,27 @@ export default function ProjectDetailPage({ params }: { params: { slug: string }
         </div>
       </section>
 
-      {project.video && (
-        <section className="px-5 pb-20 md:px-8">
-          <div className="mx-auto max-w-7xl">
-            <div className="aspect-video overflow-hidden bg-black">
-              <iframe
-                src={`${project.video}?autoplay=0&mute=1&controls=1`}
-                title={`${project.title} video`}
-                className="h-full w-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
+      <section className="px-5 pb-20 md:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-4 flex items-end justify-between gap-6">
+            <p className="text-xs uppercase tracking-[0.24em] text-muted">Project Film</p>
+            <p className="hidden text-sm text-muted md:block">Placeholder video position</p>
           </div>
-        </section>
-      )}
+          <div className="aspect-video overflow-hidden bg-black">
+            <iframe
+              src={`https://www.youtube.com/embed/${placeholderVideoId}?autoplay=0&mute=1&controls=1&modestbranding=1&rel=0`}
+              title={`${project.title} video`}
+              className="h-full w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      </section>
 
       <section className="px-5 pb-24 md:px-8 md:pb-32">
         <div className="mx-auto max-w-7xl">
-          <LightboxGallery images={project.gallery} title={project.title} />
+          <LightboxGallery project={project} />
         </div>
       </section>
 
