@@ -133,12 +133,12 @@ export function ProjectListItem({ project }: { project: Project }) {
             transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <div className="mt-8 bg-white py-5 dark:bg-[#0d0d0d] md:py-7">
-              <div className="relative">
+            <div className="mx-auto mt-8 max-w-5xl bg-white py-5 dark:bg-[#0d0d0d] md:py-7">
+              <div className="relative overflow-hidden border border-black/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setExpanded(false)}
-                  className="absolute right-5 top-5 z-20 flex h-10 w-10 items-center justify-center border border-black/15 bg-white/90 backdrop-blur transition hover:bg-ink hover:text-paper dark:border-white/15 dark:bg-charcoal/90 dark:hover:bg-paper dark:hover:text-ink"
+                  className="absolute right-3 top-3 z-20 flex h-10 w-10 items-center justify-center border border-black/15 bg-white/90 backdrop-blur transition hover:bg-ink hover:text-paper dark:border-white/15 dark:bg-charcoal/90 dark:hover:bg-paper dark:hover:text-ink"
                   aria-label={`Minimize ${project.title}`}
                 >
                   <ChevronUp size={18} />
@@ -151,12 +151,12 @@ export function ProjectListItem({ project }: { project: Project }) {
                   onPointerUp={stopDragging}
                   onPointerCancel={stopDragging}
                   onPointerLeave={stopDragging}
-                  className="flex cursor-grab select-none snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-5 active:cursor-grabbing md:gap-7 md:px-8"
+                  className="flex h-[320px] cursor-grab select-none snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-hidden p-4 active:cursor-grabbing md:h-[390px] md:gap-5 md:p-5"
                 >
-                  <section className="grid min-h-[420px] w-[76vw] max-w-[300px] shrink-0 snap-start place-items-center border-r border-black/10 pr-5 text-center dark:border-white/10">
+                  <section className="grid h-full w-[210px] shrink-0 snap-start place-items-center border-r border-black/10 pr-4 text-center dark:border-white/10 md:w-[240px]">
                     <div>
                       <ProjectMark title={project.title} />
-                      <h3 className="mt-7 font-sans text-2xl leading-tight">{project.title}</h3>
+                      <h3 className="mt-6 font-sans text-xl leading-tight md:text-2xl">{project.title}</h3>
                       <p className="mt-3 text-base uppercase text-muted">{project.location}</p>
                       <ProjectMeta project={project} />
                     </div>
@@ -165,13 +165,13 @@ export function ProjectListItem({ project }: { project: Project }) {
                   {images.map((image, index) => (
                     <section
                       key={image}
-                      className="relative h-[420px] w-[82vw] max-w-[820px] shrink-0 snap-center overflow-hidden bg-black md:h-[500px] md:w-[56vw]"
+                      className="relative h-full w-[78vw] max-w-[560px] shrink-0 snap-center overflow-hidden bg-black md:w-[560px]"
                     >
                       <Image
                         src={image}
                         alt={`${project.title} slide ${index + 1}`}
                         fill
-                        sizes="(min-width: 1024px) 56vw, 82vw"
+                        sizes="(min-width: 768px) 560px, 78vw"
                         className="object-cover"
                         priority={index === 0}
                       />
@@ -181,9 +181,9 @@ export function ProjectListItem({ project }: { project: Project }) {
                     </section>
                   ))}
 
-                  <section className="flex min-h-[420px] w-[78vw] max-w-[420px] shrink-0 snap-center items-center bg-white px-2 dark:bg-[#0d0d0d] md:w-[30vw]">
+                  <section className="flex h-full w-[78vw] max-w-[380px] shrink-0 snap-center items-center overflow-y-auto bg-white px-2 dark:bg-[#0d0d0d] md:w-[380px]">
                     <div>
-                      <p className="mb-7 text-xl leading-7">{project.excerpt}</p>
+                      <p className="mb-5 text-lg leading-7">{project.excerpt}</p>
                       <p className="text-base leading-7 text-ink/85 dark:text-paper/82">{project.description}</p>
                       <p className="mt-6 text-base leading-7 text-ink/85 dark:text-paper/82">
                         The project explores spatial clarity, climate-aware envelope design, and a measured relationship
@@ -192,7 +192,7 @@ export function ProjectListItem({ project }: { project: Project }) {
                     </div>
                   </section>
 
-                  <section className="flex min-h-[420px] w-[82vw] max-w-[760px] shrink-0 snap-center items-center md:w-[50vw]">
+                  <section className="flex h-full w-[78vw] max-w-[560px] shrink-0 snap-center items-center md:w-[560px]">
                     <div className="w-full">
                       <p className="mb-3 text-xs uppercase tracking-[0.2em] text-muted">Video</p>
                       <div className="aspect-video overflow-hidden bg-black">

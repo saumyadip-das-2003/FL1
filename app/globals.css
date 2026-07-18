@@ -16,12 +16,14 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
   min-height: 100vh;
   background: #f8f7f4;
   color: #111111;
+  overflow-x: hidden;
 }
 
 .dark body {
