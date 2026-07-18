@@ -10,7 +10,7 @@ export function Hero() {
   return (
     <section className="relative min-h-screen overflow-hidden bg-charcoal text-paper">
       <div
-        className="absolute inset-0 bg-cover bg-center"
+        className="absolute inset-0 bg-cover bg-center md:hidden"
         style={{
           backgroundImage:
             "url('https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=2200&q=80')"
@@ -19,10 +19,10 @@ export function Hero() {
       <iframe
         src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&playsinline=1&rel=0`}
         title="Architecture studio background video"
-        className="pointer-events-none absolute left-1/2 top-1/2 hidden aspect-video h-[120vh] min-h-full w-[213.34vh] min-w-full -translate-x-1/2 -translate-y-1/2 object-cover opacity-70 md:block"
+        className="pointer-events-none absolute left-1/2 top-1/2 hidden aspect-video h-[120vh] min-h-full w-[213.34vh] min-w-full -translate-x-1/2 -translate-y-1/2 object-cover md:block"
         allow="autoplay; encrypted-media; picture-in-picture"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/75" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/28 via-black/18 to-black/72" />
       <div className="relative z-10 flex min-h-screen items-end px-5 pb-16 pt-32 md:px-8 md:pb-24">
         <div className="mx-auto w-full max-w-7xl">
           <motion.p

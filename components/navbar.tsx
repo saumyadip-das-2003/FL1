@@ -11,9 +11,6 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/projects", label: "Projects" },
-  { href: "/architecture", label: "Architecture" },
-  { href: "/interior", label: "Interior" },
-  { href: "/exterior", label: "Exterior" },
   { href: "/people", label: "People" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" }
@@ -36,15 +33,15 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "fixed left-0 right-0 top-0 z-50 transition-all duration-500",
+        "fixed left-0 right-0 top-0 z-50 border-b transition-all duration-500",
         scrolled || open
-          ? "bg-paper/92 shadow-sm backdrop-blur dark:bg-charcoal/90"
-          : "bg-transparent"
+          ? "border-black/10 bg-paper/94 shadow-sm backdrop-blur dark:border-white/10 dark:bg-charcoal/94"
+          : "border-white/10 bg-black/28 text-paper backdrop-blur-md"
       )}
     >
       <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 md:px-8">
         <Link href="/" aria-label="Atelier Northline home">
-          <BrandLogo />
+          <BrandLogo light={!scrolled && !open} />
         </Link>
 
         <div className="hidden items-center gap-8 lg:flex">
@@ -53,8 +50,11 @@ export function Navbar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "relative text-sm uppercase tracking-[0.18em] text-muted transition hover:text-ink dark:hover:text-paper",
-                pathname === item.href && "text-ink dark:text-paper"
+                "relative text-sm uppercase tracking-[0.18em] transition",
+                scrolled || open
+                  ? "text-muted hover:text-ink dark:hover:text-paper"
+                  : "text-white/80 hover:text-white",
+                pathname === item.href && (scrolled || open ? "text-ink dark:text-paper" : "text-white")
               )}
             >
               {item.label}
