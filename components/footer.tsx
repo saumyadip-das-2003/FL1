@@ -1,5 +1,6 @@
 import { SocialLinks } from "@/components/social-links";
 import { offices } from "@/lib/data";
+import Link from "next/link";
 
 export function Footer() {
   return (
@@ -27,6 +28,9 @@ export function Footer() {
             <div className="pt-3">
               <SocialLinks compact />
             </div>
+            <Link href="/admin/login" className="inline-block pt-4 text-xs uppercase tracking-[0.18em] text-muted underline">
+              Admin Login
+            </Link>
           </div>
         </div>
       </div>
