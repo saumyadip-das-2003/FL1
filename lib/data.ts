@@ -1,4 +1,5 @@
 export type ProjectCategory = "Architecture" | "Interior" | "Exterior" | "Landscape";
+export type ProjectSection = "Architecture" | "Interiors" | "Landscape" | "Planning" | "Products";
 
 export type Project = {
   slug: string;
@@ -6,6 +7,8 @@ export type Project = {
   location: string;
   year: string;
   category: ProjectCategory;
+  section?: ProjectSection;
+  subsection?: string;
   image: string;
   gallery: string[];
   excerpt: string;
@@ -15,6 +18,24 @@ export type Project = {
 
 export const categories: ProjectCategory[] = ["Architecture", "Interior", "Exterior", "Landscape"];
 
+export const projectTaxonomy: Record<ProjectSection, string[]> = {
+  Architecture: [
+    "Culture",
+    "Education",
+    "Work",
+    "Hospitality",
+    "Residential",
+    "Infrastructure",
+    "Space",
+    "Sports",
+    "Health"
+  ],
+  Interiors: [],
+  Landscape: ["Civic Spaces", "Parks", "Gardens", "Balconies & Terraces"],
+  Planning: ["Campus", "City", "Region"],
+  Products: ["Lighting", "Furniture", "Consumer Products", "Mobility", "Installations"]
+};
+
 export const projects: Project[] = [
   {
     slug: "meridian-pavilion",
@@ -22,6 +43,8 @@ export const projects: Project[] = [
     location: "Dhaka, Bangladesh",
     year: "2026",
     category: "Architecture",
+    section: "Architecture",
+    subsection: "Culture",
     image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1800&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1600&q=80",
@@ -39,6 +62,8 @@ export const projects: Project[] = [
     location: "Chittagong, Bangladesh",
     year: "2025",
     category: "Exterior",
+    section: "Architecture",
+    subsection: "Residential",
     image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1800&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=80",
@@ -55,6 +80,7 @@ export const projects: Project[] = [
     location: "Singapore",
     year: "2024",
     category: "Interior",
+    section: "Interiors",
     image: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1800&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=1600&q=80",
@@ -71,6 +97,8 @@ export const projects: Project[] = [
     location: "Sylhet, Bangladesh",
     year: "2025",
     category: "Landscape",
+    section: "Landscape",
+    subsection: "Civic Spaces",
     image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1800&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1600&q=80",
@@ -87,6 +115,8 @@ export const projects: Project[] = [
     location: "Kuala Lumpur, Malaysia",
     year: "2023",
     category: "Architecture",
+    section: "Architecture",
+    subsection: "Work",
     image: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1800&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=80",
@@ -103,6 +133,7 @@ export const projects: Project[] = [
     location: "Cox's Bazar, Bangladesh",
     year: "2024",
     category: "Interior",
+    section: "Interiors",
     image: "https://images.unsplash.com/photo-1600210491369-e753d80a41f3?auto=format&fit=crop&w=1800&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=1600&q=80",
@@ -119,6 +150,8 @@ export const projects: Project[] = [
     location: "Dubai, UAE",
     year: "2026",
     category: "Exterior",
+    section: "Architecture",
+    subsection: "Infrastructure",
     image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1479839672679-a46483c0e7c8?auto=format&fit=crop&w=1600&q=80",
@@ -135,6 +168,8 @@ export const projects: Project[] = [
     location: "Rajshahi, Bangladesh",
     year: "2022",
     category: "Landscape",
+    section: "Planning",
+    subsection: "Campus",
     image: "https://images.unsplash.com/photo-1498429089284-41f8cf3ffd39?auto=format&fit=crop&w=1800&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80",
@@ -151,6 +186,8 @@ export const projects: Project[] = [
     location: "Tokyo, Japan",
     year: "2023",
     category: "Architecture",
+    section: "Products",
+    subsection: "Installations",
     image: "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1800&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1600&q=80",

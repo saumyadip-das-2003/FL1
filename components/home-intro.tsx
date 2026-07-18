@@ -53,12 +53,6 @@ export function HomeIntro({ children }: { children: React.ReactNode }) {
               className="absolute origin-top-left text-left"
             >
               <BrandLogo light className="text-paper" />
-              <motion.p
-                animate={entering ? { opacity: 0, y: -8 } : { opacity: 1, y: 0 }}
-                className="mt-4 text-center text-[9px] uppercase tracking-[0.22em] text-white/58"
-              >
-                Click to enter
-              </motion.p>
             </motion.div>
           </motion.button>
         )}

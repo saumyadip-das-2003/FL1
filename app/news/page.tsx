@@ -1,40 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Reveal } from "@/components/reveal";
-
-const news = [
-  {
-    title: "Meridian Pavilion shortlisted for a regional civic design award",
-    date: "July 2026",
-    category: "Awards",
-    image: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1400&q=80",
-    excerpt:
-      "The placeholder pavilion study has been recognized for its public ground strategy and climate-responsive envelope."
-  },
-  {
-    title: "Studio research note: shaded thresholds in humid cities",
-    date: "June 2026",
-    category: "Research",
-    image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1400&q=80",
-    excerpt:
-      "A short dummy publication outlining how verandas, arcades, and deep facades can extend civic comfort."
-  },
-  {
-    title: "Atelier Northline opens a temporary project room in Singapore",
-    date: "May 2026",
-    category: "Studio",
-    image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1400&q=80",
-    excerpt:
-      "The temporary workspace supports hospitality interiors, cultural competitions, and regional consultant workshops."
-  },
-  {
-    title: "Greenline Campus landscape framework moves into documentation",
-    date: "April 2026",
-    category: "Projects",
-    image: "https://images.unsplash.com/photo-1498429089284-41f8cf3ffd39?auto=format&fit=crop&w=1400&q=80",
-    excerpt:
-      "The campus landscape proposal advances with rain gardens, shaded walks, and outdoor teaching rooms."
-  }
-];
+import { newsItems } from "@/lib/news";
 
 export default function NewsPage() {
   return (
@@ -48,20 +15,23 @@ export default function NewsPage() {
         </Reveal>
 
         <div className="mt-16 grid gap-10">
-          {news.map((item, index) => (
+          {newsItems.map((item, index) => (
             <Reveal key={item.title} delay={index * 0.05}>
-              <article className="grid gap-6 border-t border-black/10 pt-8 dark:border-white/10 md:grid-cols-[320px_1fr] md:items-start">
+              <Link
+                href={`/news/${item.slug}`}
+                className="group grid gap-6 border-t border-black/10 pt-8 dark:border-white/10 md:grid-cols-[320px_1fr] md:items-start"
+              >
                 <div className="relative aspect-[16/10] overflow-hidden bg-black">
-                  <Image src={item.image} alt={item.title} fill sizes="(min-width: 768px) 320px, 100vw" className="object-cover" />
+                  <Image src={item.image} alt={item.title} fill sizes="(min-width: 768px) 320px, 100vw" className="object-cover transition duration-500 group-hover:scale-105" />
                 </div>
                 <div className="max-w-3xl">
                   <p className="text-xs uppercase tracking-[0.22em] text-muted">
                     {item.category} / {item.date}
                   </p>
-                  <h2 className="mt-4 font-serif text-4xl leading-tight md:text-5xl">{item.title}</h2>
+                  <h2 className="mt-4 font-serif text-4xl leading-tight transition group-hover:text-muted md:text-5xl">{item.title}</h2>
                   <p className="mt-5 text-lg leading-8 text-muted">{item.excerpt}</p>
                 </div>
-              </article>
+              </Link>
             </Reveal>
           ))}
         </div>
