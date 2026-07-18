@@ -127,6 +127,17 @@ export function ProjectListItem({ project }: { project: Project }) {
     });
   }
 
+  function captionFor(index: number) {
+    const captions = [
+      `${project.title} primary view, showing the project in its surrounding context.`,
+      `Material and spatial study for ${project.title}, focused on atmosphere and envelope detail.`,
+      `Interior and threshold sequence documenting how light, proportion, and circulation shape the project.`,
+      `Landscape and approach view for ${project.title}, showing the relationship between building and site.`
+    ];
+
+    return captions[index] ?? `${project.title} project image ${index + 1}.`;
+  }
+
   return (
     <motion.article
       layout
@@ -249,23 +260,28 @@ export function ProjectListItem({ project }: { project: Project }) {
                   }`}
                 >
                     {images.map((image, index) => (
-                      <section
-                        key={image}
-                        className="relative h-full w-[78vw] max-w-[680px] shrink-0 snap-center overflow-hidden bg-black md:w-[680px]"
-                      >
-                        <Image
-                          src={image}
-                          alt={`${project.title} slide ${index + 1}`}
-                          fill
-                          sizes="(min-width: 768px) 680px, 78vw"
-                        className="object-cover"
-                        draggable={false}
-                        priority={index === 0}
-                      />
-                        <div className="absolute bottom-4 left-4 bg-black/70 px-3 py-2 text-xs uppercase tracking-[0.18em] text-paper">
-                          Image {index + 1} / {images.length}
-                        </div>
-                      </section>
+                      <div key={image} className="contents">
+                        <section className="relative h-full w-[78vw] max-w-[680px] shrink-0 snap-center overflow-hidden bg-black md:w-[680px]">
+                          <Image
+                            src={image}
+                            alt={`${project.title} slide ${index + 1}`}
+                            fill
+                            sizes="(min-width: 768px) 680px, 78vw"
+                            className="object-cover"
+                            draggable={false}
+                            priority={index === 0}
+                          />
+                          <div className="absolute bottom-4 left-4 bg-black/70 px-3 py-2 text-xs uppercase tracking-[0.18em] text-paper">
+                            Image {index + 1} / {images.length}
+                          </div>
+                        </section>
+                        <section className="flex h-full w-[68vw] max-w-[360px] shrink-0 snap-center items-center bg-white px-6 text-ink dark:bg-[#0d0d0d] dark:text-paper md:w-[360px]">
+                          <div>
+                            <p className="text-xs uppercase tracking-[0.22em] text-muted">Caption</p>
+                            <p className="mt-5 text-lg leading-8">{captionFor(index)}</p>
+                          </div>
+                        </section>
+                      </div>
                     ))}
 
                     <section className="no-scrollbar flex h-full w-[78vw] max-w-[430px] shrink-0 snap-center items-center overflow-y-auto bg-white px-2 text-ink dark:bg-[#0d0d0d] dark:text-paper md:w-[430px]">

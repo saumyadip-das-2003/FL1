@@ -96,7 +96,7 @@ export function Navbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="font-serif text-4xl text-ink transition hover:translate-x-2 dark:text-paper"
+                  className="font-serif text-2xl text-ink transition hover:translate-x-2 dark:text-paper"
                 >
                   {item.label}
                 </Link>
