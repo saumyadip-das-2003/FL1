@@ -86,54 +86,87 @@ export function ProjectListItem({ project }: { project: Project }) {
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="mx-auto grid max-w-5xl gap-7 md:grid-cols-[210px_minmax(0,720px)] md:items-start">
-        <div className="text-center md:pt-1">
-          <button type="button" onClick={() => setExpanded((value) => !value)} aria-label={`Toggle ${project.title}`}>
-            <ProjectMark title={project.title} />
-          </button>
-          <button type="button" onClick={() => setExpanded((value) => !value)} className="mt-6 block w-full">
-            <h2 className="font-sans text-xl leading-tight tracking-normal">{project.title}</h2>
-            <p className="mt-3 text-sm uppercase tracking-normal text-muted">{project.location}</p>
-          </button>
-          <button
-            type="button"
-            onClick={() => setExpanded((value) => !value)}
-            className="mx-auto mt-8 flex h-10 w-10 items-center justify-center border border-black/15 transition hover:bg-ink hover:text-paper dark:border-white/15 dark:hover:bg-paper dark:hover:text-ink"
-            aria-label={expanded ? `Minimize ${project.title}` : `Expand ${project.title}`}
-          >
-            {expanded ? <Minus size={18} /> : <Plus size={18} />}
-          </button>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => {
-            setExpanded(true);
-          }}
-          className="group relative aspect-[16/10] overflow-hidden bg-black"
-          aria-label={`Expand ${project.title}`}
-        >
-          <Image
-            src={project.image}
-            alt={project.title}
-            fill
-            sizes="(min-width: 768px) 720px, 100vw"
-            className="object-cover transition duration-500 group-hover:scale-[1.025]"
-          />
-        </button>
-      </div>
-
       <AnimatePresence initial={false}>
-        {expanded && (
+        {!expanded ? (
           <motion.div
+            key="collapsed"
             layout
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="mx-auto grid max-w-5xl gap-7 md:grid-cols-[210px_minmax(0,720px)] md:items-start"
           >
-            <div className="mx-auto mt-8 max-w-5xl bg-white py-5 dark:bg-[#0d0d0d] md:py-7">
+            <div className="text-center md:pt-1">
+              <button type="button" onClick={() => setExpanded(true)} aria-label={`Expand ${project.title}`}>
+                <ProjectMark title={project.title} />
+              </button>
+              <button type="button" onClick={() => setExpanded(true)} className="mt-6 block w-full">
+                <h2 className="font-sans text-xl leading-tight tracking-normal">{project.title}</h2>
+                <p className="mt-3 text-sm uppercase tracking-normal text-muted">{project.location}</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => setExpanded(true)}
+                className="mx-auto mt-8 flex h-10 w-10 items-center justify-center border border-black/15 transition hover:bg-ink hover:text-paper dark:border-white/15 dark:hover:bg-paper dark:hover:text-ink"
+                aria-label={`Expand ${project.title}`}
+              >
+                <Plus size={18} />
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setExpanded(true)}
+              className="group relative aspect-[16/10] overflow-hidden bg-black"
+              aria-label={`Expand ${project.title}`}
+            >
+              <Image
+                src={project.image}
+                alt={project.title}
+                fill
+                sizes="(min-width: 768px) 720px, 100vw"
+                className="object-cover transition duration-500 group-hover:scale-[1.025]"
+              />
+            </button>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="expanded"
+            layout
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
+            className="mx-auto max-w-5xl overflow-hidden"
+          >
+            <div className="grid gap-7 md:grid-cols-[210px_minmax(0,780px)] md:items-start">
+              <div className="text-center md:pt-1">
+                <ProjectMark title={project.title} />
+                <h2 className="mt-6 font-sans text-xl leading-tight tracking-normal">{project.title}</h2>
+                <p className="mt-3 text-sm uppercase tracking-normal text-muted">{project.location}</p>
+                <button
+                  type="button"
+                  onClick={() => setExpanded(false)}
+                  className="mx-auto mt-8 flex h-10 w-10 items-center justify-center border border-black/15 transition hover:bg-ink hover:text-paper dark:border-white/15 dark:hover:bg-paper dark:hover:text-ink"
+                  aria-label={`Minimize ${project.title}`}
+                >
+                  <Minus size={18} />
+                </button>
+              </div>
+
+              <div className="relative aspect-[16/9] overflow-hidden bg-black">
+                <Image
+                  src={project.image}
+                  alt={project.title}
+                  fill
+                  sizes="(min-width: 768px) 780px, 100vw"
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            </div>
+
+            <div className="mt-5 bg-white py-5 dark:bg-[#0d0d0d] md:py-6">
               <div className="relative overflow-hidden border border-black/10 dark:border-white/10">
                 <button
                   type="button"
