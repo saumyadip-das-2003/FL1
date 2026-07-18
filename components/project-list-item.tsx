@@ -47,9 +47,10 @@ function ProjectMeta({ project }: { project: Project }) {
 
 export function ProjectListItem({ project }: { project: Project }) {
   const [expanded, setExpanded] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const images = useMemo(() => [project.image, ...project.gallery], [project.gallery, project.image]);
   const stripRef = useRef<HTMLDivElement>(null);
-  const dragState = useRef({ active: false, startX: 0, scrollLeft: 0 });
+  const dragState = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 });
 
   function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
     if (!stripRef.current) {
@@ -58,9 +59,11 @@ export function ProjectListItem({ project }: { project: Project }) {
 
     dragState.current = {
       active: true,
+      moved: false,
       startX: event.clientX,
       scrollLeft: stripRef.current.scrollLeft
     };
+    setIsDragging(true);
     stripRef.current.setPointerCapture(event.pointerId);
   }
 
@@ -70,11 +73,15 @@ export function ProjectListItem({ project }: { project: Project }) {
     }
 
     const distance = event.clientX - dragState.current.startX;
+    if (Math.abs(distance) > 4) {
+      dragState.current.moved = true;
+    }
     stripRef.current.scrollLeft = dragState.current.scrollLeft - distance;
   }
 
   function stopDragging() {
     dragState.current.active = false;
+    window.setTimeout(() => setIsDragging(false), 80);
   }
 
   function slideBy(direction: "previous" | "next") {
@@ -96,16 +103,21 @@ export function ProjectListItem({ project }: { project: Project }) {
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+      transition={{
+        duration: 0.34,
+        ease: [0.22, 1, 0.36, 1],
+        layout: { duration: 0.58, ease: [0.22, 1, 0.36, 1] }
+      }}
     >
       <AnimatePresence initial={false}>
         {!expanded ? (
           <motion.div
             key="collapsed"
             layout
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, scale: 0.985, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.985, y: -8 }}
+            transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
             className="mx-auto grid max-w-5xl gap-7 md:grid-cols-[210px_minmax(0,720px)] md:items-start"
           >
             <div className="text-center md:pt-1">
@@ -145,10 +157,10 @@ export function ProjectListItem({ project }: { project: Project }) {
           <motion.div
             key="expanded"
             layout
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, scale: 0.985, y: 18 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.985, y: -10 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="mx-auto max-w-5xl overflow-hidden"
           >
             <div className="grid gap-5 bg-white text-ink dark:bg-[#0d0d0d] dark:text-paper md:grid-cols-[210px_minmax(0,840px)] md:items-stretch">
@@ -197,11 +209,12 @@ export function ProjectListItem({ project }: { project: Project }) {
                     ref={stripRef}
                     onPointerDown={onPointerDown}
                     onPointerMove={onPointerMove}
-                    onPointerUp={stopDragging}
-                    onPointerCancel={stopDragging}
-                    onPointerLeave={stopDragging}
-                    className="no-scrollbar flex h-[380px] cursor-grab select-none snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-hidden p-4 active:cursor-grabbing md:h-[520px] md:gap-5 md:p-5"
-                  >
+                  onPointerUp={stopDragging}
+                  onPointerCancel={stopDragging}
+                  onPointerLeave={stopDragging}
+                  style={{ touchAction: "pan-x" }}
+                  className="no-scrollbar flex h-[380px] cursor-grab select-none snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-hidden scroll-smooth p-4 active:cursor-grabbing md:h-[520px] md:gap-5 md:p-5"
+                >
                     {images.map((image, index) => (
                       <section
                         key={image}
@@ -212,9 +225,10 @@ export function ProjectListItem({ project }: { project: Project }) {
                           alt={`${project.title} slide ${index + 1}`}
                           fill
                           sizes="(min-width: 768px) 680px, 78vw"
-                          className="object-cover"
-                          priority={index === 0}
-                        />
+                        className="object-cover"
+                        draggable={false}
+                        priority={index === 0}
+                      />
                         <div className="absolute bottom-4 left-4 bg-black/70 px-3 py-2 text-xs uppercase tracking-[0.18em] text-paper">
                           Image {index + 1} / {images.length}
                         </div>
@@ -239,9 +253,9 @@ export function ProjectListItem({ project }: { project: Project }) {
                           <iframe
                             src={`https://www.youtube.com/embed/${placeholderVideoId}?autoplay=0&mute=1&controls=1&modestbranding=1&rel=0`}
                             title={`${project.title} video`}
-                            className="h-full w-full"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
+                            className={isDragging ? "pointer-events-none h-full w-full" : "h-full w-full"}
                           />
                         </div>
                       </div>
