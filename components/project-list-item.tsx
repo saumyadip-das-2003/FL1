@@ -80,8 +80,27 @@ export function ProjectListItem({ project }: { project: Project }) {
   }
 
   function stopDragging() {
+    if (!stripRef.current) {
+      dragState.current.active = false;
+      setIsDragging(false);
+      return;
+    }
+
     dragState.current.active = false;
-    window.setTimeout(() => setIsDragging(false), 80);
+    const strip = stripRef.current;
+    const slides = Array.from(strip.children) as HTMLElement[];
+    const nearest = slides.reduce(
+      (closest, slide) => {
+        const distance = Math.abs(slide.offsetLeft - strip.scrollLeft);
+        return distance < closest.distance ? { slide, distance } : closest;
+      },
+      { slide: slides[0], distance: Number.POSITIVE_INFINITY }
+    );
+
+    setIsDragging(false);
+    if (nearest.slide) {
+      strip.scrollTo({ left: nearest.slide.offsetLeft, behavior: "smooth" });
+    }
   }
 
   function slideBy(direction: "previous" | "next") {
@@ -213,7 +232,9 @@ export function ProjectListItem({ project }: { project: Project }) {
                   onPointerCancel={stopDragging}
                   onPointerLeave={stopDragging}
                   style={{ touchAction: "pan-x" }}
-                  className="no-scrollbar flex h-[380px] cursor-grab select-none snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-hidden scroll-smooth p-4 active:cursor-grabbing md:h-[520px] md:gap-5 md:p-5"
+                  className={`no-scrollbar flex h-[380px] cursor-grab select-none gap-4 overflow-x-auto overflow-y-hidden p-4 active:cursor-grabbing md:h-[520px] md:gap-5 md:p-5 ${
+                    isDragging ? "snap-none scroll-auto" : "snap-x snap-mandatory scroll-smooth"
+                  }`}
                 >
                     {images.map((image, index) => (
                       <section
