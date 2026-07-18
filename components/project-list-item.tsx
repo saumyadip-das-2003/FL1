@@ -6,7 +6,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Project } from "@/lib/data";
-import { cn } from "@/lib/utils";
 
 const placeholderVideoId = "OP_fVIUTr9Y";
 
@@ -49,7 +48,6 @@ function ProjectMeta({ project }: { project: Project }) {
 
 export function ProjectListItem({ project }: { project: Project }) {
   const [expanded, setExpanded] = useState(false);
-  const [activeImage, setActiveImage] = useState(project.image);
   const images = useMemo(() => [project.image, ...project.gallery], [project.gallery, project.image]);
 
   return (
@@ -83,7 +81,6 @@ export function ProjectListItem({ project }: { project: Project }) {
         <button
           type="button"
           onClick={() => {
-            setActiveImage(project.image);
             setExpanded(true);
           }}
           className="group relative aspect-[16/10] overflow-hidden bg-black"
@@ -109,102 +106,77 @@ export function ProjectListItem({ project }: { project: Project }) {
             transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <div className="mt-11 bg-white py-8 dark:bg-[#0d0d0d] md:py-12">
-              <div className="mx-auto grid max-w-[1680px] gap-8 px-0 md:grid-cols-[210px_minmax(520px,1.05fr)_360px_minmax(360px,0.85fr)] md:items-start md:px-8">
-                <aside className="px-5 text-center md:px-0">
-                  <ProjectMark title={project.title} />
-                  <h3 className="mt-7 font-sans text-2xl leading-tight">{project.title}</h3>
-                  <p className="mt-3 text-base uppercase text-muted">{project.location}</p>
-                  <ProjectMeta project={project} />
-                  <div className="mt-16">
-                    <p className="text-xs uppercase tracking-[0.16em] text-muted">Share</p>
-                    <div className="mt-3 flex justify-center gap-1.5">
-                      {["M", "F", "in", "X"].map((item) => (
-                        <span key={item} className="flex h-5 w-5 items-center justify-center bg-black text-[10px] text-white">
-                          {item}
-                        </span>
-                      ))}
+            <div className="mt-11 bg-white py-7 dark:bg-[#0d0d0d] md:py-10">
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setExpanded(false)}
+                  className="absolute right-5 top-5 z-20 flex h-10 w-10 items-center justify-center border border-black/15 bg-white/90 backdrop-blur transition hover:bg-ink hover:text-paper dark:border-white/15 dark:bg-charcoal/90 dark:hover:bg-paper dark:hover:text-ink"
+                  aria-label={`Minimize ${project.title}`}
+                >
+                  <ChevronUp size={18} />
+                </button>
+
+                <div className="flex snap-x snap-mandatory gap-6 overflow-x-auto px-5 pb-5 md:gap-8 md:px-8">
+                  <section className="grid min-h-[560px] w-[78vw] max-w-[360px] shrink-0 snap-start place-items-center border-r border-black/10 pr-6 text-center dark:border-white/10">
+                    <div>
+                      <ProjectMark title={project.title} />
+                      <h3 className="mt-7 font-sans text-3xl leading-tight">{project.title}</h3>
+                      <p className="mt-3 text-base uppercase text-muted">{project.location}</p>
+                      <ProjectMeta project={project} />
                     </div>
-                  </div>
-                </aside>
+                  </section>
 
-                <div className="min-w-0 px-5 md:px-0">
-                  <motion.div layout className="relative aspect-[4/3] overflow-hidden bg-black">
-                    <Image
-                      src={activeImage}
-                      alt={`${project.title} expanded image`}
-                      fill
-                      sizes="(min-width: 1024px) 54vw, 100vw"
-                      className="object-cover"
-                      priority
-                    />
-                  </motion.div>
-                  <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
-                    {images.map((image, index) => (
-                      <button
-                        key={image}
-                        type="button"
-                        onClick={() => setActiveImage(image)}
-                        className={cn(
-                          "relative h-16 w-24 shrink-0 overflow-hidden border transition md:h-20 md:w-32",
-                          activeImage === image
-                            ? "border-ink dark:border-paper"
-                            : "border-black/10 opacity-65 hover:opacity-100 dark:border-white/10"
-                        )}
-                      >
-                        <Image src={image} alt={`${project.title} thumbnail ${index + 1}`} fill sizes="128px" className="object-cover" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="px-5 md:px-0">
-                  <div className="mb-7 flex items-start justify-between gap-5">
-                    <p className="text-lg leading-7">{project.excerpt}</p>
-                    <button
-                      type="button"
-                      onClick={() => setExpanded(false)}
-                      className="flex h-10 w-10 shrink-0 items-center justify-center border border-black/15 transition hover:bg-ink hover:text-paper dark:border-white/15 dark:hover:bg-paper dark:hover:text-ink"
-                      aria-label={`Minimize ${project.title}`}
+                  {images.map((image, index) => (
+                    <section
+                      key={image}
+                      className="relative min-h-[560px] w-[78vw] max-w-[980px] shrink-0 snap-center overflow-hidden bg-black md:w-[64vw]"
                     >
-                      <ChevronUp size={18} />
-                    </button>
-                  </div>
-                  <p className="text-base leading-7 text-ink/85 dark:text-paper/82">{project.description}</p>
-                  <p className="mt-6 text-base leading-7 text-ink/85 dark:text-paper/82">
-                    The project explores spatial clarity, climate-aware envelope design, and a measured relationship
-                    between public movement, landscape, and daily occupation.
-                  </p>
-                  <Link
-                    href={`/projects/${project.slug}`}
-                    className="mt-8 inline-flex items-center gap-3 border border-black/20 px-5 py-3 text-xs uppercase tracking-[0.18em] transition hover:bg-ink hover:text-paper dark:border-white/20 dark:hover:bg-paper dark:hover:text-ink"
-                  >
-                    Open detail page <ExternalLink size={15} />
-                  </Link>
-                </div>
-
-                <div className="grid gap-8 px-5 md:px-0">
-                  <div className="relative aspect-[4/3] overflow-hidden bg-black">
-                    <Image
-                      src={images[1] ?? project.image}
-                      alt={`${project.title} secondary view`}
-                      fill
-                      sizes="(min-width: 1024px) 420px, 100vw"
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <p className="mb-3 text-xs uppercase tracking-[0.2em] text-muted">Video</p>
-                    <div className="aspect-video overflow-hidden bg-black">
-                      <iframe
-                        src={`https://www.youtube.com/embed/${placeholderVideoId}?autoplay=0&mute=1&controls=1&modestbranding=1&rel=0`}
-                        title={`${project.title} video`}
-                        className="h-full w-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
+                      <Image
+                        src={image}
+                        alt={`${project.title} slide ${index + 1}`}
+                        fill
+                        sizes="(min-width: 1024px) 64vw, 78vw"
+                        className="object-cover"
+                        priority={index === 0}
                       />
+                      <div className="absolute bottom-4 left-4 bg-black/70 px-3 py-2 text-xs uppercase tracking-[0.18em] text-paper">
+                        Image {index + 1} / {images.length}
+                      </div>
+                    </section>
+                  ))}
+
+                  <section className="flex min-h-[560px] w-[78vw] max-w-[460px] shrink-0 snap-center items-center bg-white px-2 dark:bg-[#0d0d0d] md:w-[34vw]">
+                    <div>
+                      <p className="mb-7 text-xl leading-7">{project.excerpt}</p>
+                      <p className="text-base leading-7 text-ink/85 dark:text-paper/82">{project.description}</p>
+                      <p className="mt-6 text-base leading-7 text-ink/85 dark:text-paper/82">
+                        The project explores spatial clarity, climate-aware envelope design, and a measured relationship
+                        between public movement, landscape, and daily occupation.
+                      </p>
+                      <Link
+                        href={`/projects/${project.slug}`}
+                        className="mt-8 inline-flex items-center gap-3 border border-black/20 px-5 py-3 text-xs uppercase tracking-[0.18em] transition hover:bg-ink hover:text-paper dark:border-white/20 dark:hover:bg-paper dark:hover:text-ink"
+                      >
+                        Open detail page <ExternalLink size={15} />
+                      </Link>
                     </div>
-                  </div>
+                  </section>
+
+                  <section className="flex min-h-[560px] w-[78vw] max-w-[860px] shrink-0 snap-center items-center md:w-[56vw]">
+                    <div className="w-full">
+                      <p className="mb-3 text-xs uppercase tracking-[0.2em] text-muted">Video</p>
+                      <div className="aspect-video overflow-hidden bg-black">
+                        <iframe
+                          src={`https://www.youtube.com/embed/${placeholderVideoId}?autoplay=0&mute=1&controls=1&modestbranding=1&rel=0`}
+                          title={`${project.title} video`}
+                          className="h-full w-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                    </div>
+                  </section>
                 </div>
               </div>
             </div>
