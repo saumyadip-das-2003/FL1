@@ -27,7 +27,7 @@ export function HomeIntro({ children }: { children: React.ReactNode }) {
             onClick={enterSite}
           >
             <motion.div
-              initial={{ opacity: 0, x: "-50%", y: "-50%", scale: 2.85 }}
+              initial={{ opacity: 0, x: "-50%", y: "-50%", scale: 2.85, transformOrigin: "center center" }}
               animate={
                 entering
                   ? {
@@ -36,9 +36,18 @@ export function HomeIntro({ children }: { children: React.ReactNode }) {
                       top: 20,
                       x: 0,
                       y: 0,
-                      scale: 1
+                      scale: 1,
+                      transformOrigin: "top left"
                     }
-                  : { opacity: 1, left: "50%", top: "50%", x: "-50%", y: "-50%", scale: 2.85 }
+                  : {
+                      opacity: 1,
+                      left: "50%",
+                      top: "50%",
+                      x: "-50%",
+                      y: "-50%",
+                      scale: 2.85,
+                      transformOrigin: "center center"
+                    }
               }
               transition={{ duration: entering ? 0.72 : 0.8, ease: [0.22, 1, 0.36, 1] }}
               className="absolute origin-top-left text-left"
