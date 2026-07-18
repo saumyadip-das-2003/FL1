@@ -64,7 +64,7 @@ export default function ServicesPage() {
         <div className="mt-16 grid gap-7 md:grid-cols-2 xl:grid-cols-3">
           {services.map((service, index) => (
             <Reveal key={service.title} delay={index * 0.04}>
-              <article className="group overflow-hidden border border-black/10 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-soft dark:border-white/10 dark:bg-[#0d0d0d]">
+              <article className="group overflow-hidden border border-black/10 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-soft dark:border-white/10 dark:bg-[#1d1d1d]">
                 <div className="relative aspect-[16/10] overflow-hidden bg-black">
                   <Image
                     src={service.image}

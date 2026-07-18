@@ -12,7 +12,7 @@ const stats = [
 
 export function AboutTeaser() {
   return (
-    <section className="border-y border-black/10 bg-white px-5 py-24 transition-colors dark:border-white/10 dark:bg-[#0d0d0d] md:px-8 md:py-32">
+    <section className="border-y border-black/10 bg-white px-5 py-24 transition-colors dark:border-white/10 dark:bg-[#1d1d1d] md:px-8 md:py-32">
       <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[1fr_1.2fr] lg:items-end">
         <Reveal>
           <p className="text-xs uppercase tracking-[0.28em] text-muted">About the Studio</p>

@@ -209,7 +209,7 @@ export function ProjectListItem({ project }: { project: Project }) {
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="mx-auto max-w-5xl overflow-hidden"
           >
-            <div className="grid gap-5 bg-white text-ink dark:bg-[#0d0d0d] dark:text-paper md:grid-cols-[210px_minmax(0,840px)] md:items-stretch">
+            <div className="grid gap-5 bg-white text-ink dark:bg-[#1d1d1d] dark:text-paper md:grid-cols-[210px_minmax(0,840px)] md:items-stretch">
               <aside className="px-5 text-center md:px-0 md:pt-1">
                 <ProjectMark title={project.title} />
                 <h2 className="mt-6 font-sans text-xl leading-tight tracking-normal">{project.title}</h2>
@@ -263,7 +263,7 @@ export function ProjectListItem({ project }: { project: Project }) {
                     isDragging ? "snap-none scroll-auto" : "snap-x snap-mandatory scroll-smooth"
                   }`}
                 >
-                    <section data-slide className="no-scrollbar flex h-full w-[76vw] max-w-[430px] shrink-0 snap-center items-center overflow-y-auto bg-white px-6 text-ink dark:bg-[#0d0d0d] dark:text-paper md:w-[430px]">
+                    <section data-slide className="no-scrollbar flex h-full w-[76vw] max-w-[430px] shrink-0 snap-center items-center overflow-y-auto bg-white px-6 text-ink dark:bg-[#1d1d1d] dark:text-paper md:w-[430px]">
                       <div>
                         <p className="text-xs uppercase tracking-[0.22em] text-muted">Project Caption</p>
                         <p className="mt-5 text-lg leading-8 text-ink dark:text-paper">{project.excerpt}</p>
@@ -288,7 +288,7 @@ export function ProjectListItem({ project }: { project: Project }) {
                             Image {index + 1} / {images.length}
                           </div>
                         </section>
-                        <section data-slide className="flex h-full w-[68vw] max-w-[340px] shrink-0 snap-center items-center bg-white px-6 text-ink dark:bg-[#0d0d0d] dark:text-paper md:w-[340px]">
+                        <section data-slide className="flex h-full w-[68vw] max-w-[340px] shrink-0 snap-center items-center bg-white px-6 text-ink dark:bg-[#1d1d1d] dark:text-paper md:w-[340px]">
                           <div>
                             <p className="text-xs uppercase tracking-[0.22em] text-muted">Image Caption</p>
                             <p className="mt-5 text-lg leading-8">{captionFor(index)}</p>

@@ -37,8 +37,8 @@ export function Navbar() {
       className={cn(
         "fixed left-0 right-0 top-0 z-50 border-b transition-all duration-500",
         scrolled || open
-          ? "border-black/10 bg-white shadow-sm dark:border-white/10 dark:bg-black"
-          : "border-black/10 bg-white dark:border-white/10 dark:bg-black"
+          ? "border-black/10 bg-white shadow-sm dark:border-white/10 dark:bg-charcoal"
+          : "border-black/10 bg-white dark:border-white/10 dark:bg-charcoal"
       )}
     >
       <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 md:px-8">

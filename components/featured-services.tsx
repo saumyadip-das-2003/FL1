@@ -23,7 +23,7 @@ const services = [
 
 export function FeaturedServices() {
   return (
-    <section className="bg-white px-5 py-24 transition-colors dark:bg-[#0d0d0d] md:px-8 md:py-28">
+    <section className="bg-white px-5 py-24 transition-colors dark:bg-[#1d1d1d] md:px-8 md:py-28">
       <div className="mx-auto max-w-7xl">
         <Reveal>
           <div className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
