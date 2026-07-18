@@ -5,6 +5,7 @@ import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { BrandLogo } from "@/components/brand-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
@@ -42,11 +43,8 @@ export function Navbar() {
       )}
     >
       <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 md:px-8">
-        <Link href="/" className="group inline-flex flex-col leading-none">
-          <span className="font-serif text-2xl tracking-normal">Atelier Northline</span>
-          <span className="mt-1 text-[10px] uppercase tracking-[0.28em] text-muted transition group-hover:text-ink dark:group-hover:text-paper">
-            Architecture Studio
-          </span>
+        <Link href="/" aria-label="Atelier Northline home">
+          <BrandLogo />
         </Link>
 
         <div className="hidden items-center gap-8 lg:flex">

@@ -1,10 +1,9 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronUp, ExternalLink, Minus, Plus } from "lucide-react";
+import { ChevronUp, Minus, Plus } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { Project } from "@/lib/data";
 
 const placeholderVideoId = "OP_fVIUTr9Y";
@@ -49,6 +48,34 @@ function ProjectMeta({ project }: { project: Project }) {
 export function ProjectListItem({ project }: { project: Project }) {
   const [expanded, setExpanded] = useState(false);
   const images = useMemo(() => [project.image, ...project.gallery], [project.gallery, project.image]);
+  const stripRef = useRef<HTMLDivElement>(null);
+  const dragState = useRef({ active: false, startX: 0, scrollLeft: 0 });
+
+  function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
+    if (!stripRef.current) {
+      return;
+    }
+
+    dragState.current = {
+      active: true,
+      startX: event.clientX,
+      scrollLeft: stripRef.current.scrollLeft
+    };
+    stripRef.current.setPointerCapture(event.pointerId);
+  }
+
+  function onPointerMove(event: React.PointerEvent<HTMLDivElement>) {
+    if (!dragState.current.active || !stripRef.current) {
+      return;
+    }
+
+    const distance = event.clientX - dragState.current.startX;
+    stripRef.current.scrollLeft = dragState.current.scrollLeft - distance;
+  }
+
+  function stopDragging() {
+    dragState.current.active = false;
+  }
 
   return (
     <motion.article
@@ -106,7 +133,7 @@ export function ProjectListItem({ project }: { project: Project }) {
             transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <div className="mt-11 bg-white py-7 dark:bg-[#0d0d0d] md:py-10">
+            <div className="mt-8 bg-white py-5 dark:bg-[#0d0d0d] md:py-7">
               <div className="relative">
                 <button
                   type="button"
@@ -117,11 +144,19 @@ export function ProjectListItem({ project }: { project: Project }) {
                   <ChevronUp size={18} />
                 </button>
 
-                <div className="flex snap-x snap-mandatory gap-6 overflow-x-auto px-5 pb-5 md:gap-8 md:px-8">
-                  <section className="grid min-h-[560px] w-[78vw] max-w-[360px] shrink-0 snap-start place-items-center border-r border-black/10 pr-6 text-center dark:border-white/10">
+                <div
+                  ref={stripRef}
+                  onPointerDown={onPointerDown}
+                  onPointerMove={onPointerMove}
+                  onPointerUp={stopDragging}
+                  onPointerCancel={stopDragging}
+                  onPointerLeave={stopDragging}
+                  className="flex cursor-grab select-none snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-5 active:cursor-grabbing md:gap-7 md:px-8"
+                >
+                  <section className="grid min-h-[420px] w-[76vw] max-w-[300px] shrink-0 snap-start place-items-center border-r border-black/10 pr-5 text-center dark:border-white/10">
                     <div>
                       <ProjectMark title={project.title} />
-                      <h3 className="mt-7 font-sans text-3xl leading-tight">{project.title}</h3>
+                      <h3 className="mt-7 font-sans text-2xl leading-tight">{project.title}</h3>
                       <p className="mt-3 text-base uppercase text-muted">{project.location}</p>
                       <ProjectMeta project={project} />
                     </div>
@@ -130,13 +165,13 @@ export function ProjectListItem({ project }: { project: Project }) {
                   {images.map((image, index) => (
                     <section
                       key={image}
-                      className="relative min-h-[560px] w-[78vw] max-w-[980px] shrink-0 snap-center overflow-hidden bg-black md:w-[64vw]"
+                      className="relative h-[420px] w-[82vw] max-w-[820px] shrink-0 snap-center overflow-hidden bg-black md:h-[500px] md:w-[56vw]"
                     >
                       <Image
                         src={image}
                         alt={`${project.title} slide ${index + 1}`}
                         fill
-                        sizes="(min-width: 1024px) 64vw, 78vw"
+                        sizes="(min-width: 1024px) 56vw, 82vw"
                         className="object-cover"
                         priority={index === 0}
                       />
@@ -146,7 +181,7 @@ export function ProjectListItem({ project }: { project: Project }) {
                     </section>
                   ))}
 
-                  <section className="flex min-h-[560px] w-[78vw] max-w-[460px] shrink-0 snap-center items-center bg-white px-2 dark:bg-[#0d0d0d] md:w-[34vw]">
+                  <section className="flex min-h-[420px] w-[78vw] max-w-[420px] shrink-0 snap-center items-center bg-white px-2 dark:bg-[#0d0d0d] md:w-[30vw]">
                     <div>
                       <p className="mb-7 text-xl leading-7">{project.excerpt}</p>
                       <p className="text-base leading-7 text-ink/85 dark:text-paper/82">{project.description}</p>
@@ -154,16 +189,10 @@ export function ProjectListItem({ project }: { project: Project }) {
                         The project explores spatial clarity, climate-aware envelope design, and a measured relationship
                         between public movement, landscape, and daily occupation.
                       </p>
-                      <Link
-                        href={`/projects/${project.slug}`}
-                        className="mt-8 inline-flex items-center gap-3 border border-black/20 px-5 py-3 text-xs uppercase tracking-[0.18em] transition hover:bg-ink hover:text-paper dark:border-white/20 dark:hover:bg-paper dark:hover:text-ink"
-                      >
-                        Open detail page <ExternalLink size={15} />
-                      </Link>
                     </div>
                   </section>
 
-                  <section className="flex min-h-[560px] w-[78vw] max-w-[860px] shrink-0 snap-center items-center md:w-[56vw]">
+                  <section className="flex min-h-[420px] w-[82vw] max-w-[760px] shrink-0 snap-center items-center md:w-[50vw]">
                     <div className="w-full">
                       <p className="mb-3 text-xs uppercase tracking-[0.2em] text-muted">Video</p>
                       <div className="aspect-video overflow-hidden bg-black">
