@@ -27,7 +27,7 @@ export function HomeIntro({ children }: { children: React.ReactNode }) {
             onClick={enterSite}
           >
             <motion.div
-              initial={{ opacity: 0, x: "-50%", y: "-50%", scale: 2.85, transformOrigin: "center center" }}
+              initial={{ opacity: 0, x: "-50%", y: "-50%", scale: 2.25, transformOrigin: "center center" }}
               animate={
                 entering
                   ? {
@@ -45,7 +45,7 @@ export function HomeIntro({ children }: { children: React.ReactNode }) {
                       top: "50%",
                       x: "-50%",
                       y: "-50%",
-                      scale: 2.85,
+                      scale: 2.25,
                       transformOrigin: "center center"
                     }
               }
