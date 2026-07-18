@@ -4,9 +4,18 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, ChevronUp, Minus, Plus } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
-import type { Project } from "@/lib/data";
+import type { Project, ProjectMedia } from "@/lib/data";
 
 const placeholderVideoId = "OP_fVIUTr9Y";
+
+function youtubeEmbedUrl(source: string) {
+  const idMatch =
+    source.match(/youtu\.be\/([^?&]+)/) ??
+    source.match(/[?&]v=([^?&]+)/) ??
+    source.match(/embed\/([^?&]+)/);
+  const id = idMatch?.[1] ?? placeholderVideoId;
+  return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&modestbranding=1&playsinline=1&rel=0`;
+}
 
 function ProjectMark({ title }: { title: string }) {
   const letters = title
@@ -49,6 +58,24 @@ export function ProjectListItem({ project }: { project: Project }) {
   const [expanded, setExpanded] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const images = useMemo(() => [project.image, ...project.gallery], [project.gallery, project.image]);
+  const mediaItems = useMemo<ProjectMedia[]>(() => {
+    if (project.media?.length) {
+      return project.media;
+    }
+
+    return [
+      ...images.map((image, index) => ({
+        type: "image" as const,
+        source: image,
+        caption: captionFor(index)
+      })),
+      {
+        type: "video" as const,
+        source: project.video ?? "https://youtu.be/OP_fVIUTr9Y",
+        caption: `${project.title} placeholder project film.`
+      }
+    ];
+  }, [images, project.media, project.title, project.video]);
   const stripRef = useRef<HTMLDivElement>(null);
   const dragState = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 });
 
@@ -272,45 +299,42 @@ export function ProjectListItem({ project }: { project: Project }) {
                         </p>
                       </div>
                     </section>
-                    {images.map((image, index) => (
-                      <div key={image} className="contents">
+                    {mediaItems.map((media, index) => (
+                      <div key={`${media.type}-${media.source}-${index}`} className="contents">
                         <section data-slide className="relative h-full w-[78vw] max-w-[680px] shrink-0 snap-center overflow-hidden bg-black md:w-[680px]">
-                          <Image
-                            src={image}
-                            alt={`${project.title} slide ${index + 1}`}
-                            fill
-                            sizes="(min-width: 768px) 680px, 78vw"
-                            className="object-cover"
-                            draggable={false}
-                            priority={index === 0}
-                          />
+                          {media.type === "image" ? (
+                            <Image
+                              src={media.source}
+                              alt={`${project.title} media ${index + 1}`}
+                              fill
+                              sizes="(min-width: 768px) 680px, 78vw"
+                              className="object-cover"
+                              draggable={false}
+                              priority={index === 0}
+                            />
+                          ) : (
+                            <iframe
+                              src={youtubeEmbedUrl(media.source)}
+                              title={`${project.title} media video ${index + 1}`}
+                              allow="autoplay; encrypted-media; picture-in-picture"
+                              allowFullScreen
+                              className={isDragging ? "pointer-events-none h-full w-full" : "h-full w-full"}
+                            />
+                          )}
                           <div className="absolute bottom-4 left-4 bg-black/70 px-3 py-2 text-xs uppercase tracking-[0.18em] text-paper">
-                            Image {index + 1} / {images.length}
+                            {media.type} {index + 1} / {mediaItems.length}
                           </div>
                         </section>
                         <section data-slide className="flex h-full w-[68vw] max-w-[340px] shrink-0 snap-center items-center bg-white px-6 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[340px]">
                           <div>
-                            <p className="text-xs uppercase tracking-[0.22em] text-muted">Image Caption</p>
-                            <p className="mt-5 text-lg leading-8">{captionFor(index)}</p>
+                            <p className="text-xs uppercase tracking-[0.22em] text-muted">
+                              {media.type === "image" ? "Image Caption" : "Video Caption"}
+                            </p>
+                            <p className="mt-5 text-lg leading-8">{media.caption}</p>
                           </div>
                         </section>
                       </div>
                     ))}
-
-                    <section data-slide className="flex h-full w-[78vw] max-w-[680px] shrink-0 snap-center items-center md:w-[680px]">
-                      <div className="w-full">
-                        <p className="mb-3 text-xs uppercase tracking-[0.2em] text-muted">Video</p>
-                        <div className="aspect-video overflow-hidden bg-black">
-                          <iframe
-                            src={`https://www.youtube.com/embed/${placeholderVideoId}?autoplay=0&mute=1&controls=1&modestbranding=1&rel=0`}
-                            title={`${project.title} video`}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                            className={isDragging ? "pointer-events-none h-full w-full" : "h-full w-full"}
-                          />
-                        </div>
-                      </div>
-                    </section>
                   </div>
               </div>
             </div>

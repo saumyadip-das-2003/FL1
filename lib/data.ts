@@ -1,6 +1,12 @@
 export type ProjectCategory = "Architecture" | "Interior" | "Exterior" | "Landscape";
 export type ProjectSection = "Architecture" | "Interiors" | "Landscape" | "Planning" | "Products";
 
+export type ProjectMedia = {
+  type: "image" | "video";
+  source: string;
+  caption: string;
+};
+
 export type Project = {
   slug: string;
   title: string;
@@ -11,6 +17,7 @@ export type Project = {
   subsection?: string;
   image: string;
   gallery: string[];
+  media?: ProjectMedia[];
   excerpt: string;
   description: string;
   video?: string;

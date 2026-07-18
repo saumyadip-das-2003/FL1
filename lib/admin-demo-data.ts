@@ -1,6 +1,13 @@
 import { projects, team } from "@/lib/data";
 import { newsItems } from "@/lib/news";
 
+export type AdminMedia = {
+  id: string;
+  type: "image" | "video";
+  source: string;
+  caption: string;
+};
+
 export type AdminProject = {
   id: string;
   title: string;
@@ -9,8 +16,7 @@ export type AdminProject = {
   section: string;
   subsection: string;
   image: string;
-  gallery: string;
-  video: string;
+  media: AdminMedia[];
   description: string;
 };
 
@@ -45,9 +51,23 @@ export type AdminContent = {
     companyName: string;
     tagline: string;
     logoUrl: string;
+    homeHeadline: string;
+    homeTagline: string;
+    featuredProjectIds: string;
+    featuredServiceIds: string;
+    featuredNewsIds: string;
+    statYears: string;
+    statProjects: string;
+    statCountries: string;
+    aboutStudioProfile: string;
+    aboutMission: string;
+    aboutVision: string;
+    founderMessage: string;
+    founderImage: string;
     email: string;
     phone: string;
     address: string;
+    offices: string;
     whatsapp: string;
     facebook: string;
     instagram: string;
@@ -92,9 +112,25 @@ export function createSeedAdminContent(): AdminContent {
       companyName: "Atelier Northline",
       tagline: "Architecture Studio",
       logoUrl: "",
+      homeHeadline: "Formal spaces for a changing climate.",
+      homeTagline: "A client-facing studio prototype for architecture, interiors, exteriors, and landscape portfolios.",
+      featuredProjectIds: projects.slice(0, 3).map((project) => project.slug).join(", "),
+      featuredServiceIds: demoServices.map((service) => service.id).join(", "),
+      featuredNewsIds: newsItems.slice(0, 2).map((item) => item.slug).join(", "),
+      statYears: "14",
+      statProjects: "86",
+      statCountries: "11",
+      aboutStudioProfile:
+        "Atelier Northline is a multidisciplinary office working across civic architecture, private residences, hospitality interiors, exterior envelopes, and climate-responsive landscapes.",
+      aboutMission: "We pursue architecture that is formally clear, materially precise, and generous to daily life.",
+      aboutVision: "To shape calm, durable places that help cities adapt with intelligence and grace.",
+      founderMessage:
+        "Architecture should make complexity feel quietly resolved. This founder message can introduce the real practice, its origins, collaborators, and values.",
+      founderImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80",
       email: "studio@ateliernorthline.test",
       phone: "+880 1700 000 000",
       address: "House 18, Road 7, Gulshan, Dhaka",
+      offices: "Dhaka / House 18, Road 7, Gulshan\nSingapore / 22 Keong Saik Road\nDubai / Design District, Building 5",
       whatsapp: "https://wa.me/8801700000000",
       facebook: "https://facebook.com",
       instagram: "https://instagram.com",
@@ -109,8 +145,26 @@ export function createSeedAdminContent(): AdminContent {
       section: project.section ?? project.category,
       subsection: project.subsection ?? "",
       image: project.image,
-      gallery: project.gallery.join("\n"),
-      video: project.video ?? "https://youtu.be/OP_fVIUTr9Y",
+      media: [
+        {
+          id: `${project.slug}-cover`,
+          type: "image",
+          source: project.image,
+          caption: `${project.title} primary view in context.`
+        },
+        ...project.gallery.map((image, index) => ({
+          id: `${project.slug}-image-${index + 1}`,
+          type: "image" as const,
+          source: image,
+          caption: `${project.title} gallery image ${index + 1}.`
+        })),
+        {
+          id: `${project.slug}-video-1`,
+          type: "video",
+          source: project.video ?? "https://youtu.be/OP_fVIUTr9Y",
+          caption: `${project.title} placeholder project film.`
+        }
+      ],
       description: project.description
     })),
     services: demoServices,

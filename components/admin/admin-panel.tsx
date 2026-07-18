@@ -7,6 +7,7 @@ import {
   adminStorageKey,
   createSeedAdminContent,
   type AdminContent,
+  type AdminMedia,
   type AdminNews,
   type AdminPerson,
   type AdminProject,
@@ -32,9 +33,7 @@ const fieldMap: Record<CollectionKey, { key: string; label: string; textarea?: b
     { key: "year", label: "Year" },
     { key: "section", label: "Section" },
     { key: "subsection", label: "Subsection" },
-    { key: "image", label: "Cover image URL" },
-    { key: "gallery", label: "Gallery image URLs, one per line", textarea: true },
-    { key: "video", label: "YouTube video URL" },
+    { key: "image", label: "Cover image URL or uploaded image" },
     { key: "description", label: "Description", textarea: true }
   ],
   services: [
@@ -68,8 +67,7 @@ const emptyItem: Record<CollectionKey, EditableItem> = {
     section: "Architecture",
     subsection: "Culture",
     image: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1600&q=80",
-    gallery: "",
-    video: "https://youtu.be/OP_fVIUTr9Y",
+    media: [],
     description: "Project description goes here."
   },
   services: {
@@ -102,6 +100,15 @@ function makeId(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+}
+
+function readFileAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 export function AdminPanel() {
@@ -147,6 +154,75 @@ export function AdminPanel() {
     setContent((current) => ({
       ...current,
       [key]: current[key].map((item) => (item.id === id ? { ...item, [field]: value } : item))
+    }));
+  }
+
+  async function uploadToItem(key: CollectionKey, id: string, field: string, file?: File) {
+    if (!file) {
+      return;
+    }
+
+    const dataUrl = await readFileAsDataUrl(file);
+    updateItem(key, id, field, dataUrl);
+  }
+
+  async function uploadToSettings(key: keyof AdminContent["settings"], file?: File) {
+    if (!file) {
+      return;
+    }
+
+    const dataUrl = await readFileAsDataUrl(file);
+    updateSettings(key, dataUrl);
+  }
+
+  function updateProjectMedia(projectId: string, mediaId: string, field: keyof AdminMedia, value: string) {
+    setContent((current) => ({
+      ...current,
+      projects: current.projects.map((project) =>
+        project.id === projectId
+          ? {
+              ...project,
+              media: project.media.map((media) => (media.id === mediaId ? { ...media, [field]: value } : media))
+            }
+          : project
+      )
+    }));
+  }
+
+  async function uploadProjectMedia(projectId: string, mediaId: string, file?: File) {
+    if (!file) {
+      return;
+    }
+
+    const dataUrl = await readFileAsDataUrl(file);
+    updateProjectMedia(projectId, mediaId, "source", dataUrl);
+  }
+
+  function addProjectMedia(projectId: string, type: AdminMedia["type"]) {
+    const media: AdminMedia = {
+      id: makeId(`${type}-media`),
+      type,
+      source:
+        type === "image"
+          ? "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1600&q=80"
+          : "https://youtu.be/OP_fVIUTr9Y",
+      caption: type === "image" ? "Image caption goes here." : "Video caption goes here."
+    };
+
+    setContent((current) => ({
+      ...current,
+      projects: current.projects.map((project) =>
+        project.id === projectId ? { ...project, media: [...project.media, media] } : project
+      )
+    }));
+  }
+
+  function deleteProjectMedia(projectId: string, mediaId: string) {
+    setContent((current) => ({
+      ...current,
+      projects: current.projects.map((project) =>
+        project.id === projectId ? { ...project, media: project.media.filter((media) => media.id !== mediaId) } : project
+      )
     }));
   }
 
@@ -222,11 +298,29 @@ export function AdminPanel() {
             {(Object.keys(content.settings) as (keyof AdminContent["settings"])[]).map((key) => (
               <label key={key} className="grid gap-2 text-xs uppercase tracking-[0.18em] text-muted">
                 {key.replace(/([A-Z])/g, " $1")}
-                <input
-                  value={content.settings[key]}
-                  onChange={(event) => updateSettings(key, event.target.value)}
-                  className="h-12 border border-black/15 bg-white px-4 text-base normal-case tracking-normal text-ink outline-none dark:border-white/15 dark:bg-[#4a4a4a] dark:text-paper"
-                />
+                {["aboutStudioProfile", "aboutMission", "aboutVision", "founderMessage", "offices"].includes(key) ? (
+                  <textarea
+                    value={content.settings[key]}
+                    onChange={(event) => updateSettings(key, event.target.value)}
+                    className="min-h-28 border border-black/15 bg-white p-4 text-base normal-case tracking-normal text-ink outline-none dark:border-white/15 dark:bg-[#4a4a4a] dark:text-paper"
+                  />
+                ) : (
+                  <>
+                    <input
+                      value={content.settings[key]}
+                      onChange={(event) => updateSettings(key, event.target.value)}
+                      className="h-12 border border-black/15 bg-white px-4 text-base normal-case tracking-normal text-ink outline-none dark:border-white/15 dark:bg-[#4a4a4a] dark:text-paper"
+                    />
+                    {["logoUrl", "founderImage"].includes(key) && (
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(event) => uploadToSettings(key, event.target.files?.[0])}
+                        className="text-xs normal-case tracking-normal"
+                      />
+                    )}
+                  </>
+                )}
               </label>
             ))}
           </section>
@@ -287,8 +381,91 @@ export function AdminPanel() {
                           className="h-12 border border-black/15 bg-paper px-4 text-base normal-case tracking-normal text-ink outline-none dark:border-white/15 dark:bg-charcoal dark:text-paper"
                         />
                       )}
+                      {field.key === "image" && (
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(event) => uploadToItem(tab, selectedItem.id, field.key, event.target.files?.[0])}
+                          className="text-xs normal-case tracking-normal"
+                        />
+                      )}
                     </label>
                   ))}
+                  {tab === "projects" && "media" in selectedItem && (
+                    <div className="mt-4 border-t border-black/10 pt-6 dark:border-white/10">
+                      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                        <h3 className="font-serif text-2xl">Ordered Media</h3>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => addProjectMedia(selectedItem.id, "image")}
+                            className="border border-black/15 px-4 py-2 text-xs uppercase tracking-[0.16em] dark:border-white/15"
+                          >
+                            Add image
+                          </button>
+                          <button
+                            onClick={() => addProjectMedia(selectedItem.id, "video")}
+                            className="border border-black/15 px-4 py-2 text-xs uppercase tracking-[0.16em] dark:border-white/15"
+                          >
+                            Add video
+                          </button>
+                        </div>
+                      </div>
+                      <div className="grid gap-4">
+                        {selectedItem.media.map((media, index) => (
+                          <div key={media.id} className="grid gap-3 border border-black/10 p-4 dark:border-white/10">
+                            <div className="flex items-center justify-between gap-3">
+                              <p className="text-xs uppercase tracking-[0.18em] text-muted">
+                                Media {index + 1} / {media.type}
+                              </p>
+                              <button
+                                onClick={() => deleteProjectMedia(selectedItem.id, media.id)}
+                                className="text-xs uppercase tracking-[0.16em] text-muted underline"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                            <label className="grid gap-2 text-xs uppercase tracking-[0.18em] text-muted">
+                              Type
+                              <select
+                                value={media.type}
+                                onChange={(event) =>
+                                  updateProjectMedia(selectedItem.id, media.id, "type", event.target.value as AdminMedia["type"])
+                                }
+                                className="h-11 border border-black/15 bg-paper px-3 text-base normal-case tracking-normal text-ink dark:border-white/15 dark:bg-charcoal dark:text-paper"
+                              >
+                                <option value="image">Image</option>
+                                <option value="video">Video</option>
+                              </select>
+                            </label>
+                            <label className="grid gap-2 text-xs uppercase tracking-[0.18em] text-muted">
+                              {media.type === "image" ? "Image URL or upload" : "YouTube video link"}
+                              <input
+                                value={media.source}
+                                onChange={(event) => updateProjectMedia(selectedItem.id, media.id, "source", event.target.value)}
+                                className="h-11 border border-black/15 bg-paper px-3 text-base normal-case tracking-normal text-ink dark:border-white/15 dark:bg-charcoal dark:text-paper"
+                              />
+                              {media.type === "image" && (
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(event) => uploadProjectMedia(selectedItem.id, media.id, event.target.files?.[0])}
+                                  className="text-xs normal-case tracking-normal"
+                                />
+                              )}
+                            </label>
+                            <label className="grid gap-2 text-xs uppercase tracking-[0.18em] text-muted">
+                              Caption
+                              <textarea
+                                value={media.caption}
+                                onChange={(event) => updateProjectMedia(selectedItem.id, media.id, "caption", event.target.value)}
+                                className="min-h-20 border border-black/15 bg-paper p-3 text-base normal-case tracking-normal text-ink dark:border-white/15 dark:bg-charcoal dark:text-paper"
+                              />
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
