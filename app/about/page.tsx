@@ -18,7 +18,8 @@ const sections = [
     label: "Message from Founder",
     title: "Architecture should make complexity feel quietly resolved.",
     body:
-      "Atelier Northline was shaped around a simple belief: the best spaces carry discipline without losing warmth. This placeholder founder message can later introduce the real practice, its origins, collaborators, and the values that guide each commission."
+      "Atelier Northline was shaped around a simple belief: the best spaces carry discipline without losing warmth. This placeholder founder message can later introduce the real practice, its origins, collaborators, and the values that guide each commission.",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80"
   }
 ];
 
@@ -64,8 +65,23 @@ export default function AboutPage() {
                 <p className="text-xs uppercase tracking-[0.28em] text-muted">{section.label}</p>
               </Reveal>
               <Reveal delay={0.08}>
-                <p className="font-serif text-4xl leading-tight text-balance md:text-6xl">{section.title}</p>
-                <p className="mt-8 max-w-3xl text-lg leading-9 text-muted">{section.body}</p>
+                <div className={section.image ? "grid gap-8 md:grid-cols-[260px_1fr] md:items-start" : ""}>
+                  {section.image && (
+                    <div className="relative aspect-[4/5] overflow-hidden bg-black">
+                      <Image
+                        src={section.image}
+                        alt="Founder portrait"
+                        fill
+                        sizes="(min-width: 768px) 260px, 100vw"
+                        className="object-cover grayscale"
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-serif text-4xl leading-tight text-balance md:text-6xl">{section.title}</p>
+                    <p className="mt-8 max-w-3xl text-lg leading-9 text-muted">{section.body}</p>
+                  </div>
+                </div>
               </Reveal>
             </div>
           ))}

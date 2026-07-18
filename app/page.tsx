@@ -2,6 +2,7 @@ import { AboutTeaser } from "@/components/about-teaser";
 import { FeaturedProjects } from "@/components/featured-projects";
 import { Hero } from "@/components/hero";
 import { HomeIntro } from "@/components/home-intro";
+import { HomeSocialDock } from "@/components/home-social-dock";
 
 export default function Home() {
   return (
@@ -11,6 +12,7 @@ export default function Home() {
         <FeaturedProjects />
         <AboutTeaser />
       </main>
+      <HomeSocialDock />
     </HomeIntro>
   );
 }

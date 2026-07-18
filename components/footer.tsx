@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { SocialLinks } from "@/components/social-links";
 import { offices } from "@/lib/data";
 
 export function Footer() {
@@ -24,10 +24,8 @@ export function Footer() {
           <div className="space-y-3 text-sm">
             <p>studio@ateliernorthline.test</p>
             <p>+880 1700 000 000</p>
-            <div className="flex gap-5 pt-3 text-muted">
-              <Link href="#">Instagram</Link>
-              <Link href="#">LinkedIn</Link>
-              <Link href="#">Press</Link>
+            <div className="pt-3">
+              <SocialLinks compact />
             </div>
           </div>
         </div>
