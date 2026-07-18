@@ -32,7 +32,7 @@ export default function ProjectDetailPage({ params }: { params: { slug: string }
             <p className="mb-5 text-xs uppercase tracking-[0.28em] text-white/70">
               {project.category} / {project.year}
             </p>
-            <h1 className="max-w-5xl font-serif text-6xl leading-none text-balance md:text-8xl">{project.title}</h1>
+            <h1 className="max-w-5xl font-serif text-4xl leading-tight text-balance md:text-6xl">{project.title}</h1>
             <p className="mt-5 text-lg text-white/75">{project.location}</p>
           </div>
         </div>
@@ -57,7 +57,7 @@ export default function ProjectDetailPage({ params }: { params: { slug: string }
             </div>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="font-serif text-4xl leading-tight text-balance md:text-6xl">{project.excerpt}</p>
+            <p className="font-serif text-3xl leading-tight text-balance md:text-5xl">{project.excerpt}</p>
             <p className="mt-8 max-w-3xl text-lg leading-9 text-muted">{project.description}</p>
           </Reveal>
         </div>

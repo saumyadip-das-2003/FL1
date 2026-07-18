@@ -30,7 +30,7 @@ export default function AboutPage() {
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1fr_1.1fr] lg:items-end">
           <Reveal>
             <p className="text-xs uppercase tracking-[0.28em] text-muted">Studio Profile</p>
-            <h1 className="mt-5 font-serif text-6xl leading-[0.98] text-balance md:text-8xl">
+            <h1 className="mt-5 font-serif text-4xl leading-tight text-balance md:text-6xl">
               Quiet buildings with a strong public life.
             </h1>
           </Reveal>
@@ -78,7 +78,7 @@ export default function AboutPage() {
                     </div>
                   )}
                   <div>
-                    <p className="font-serif text-4xl leading-tight text-balance md:text-6xl">{section.title}</p>
+                    <p className="font-serif text-3xl leading-tight text-balance md:text-5xl">{section.title}</p>
                     <p className="mt-8 max-w-3xl text-lg leading-9 text-muted">{section.body}</p>
                   </div>
                 </div>

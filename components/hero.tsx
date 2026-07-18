@@ -19,7 +19,7 @@ export function Hero() {
       <iframe
         src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&playsinline=1&rel=0`}
         title="Architecture studio background video"
-        className="pointer-events-none absolute left-1/2 top-1/2 hidden aspect-video h-[120vh] min-h-full w-[213.34vh] min-w-full -translate-x-1/2 -translate-y-1/2 object-cover md:block"
+        className="pointer-events-none absolute left-1/2 top-1/2 block aspect-video h-[120vh] min-h-full w-[213.34vh] min-w-full -translate-x-1/2 -translate-y-1/2 object-cover"
         allow="autoplay; encrypted-media; picture-in-picture"
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/28 via-black/18 to-black/72" />
@@ -37,7 +37,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 42 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.95, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-            className="max-w-5xl font-serif text-6xl leading-[0.95] text-balance md:text-8xl lg:text-9xl"
+            className="max-w-5xl font-serif text-5xl leading-[0.98] text-balance md:text-7xl lg:text-8xl"
           >
             Formal spaces for a changing climate.
           </motion.h1>

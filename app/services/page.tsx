@@ -53,7 +53,7 @@ export default function ServicesPage() {
         <Reveal>
           <div className="mx-auto max-w-4xl text-center">
             <p className="text-xs uppercase tracking-[0.28em] text-muted">Services</p>
-            <h1 className="mt-5 font-serif text-6xl leading-[0.98] text-balance md:text-8xl">Our expertise</h1>
+            <h1 className="mt-5 font-serif text-4xl leading-tight text-balance md:text-6xl">Our expertise</h1>
             <p className="mx-auto mt-7 max-w-3xl text-lg leading-8 text-muted">
               From concept drafting to cinematic walkthroughs, we deliver architecture-focused design and visualization
               services for local and international projects.

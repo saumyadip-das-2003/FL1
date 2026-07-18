@@ -53,6 +53,10 @@ export function ProjectListItem({ project }: { project: Project }) {
   const dragState = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 });
 
   function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
+    if (event.pointerType !== "mouse") {
+      return;
+    }
+
     if (!stripRef.current) {
       return;
     }
@@ -68,6 +72,10 @@ export function ProjectListItem({ project }: { project: Project }) {
   }
 
   function onPointerMove(event: React.PointerEvent<HTMLDivElement>) {
+    if (event.pointerType !== "mouse") {
+      return;
+    }
+
     if (!dragState.current.active || !stripRef.current) {
       return;
     }
@@ -80,6 +88,10 @@ export function ProjectListItem({ project }: { project: Project }) {
   }
 
   function stopDragging() {
+    if (!dragState.current.active) {
+      return;
+    }
+
     if (!stripRef.current) {
       dragState.current.active = false;
       setIsDragging(false);
@@ -231,7 +243,7 @@ export function ProjectListItem({ project }: { project: Project }) {
                   onPointerUp={stopDragging}
                   onPointerCancel={stopDragging}
                   onPointerLeave={stopDragging}
-                  style={{ touchAction: "pan-x" }}
+                  style={{ touchAction: "auto", WebkitOverflowScrolling: "touch" }}
                   className={`no-scrollbar flex h-[380px] cursor-grab select-none gap-4 overflow-x-auto overflow-y-hidden p-4 active:cursor-grabbing md:h-[520px] md:gap-5 md:p-5 ${
                     isDragging ? "snap-none scroll-auto" : "snap-x snap-mandatory scroll-smooth"
                   }`}

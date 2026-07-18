@@ -50,9 +50,9 @@ export function HomeIntro({ children }: { children: React.ReactNode }) {
                     }
               }
               transition={{ duration: entering ? 0.72 : 0.8, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute origin-top-left text-left"
+              className="absolute origin-top-left text-center"
             >
-              <BrandLogo light className="text-paper" />
+              <BrandLogo light className="items-center text-paper" />
             </motion.div>
           </motion.button>
         )}

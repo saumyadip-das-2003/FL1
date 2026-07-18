@@ -7,7 +7,7 @@ export default function ContactPage() {
       <section className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.9fr_1.1fr]">
         <Reveal>
           <p className="text-xs uppercase tracking-[0.28em] text-muted">Contact</p>
-          <h1 className="mt-5 font-serif text-6xl leading-[0.98] text-balance md:text-8xl">
+          <h1 className="mt-5 font-serif text-4xl leading-tight text-balance md:text-6xl">
             Begin a conversation about place, program, and possibility.
           </h1>
           <div className="mt-12 grid gap-5 text-sm">

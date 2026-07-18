@@ -26,7 +26,7 @@ export default function NewsDetailPage({ params }: { params: { slug: string } })
             <p className="mb-5 text-xs uppercase tracking-[0.28em] text-white/70">
               {item.category} / {item.date}
             </p>
-            <h1 className="max-w-5xl font-serif text-5xl leading-tight text-balance md:text-8xl">{item.title}</h1>
+            <h1 className="max-w-5xl font-serif text-4xl leading-tight text-balance md:text-6xl">{item.title}</h1>
           </div>
         </div>
       </section>
@@ -45,7 +45,7 @@ export default function NewsDetailPage({ params }: { params: { slug: string } })
             </div>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="font-serif text-4xl leading-tight text-balance md:text-6xl">{item.excerpt}</p>
+            <p className="font-serif text-3xl leading-tight text-balance md:text-5xl">{item.excerpt}</p>
             <div className="mt-9 grid gap-7 text-lg leading-9 text-muted">
               {item.body.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>

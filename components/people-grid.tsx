@@ -85,7 +85,7 @@ export function PeopleGrid() {
                   onClick={() => setActiveName(expanded ? null : member.name)}
                   className="text-left"
                 >
-                  <h2 className="font-serif text-4xl leading-tight transition hover:text-muted md:text-6xl">
+                  <h2 className="font-serif text-3xl leading-tight transition hover:text-muted md:text-4xl">
                     {member.name}
                   </h2>
                   <p className="mt-2 text-xs uppercase tracking-[0.22em] text-muted">{member.role}</p>
@@ -121,8 +121,8 @@ export function PeopleGrid() {
                         />
                       </div>
                       <div className="max-w-2xl">
-                        <p className="font-serif text-3xl leading-tight">{member.role}</p>
-                        <p className="mt-5 text-lg leading-9 text-muted">{member.bio}</p>
+                        <p className="font-serif text-2xl leading-tight">{member.role}</p>
+                        <p className="mt-5 text-base leading-8 text-muted">{member.bio}</p>
                         <div className="mt-8 grid gap-4 border-y border-black/10 py-6 text-sm dark:border-white/10">
                           <p className="flex justify-between gap-5">
                             <span className="text-muted">Studio</span>

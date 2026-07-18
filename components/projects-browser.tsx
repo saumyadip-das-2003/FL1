@@ -57,7 +57,7 @@ export function ProjectsBrowser({ initialCategory }: { initialCategory?: Project
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 max-w-4xl">
           <p className="text-xs uppercase tracking-[0.28em] text-muted">Portfolio</p>
-          <h1 className="mt-5 font-serif text-6xl leading-[0.98] text-balance md:text-8xl">
+          <h1 className="mt-5 font-serif text-4xl leading-tight text-balance md:text-6xl">
             Work organized by type, atmosphere, and public intent.
           </h1>
         </div>

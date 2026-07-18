@@ -7,7 +7,7 @@ export default function PeoplePage() {
       <section className="mx-auto max-w-7xl">
         <Reveal>
           <p className="text-xs uppercase tracking-[0.28em] text-muted">People</p>
-          <h1 className="mt-5 max-w-5xl font-serif text-6xl leading-[0.98] text-balance md:text-8xl">
+          <h1 className="mt-5 max-w-4xl font-serif text-4xl leading-tight text-balance md:text-6xl">
             A compact studio shaped by research, delivery, and craft.
           </h1>
         </Reveal>
