@@ -53,3 +53,12 @@ body {
   break-inside: avoid;
   margin-bottom: 1rem;
 }
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

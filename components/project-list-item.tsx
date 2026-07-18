@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronUp, Minus, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronUp, Minus, Plus } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
 import type { Project } from "@/lib/data";
@@ -77,6 +77,18 @@ export function ProjectListItem({ project }: { project: Project }) {
     dragState.current.active = false;
   }
 
+  function slideBy(direction: "previous" | "next") {
+    if (!stripRef.current) {
+      return;
+    }
+
+    const distance = Math.round(stripRef.current.clientWidth * 0.82);
+    stripRef.current.scrollBy({
+      left: direction === "next" ? distance : -distance,
+      behavior: "smooth"
+    });
+  }
+
   return (
     <motion.article
       layout
@@ -139,7 +151,7 @@ export function ProjectListItem({ project }: { project: Project }) {
             transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
             className="mx-auto max-w-5xl overflow-hidden"
           >
-            <div className="grid gap-5 bg-white text-ink dark:bg-[#0d0d0d] dark:text-paper md:grid-cols-[210px_minmax(0,780px)] md:items-stretch">
+            <div className="grid gap-5 bg-white text-ink dark:bg-[#0d0d0d] dark:text-paper md:grid-cols-[210px_minmax(0,840px)] md:items-stretch">
               <aside className="px-5 text-center md:px-0 md:pt-1">
                 <ProjectMark title={project.title} />
                 <h2 className="mt-6 font-sans text-xl leading-tight tracking-normal">{project.title}</h2>
@@ -164,6 +176,22 @@ export function ProjectListItem({ project }: { project: Project }) {
                   >
                     <ChevronUp size={18} />
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => slideBy("previous")}
+                    className="absolute bottom-0 left-0 top-0 z-10 flex w-14 items-center justify-center bg-gradient-to-r from-black/18 to-transparent text-paper opacity-0 transition hover:opacity-100"
+                    aria-label={`Previous ${project.title} media`}
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => slideBy("next")}
+                    className="absolute bottom-0 right-0 top-0 z-10 flex w-14 items-center justify-center bg-gradient-to-l from-black/18 to-transparent text-paper opacity-0 transition hover:opacity-100"
+                    aria-label={`Next ${project.title} media`}
+                  >
+                    <ChevronRight size={24} />
+                  </button>
 
                   <div
                     ref={stripRef}
@@ -172,18 +200,18 @@ export function ProjectListItem({ project }: { project: Project }) {
                     onPointerUp={stopDragging}
                     onPointerCancel={stopDragging}
                     onPointerLeave={stopDragging}
-                    className="flex h-[320px] cursor-grab select-none snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-hidden p-4 active:cursor-grabbing md:h-[430px] md:gap-5 md:p-5"
+                    className="no-scrollbar flex h-[380px] cursor-grab select-none snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-hidden p-4 active:cursor-grabbing md:h-[520px] md:gap-5 md:p-5"
                   >
                     {images.map((image, index) => (
                       <section
                         key={image}
-                        className="relative h-full w-[78vw] max-w-[560px] shrink-0 snap-center overflow-hidden bg-black md:w-[560px]"
+                        className="relative h-full w-[78vw] max-w-[680px] shrink-0 snap-center overflow-hidden bg-black md:w-[680px]"
                       >
                         <Image
                           src={image}
                           alt={`${project.title} slide ${index + 1}`}
                           fill
-                          sizes="(min-width: 768px) 560px, 78vw"
+                          sizes="(min-width: 768px) 680px, 78vw"
                           className="object-cover"
                           priority={index === 0}
                         />
@@ -193,7 +221,7 @@ export function ProjectListItem({ project }: { project: Project }) {
                       </section>
                     ))}
 
-                    <section className="flex h-full w-[78vw] max-w-[380px] shrink-0 snap-center items-center overflow-y-auto bg-white px-2 text-ink dark:bg-[#0d0d0d] dark:text-paper md:w-[380px]">
+                    <section className="no-scrollbar flex h-full w-[78vw] max-w-[430px] shrink-0 snap-center items-center overflow-y-auto bg-white px-2 text-ink dark:bg-[#0d0d0d] dark:text-paper md:w-[430px]">
                       <div>
                         <p className="mb-5 text-lg leading-7 text-ink dark:text-paper">{project.excerpt}</p>
                         <p className="text-base leading-7 text-ink/85 dark:text-paper/85">{project.description}</p>
@@ -204,7 +232,7 @@ export function ProjectListItem({ project }: { project: Project }) {
                       </div>
                     </section>
 
-                    <section className="flex h-full w-[78vw] max-w-[560px] shrink-0 snap-center items-center md:w-[560px]">
+                    <section className="flex h-full w-[78vw] max-w-[680px] shrink-0 snap-center items-center md:w-[680px]">
                       <div className="w-full">
                         <p className="mb-3 text-xs uppercase tracking-[0.2em] text-muted">Video</p>
                         <div className="aspect-video overflow-hidden bg-black">
