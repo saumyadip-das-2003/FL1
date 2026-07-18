@@ -1,10 +1,25 @@
 import Image from "next/image";
 import { Reveal } from "@/components/reveal";
 
-const values = [
-  "Design with climatic intelligence before formal expression.",
-  "Make public-facing work legible, generous, and durable.",
-  "Treat drawing, research, material testing, and delivery as one continuous practice."
+const sections = [
+  {
+    label: "Mission",
+    title: "We pursue architecture that is formally clear, materially precise, and generous to daily life.",
+    body:
+      "Every commission begins with context: climate, program, construction culture, budget, and the social behaviors the project must support. From that foundation, the work develops through disciplined proportion, long-life materials, and carefully staged transitions between public and private space."
+  },
+  {
+    label: "Vision",
+    title: "To shape calm, durable places that help cities adapt with intelligence and grace.",
+    body:
+      "Our long-term ambition is to connect design excellence with climate responsibility. We imagine buildings, interiors, and landscapes that remain useful, legible, and emotionally resonant as communities and environments continue to change."
+  },
+  {
+    label: "Message from Founder",
+    title: "Architecture should make complexity feel quietly resolved.",
+    body:
+      "Atelier Northline was shaped around a simple belief: the best spaces carry discipline without losing warmth. This placeholder founder message can later introduce the real practice, its origins, collaborators, and the values that guide each commission."
+  }
 ];
 
 export default function AboutPage() {
@@ -39,38 +54,21 @@ export default function AboutPage() {
       </section>
 
       <section className="px-5 py-24 md:px-8 md:py-32">
-        <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.7fr_1.3fr]">
-          <Reveal>
-            <p className="text-xs uppercase tracking-[0.28em] text-muted">Mission</p>
-          </Reveal>
-          <Reveal delay={0.08}>
-            <p className="font-serif text-4xl leading-tight text-balance md:text-6xl">
-              We pursue architecture that is formally clear, materially precise, and generous to daily life.
-            </p>
-            <p className="mt-8 max-w-3xl text-lg leading-9 text-muted">
-              Every commission begins with context: climate, program, construction culture, budget, and the social
-              behaviors the project must support. From that foundation, the work develops through disciplined
-              proportion, long-life materials, and carefully staged transitions between public and private space.
-            </p>
-          </Reveal>
-        </div>
-      </section>
-
-      <section className="border-t border-black/10 px-5 py-20 dark:border-white/10 md:px-8">
-        <div className="mx-auto max-w-7xl">
-          <Reveal>
-            <p className="text-xs uppercase tracking-[0.28em] text-muted">Values</p>
-          </Reveal>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {values.map((value, index) => (
-              <Reveal key={value} delay={index * 0.08}>
-                <div className="border-t border-black/20 pt-6 dark:border-white/20">
-                  <p className="font-serif text-5xl text-muted">0{index + 1}</p>
-                  <p className="mt-6 text-lg leading-8">{value}</p>
-                </div>
+        <div className="mx-auto grid max-w-7xl gap-16">
+          {sections.map((section) => (
+            <div
+              key={section.label}
+              className="grid gap-10 border-t border-black/10 pt-12 dark:border-white/10 lg:grid-cols-[0.7fr_1.3fr]"
+            >
+              <Reveal>
+                <p className="text-xs uppercase tracking-[0.28em] text-muted">{section.label}</p>
               </Reveal>
-            ))}
-          </div>
+              <Reveal delay={0.08}>
+                <p className="font-serif text-4xl leading-tight text-balance md:text-6xl">{section.title}</p>
+                <p className="mt-8 max-w-3xl text-lg leading-9 text-muted">{section.body}</p>
+              </Reveal>
+            </div>
+          ))}
         </div>
       </section>
     </main>

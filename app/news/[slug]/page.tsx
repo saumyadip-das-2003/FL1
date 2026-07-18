@@ -1,5 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { Reveal } from "@/components/reveal";
 import { newsItems } from "@/lib/news";
 
@@ -32,7 +34,15 @@ export default function NewsDetailPage({ params }: { params: { slug: string } })
       <section className="px-5 py-20 md:px-8 md:py-28">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.7fr_1.3fr]">
           <Reveal>
-            <p className="text-xs uppercase tracking-[0.28em] text-muted">Full Story</p>
+            <div>
+              <Link
+                href="/news"
+                className="mb-10 inline-flex items-center gap-3 border border-black/20 px-5 py-3 text-xs uppercase tracking-[0.2em] transition hover:bg-ink hover:text-paper dark:border-white/20 dark:hover:bg-paper dark:hover:text-ink"
+              >
+                <ArrowLeft size={15} /> All News
+              </Link>
+              <p className="text-xs uppercase tracking-[0.28em] text-muted">Full Story</p>
+            </div>
           </Reveal>
           <Reveal delay={0.1}>
             <p className="font-serif text-4xl leading-tight text-balance md:text-6xl">{item.excerpt}</p>
