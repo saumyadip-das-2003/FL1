@@ -22,7 +22,7 @@ export function SocialLinks({ compact = false }: { compact?: boolean }) {
             aria-label={link.label}
             target="_blank"
             rel="noreferrer"
-            className="flex h-10 w-10 items-center justify-center border border-black/15 bg-white text-ink transition hover:bg-ink hover:text-paper dark:border-white/15 dark:bg-[#202020] dark:text-paper dark:hover:bg-paper dark:hover:text-ink"
+            className="flex h-10 w-10 items-center justify-center border border-black/15 bg-white text-ink transition hover:bg-ink hover:text-paper dark:border-white/15 dark:bg-[#4a4a4a] dark:text-paper dark:hover:bg-paper dark:hover:text-ink"
           >
             {Icon ? <Icon size={17} /> : <span className="text-sm font-medium">{link.text}</span>}
           </Link>

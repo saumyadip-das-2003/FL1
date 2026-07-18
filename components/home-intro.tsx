@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 
 export function HomeIntro({ children }: { children: React.ReactNode }) {
@@ -9,9 +9,18 @@ export function HomeIntro({ children }: { children: React.ReactNode }) {
   const [entering, setEntering] = useState(false);
 
   function enterSite() {
+    if (entering) {
+      return;
+    }
+
     setEntering(true);
     window.setTimeout(() => setIntroOpen(false), 780);
   }
+
+  useEffect(() => {
+    const timer = window.setTimeout(enterSite, 1800);
+    return () => window.clearTimeout(timer);
+  });
 
   return (
     <>

@@ -60,7 +60,7 @@ export default function ContactPage() {
 
       <section className="mx-auto mt-20 max-w-7xl">
         <Reveal>
-          <div className="flex min-h-80 items-center justify-center border border-black/10 bg-white text-center dark:border-white/10 dark:bg-[#1d1d1d]">
+          <div className="flex min-h-80 items-center justify-center border border-black/10 bg-white text-center dark:border-white/10 dark:bg-[#4a4a4a]">
             <div>
               <MapPin className="mx-auto mb-5" size={28} />
               <p className="text-xs uppercase tracking-[0.28em] text-muted">Map Placeholder</p>

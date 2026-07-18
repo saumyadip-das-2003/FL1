@@ -13,7 +13,7 @@ const config: Config = {
         ink: "#111111",
         paper: "#f8f7f4",
         muted: "#77736a",
-        charcoal: "#151515",
+        charcoal: "#3a3a3a",
         line: "rgba(17,17,17,0.12)"
       },
       fontFamily: {
