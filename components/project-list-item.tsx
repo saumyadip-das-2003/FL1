@@ -67,7 +67,9 @@ export function ProjectListItem({ project }: { project: Project }) {
       startX: event.clientX,
       scrollLeft: stripRef.current.scrollLeft
     };
+    event.preventDefault();
     setIsDragging(true);
+    stripRef.current.style.scrollSnapType = "none";
     stripRef.current.setPointerCapture(event.pointerId);
   }
 
@@ -80,6 +82,7 @@ export function ProjectListItem({ project }: { project: Project }) {
       return;
     }
 
+    event.preventDefault();
     const distance = event.clientX - dragState.current.startX;
     if (Math.abs(distance) > 4) {
       dragState.current.moved = true;
@@ -100,7 +103,7 @@ export function ProjectListItem({ project }: { project: Project }) {
 
     dragState.current.active = false;
     const strip = stripRef.current;
-    const slides = Array.from(strip.children) as HTMLElement[];
+    const slides = Array.from(strip.querySelectorAll<HTMLElement>("[data-slide]"));
     const nearest = slides.reduce(
       (closest, slide) => {
         const distance = Math.abs(slide.offsetLeft - strip.scrollLeft);
@@ -110,6 +113,7 @@ export function ProjectListItem({ project }: { project: Project }) {
     );
 
     setIsDragging(false);
+    strip.style.scrollSnapType = "";
     if (nearest.slide) {
       strip.scrollTo({ left: nearest.slide.offsetLeft, behavior: "smooth" });
     }
@@ -261,7 +265,7 @@ export function ProjectListItem({ project }: { project: Project }) {
                 >
                     {images.map((image, index) => (
                       <div key={image} className="contents">
-                        <section className="relative h-full w-[78vw] max-w-[680px] shrink-0 snap-center overflow-hidden bg-black md:w-[680px]">
+                        <section data-slide className="relative h-full w-[78vw] max-w-[680px] shrink-0 snap-center overflow-hidden bg-black md:w-[680px]">
                           <Image
                             src={image}
                             alt={`${project.title} slide ${index + 1}`}
@@ -275,27 +279,27 @@ export function ProjectListItem({ project }: { project: Project }) {
                             Image {index + 1} / {images.length}
                           </div>
                         </section>
-                        <section className="flex h-full w-[68vw] max-w-[360px] shrink-0 snap-center items-center bg-white px-6 text-ink dark:bg-[#0d0d0d] dark:text-paper md:w-[360px]">
+                        {index === 0 && (
+                          <section data-slide className="no-scrollbar flex h-full w-[76vw] max-w-[430px] shrink-0 snap-center items-center overflow-y-auto bg-white px-6 text-ink dark:bg-[#0d0d0d] dark:text-paper md:w-[430px]">
+                            <div>
+                              <p className="text-xs uppercase tracking-[0.22em] text-muted">Project Caption</p>
+                              <p className="mt-5 text-lg leading-8 text-ink dark:text-paper">{project.excerpt}</p>
+                              <p className="mt-5 text-base leading-7 text-ink/85 dark:text-paper/85">
+                                {project.description}
+                              </p>
+                            </div>
+                          </section>
+                        )}
+                        <section data-slide className="flex h-full w-[68vw] max-w-[340px] shrink-0 snap-center items-center bg-white px-6 text-ink dark:bg-[#0d0d0d] dark:text-paper md:w-[340px]">
                           <div>
-                            <p className="text-xs uppercase tracking-[0.22em] text-muted">Caption</p>
+                            <p className="text-xs uppercase tracking-[0.22em] text-muted">Image Caption</p>
                             <p className="mt-5 text-lg leading-8">{captionFor(index)}</p>
                           </div>
                         </section>
                       </div>
                     ))}
 
-                    <section className="no-scrollbar flex h-full w-[78vw] max-w-[430px] shrink-0 snap-center items-center overflow-y-auto bg-white px-2 text-ink dark:bg-[#0d0d0d] dark:text-paper md:w-[430px]">
-                      <div>
-                        <p className="mb-5 text-lg leading-7 text-ink dark:text-paper">{project.excerpt}</p>
-                        <p className="text-base leading-7 text-ink/85 dark:text-paper/85">{project.description}</p>
-                        <p className="mt-6 text-base leading-7 text-ink/85 dark:text-paper/85">
-                          The project explores spatial clarity, climate-aware envelope design, and a measured relationship
-                          between public movement, landscape, and daily occupation.
-                        </p>
-                      </div>
-                    </section>
-
-                    <section className="flex h-full w-[78vw] max-w-[680px] shrink-0 snap-center items-center md:w-[680px]">
+                    <section data-slide className="flex h-full w-[78vw] max-w-[680px] shrink-0 snap-center items-center md:w-[680px]">
                       <div className="w-full">
                         <p className="mb-3 text-xs uppercase tracking-[0.2em] text-muted">Video</p>
                         <div className="aspect-video overflow-hidden bg-black">
