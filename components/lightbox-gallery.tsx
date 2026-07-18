@@ -3,12 +3,12 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
-import { ProjectModal } from "@/components/project-modal";
 import type { Project } from "@/lib/data";
+import { cn } from "@/lib/utils";
 
 export function LightboxGallery({ project }: { project: Project }) {
   const images = [project.image, ...project.gallery];
-  const [active, setActive] = useState<string | null>(null);
+  const [active, setActive] = useState(images[0]);
 
   return (
     <>
@@ -34,7 +34,33 @@ export function LightboxGallery({ project }: { project: Project }) {
           </motion.button>
         ))}
       </div>
-      <ProjectModal project={project} open={Boolean(active)} initialImage={active ?? undefined} onClose={() => setActive(null)} />
+
+      <div className="mt-6 border-t border-black/10 pt-6 dark:border-white/10">
+        <div className="relative aspect-[16/9] overflow-hidden bg-black">
+          <Image
+            src={active}
+            alt={`${project.title} selected image`}
+            fill
+            sizes="100vw"
+            className="object-cover"
+          />
+        </div>
+        <div className="mt-3 flex gap-3 overflow-x-auto pb-2">
+          {images.map((image, index) => (
+            <button
+              key={image}
+              type="button"
+              onClick={() => setActive(image)}
+              className={cn(
+                "relative h-20 w-32 shrink-0 overflow-hidden border transition",
+                active === image ? "border-ink dark:border-paper" : "border-black/10 opacity-65 hover:opacity-100 dark:border-white/10"
+              )}
+            >
+              <Image src={image} alt={`${project.title} thumbnail ${index + 1}`} fill sizes="128px" className="object-cover" />
+            </button>
+          ))}
+        </div>
+      </div>
     </>
   );
 }

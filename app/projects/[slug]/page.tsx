@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LightboxGallery } from "@/components/lightbox-gallery";
-import { ProjectCard } from "@/components/project-card";
+import { ProjectListItem } from "@/components/project-list-item";
 import { Reveal } from "@/components/reveal";
 import { getNextProject } from "@/lib/utils";
 import { projects } from "@/lib/data";
@@ -92,7 +92,7 @@ export default function ProjectDetailPage({ params }: { params: { slug: string }
           <Link href={`/projects/${nextProject.slug}`} className="mb-8 inline-flex items-center gap-3 text-xs uppercase tracking-[0.24em] text-muted">
             Next project <ArrowRight size={16} />
           </Link>
-          <ProjectCard project={nextProject} />
+          <ProjectListItem project={nextProject} />
         </div>
       </section>
     </main>

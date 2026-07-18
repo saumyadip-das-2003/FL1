@@ -2,21 +2,31 @@
 
 import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
-import { ProjectCard } from "@/components/project-card";
+import { ProjectListItem } from "@/components/project-list-item";
 import { categories, projects, type ProjectCategory } from "@/lib/data";
 
 type Filter = "All" | ProjectCategory;
 
 export function ProjectsBrowser({ initialCategory }: { initialCategory?: ProjectCategory }) {
   const [active, setActive] = useState<Filter>(initialCategory ?? "All");
+  const [query, setQuery] = useState("");
   const filters: Filter[] = ["All", ...categories];
 
   const visibleProjects = useMemo(() => {
-    if (active === "All") {
-      return projects;
-    }
-    return projects.filter((project) => project.category === active);
-  }, [active]);
+    const normalizedQuery = query.trim().toLowerCase();
+
+    return projects.filter((project) => {
+      const matchesCategory = active === "All" || project.category === active;
+      const matchesQuery =
+        normalizedQuery.length === 0 ||
+        [project.title, project.location, project.category, project.year, project.excerpt, project.description]
+          .join(" ")
+          .toLowerCase()
+          .includes(normalizedQuery);
+
+      return matchesCategory && matchesQuery;
+    });
+  }, [active, query]);
 
   return (
     <section className="bg-paper px-5 pb-24 pt-32 transition-colors dark:bg-charcoal md:px-8 md:pb-32 md:pt-40">
@@ -28,29 +38,45 @@ export function ProjectsBrowser({ initialCategory }: { initialCategory?: Project
           </h1>
         </div>
 
-        <div className="mb-12 flex gap-6 overflow-x-auto border-b border-black/10 pb-1 dark:border-white/10">
-          {filters.map((filter) => (
-            <button
-              key={filter}
-              type="button"
-              onClick={() => setActive(filter)}
-              className="relative whitespace-nowrap pb-4 text-xs uppercase tracking-[0.22em] text-muted transition hover:text-ink dark:hover:text-paper"
-            >
-              {filter}
-              {active === filter && (
-                <motion.span
-                  layoutId="project-filter"
-                  className="absolute bottom-0 left-0 h-px w-full bg-ink dark:bg-paper"
-                />
-              )}
-            </button>
-          ))}
+        <div className="mb-12 grid gap-6 lg:grid-cols-[1fr_360px] lg:items-end">
+          <div className="flex gap-6 overflow-x-auto border-b border-black/10 pb-1 dark:border-white/10">
+            {filters.map((filter) => (
+              <button
+                key={filter}
+                type="button"
+                onClick={() => setActive(filter)}
+                className="relative whitespace-nowrap pb-4 text-xs uppercase tracking-[0.22em] text-muted transition hover:text-ink dark:hover:text-paper"
+              >
+                {filter}
+                {active === filter && (
+                  <motion.span
+                    layoutId="project-filter"
+                    className="absolute bottom-0 left-0 h-px w-full bg-ink dark:bg-paper"
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+          <label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-muted">
+            Search projects
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Name, place, year, category"
+              className="h-12 border border-black/15 bg-transparent px-4 text-base normal-case tracking-normal text-ink outline-none transition placeholder:text-muted/65 focus:border-ink dark:border-white/15 dark:text-paper dark:focus:border-paper"
+            />
+          </label>
         </div>
 
-        <motion.div layout className="grid gap-x-6 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
-          {visibleProjects.map((project, index) => (
-            <ProjectCard key={project.slug} project={project} tall={index % 2 === 0} />
+        <motion.div layout className="grid">
+          {visibleProjects.map((project) => (
+            <ProjectListItem key={project.slug} project={project} />
           ))}
+          {visibleProjects.length === 0 && (
+            <div className="border-y border-black/10 py-16 text-muted dark:border-white/10">
+              No projects match the current search and filter.
+            </div>
+          )}
         </motion.div>
       </div>
     </section>

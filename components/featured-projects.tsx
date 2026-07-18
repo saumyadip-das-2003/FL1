@@ -1,4 +1,4 @@
-import { ProjectCard } from "@/components/project-card";
+import { ProjectListItem } from "@/components/project-list-item";
 import { Reveal } from "@/components/reveal";
 import { projects } from "@/lib/data";
 
@@ -19,9 +19,9 @@ export function FeaturedProjects() {
             </p>
           </div>
         </Reveal>
-        <div className="masonry md:columns-2 lg:columns-3">
-          {projects.slice(0, 6).map((project, index) => (
-            <ProjectCard key={project.slug} project={project} tall={index % 3 === 1} />
+        <div className="grid">
+          {projects.slice(0, 6).map((project) => (
+            <ProjectListItem key={project.slug} project={project} />
           ))}
         </div>
       </div>
