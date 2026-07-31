@@ -4,7 +4,19 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 
-export function HomeIntro({ children }: { children: React.ReactNode }) {
+export function HomeIntro({
+  children,
+  companyName,
+  tagline,
+  logoUrl,
+  homeLogoText
+}: {
+  children: React.ReactNode;
+  companyName?: string;
+  tagline?: string;
+  logoUrl?: string;
+  homeLogoText?: string;
+}) {
   const [introOpen, setIntroOpen] = useState(true);
   const [entering, setEntering] = useState(false);
 
@@ -61,7 +73,13 @@ export function HomeIntro({ children }: { children: React.ReactNode }) {
               transition={{ duration: entering ? 0.72 : 0.8, ease: [0.22, 1, 0.36, 1] }}
               className="absolute origin-top-left text-center"
             >
-              <BrandLogo light className="items-center text-paper" />
+              <BrandLogo
+                light
+                className="items-center text-paper"
+                companyName={homeLogoText || companyName}
+                tagline={tagline}
+                logoUrl={logoUrl}
+              />
             </motion.div>
           </motion.button>
         )}

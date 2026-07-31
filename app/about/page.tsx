@@ -20,8 +20,7 @@ export default async function AboutPage() {
     {
       label: "Message from Founder",
       title: "Message from Founder",
-      body: content.settings.founderMessage,
-      image: content.settings.founderImage
+      body: content.settings.founderMessage
     }
   ];
 
@@ -45,7 +44,7 @@ export default async function AboutPage() {
 
       <section className="relative h-[60vh] overflow-hidden bg-black">
         <Image
-          src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=2200&q=80"
+          src={content.settings.aboutHeroImage}
           alt="Architecture studio workspace"
           fill
           sizes="100vw"
@@ -64,18 +63,7 @@ export default async function AboutPage() {
                 <p className="text-xs uppercase tracking-[0.28em] text-muted">{section.label}</p>
               </Reveal>
               <Reveal delay={0.08}>
-                <div className={section.image ? "grid gap-8 md:grid-cols-[260px_1fr] md:items-start" : ""}>
-                  {section.image && (
-                    <div className="relative aspect-[4/5] overflow-hidden bg-black">
-                      <Image
-                        src={section.image}
-                        alt="Founder portrait"
-                        fill
-                        sizes="(min-width: 768px) 260px, 100vw"
-                        className="object-cover grayscale"
-                      />
-                    </div>
-                  )}
+                <div>
                   <div>
                     <p className="font-serif text-3xl leading-tight text-balance md:text-5xl">{section.title}</p>
                     <p className="mt-8 max-w-3xl text-lg leading-9 text-muted">{section.body}</p>

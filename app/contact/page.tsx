@@ -1,11 +1,14 @@
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Reveal } from "@/components/reveal";
 import { getLiveContent } from "@/lib/live-content";
+import { ContactForm } from "@/components/contact-form";
 
 export const dynamic = "force-dynamic";
 
 export default async function ContactPage() {
   const content = await getLiveContent();
+  const offices = content.settings.offices.split(/\n+/).map((office) => office.trim()).filter(Boolean);
+  const officeMaps = (content.settings.officeMaps ?? "").split(/\n+/).map((map) => map.trim());
 
   return (
     <main className="bg-paper px-5 pb-24 pt-32 transition-colors dark:bg-charcoal md:px-8 md:pb-32 md:pt-40">
@@ -17,7 +20,10 @@ export default async function ContactPage() {
           </h1>
           <div className="mt-12 grid gap-5 text-sm">
             <p className="flex items-center gap-3">
-              <Mail size={18} /> {content.settings.email}
+              <Mail size={18} />
+              <a href={`mailto:${content.settings.email}`} className="transition hover:text-muted">
+                {content.settings.email}
+              </a>
             </p>
             <p className="flex items-center gap-3">
               <Phone size={18} /> {content.settings.phone}
@@ -29,50 +35,37 @@ export default async function ContactPage() {
         </Reveal>
 
         <Reveal delay={0.1}>
-          <form className="grid gap-5">
-            <div className="grid gap-5 md:grid-cols-2">
-              <label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-muted">
-                Name
-                <input className="h-14 border border-black/15 bg-transparent px-4 text-base normal-case tracking-normal text-ink outline-none transition focus:border-ink dark:border-white/15 dark:text-paper dark:focus:border-paper" />
-              </label>
-              <label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-muted">
-                Email
-                <input type="email" className="h-14 border border-black/15 bg-transparent px-4 text-base normal-case tracking-normal text-ink outline-none transition focus:border-ink dark:border-white/15 dark:text-paper dark:focus:border-paper" />
-              </label>
-            </div>
-            <label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-muted">
-              Project Type
-              <select className="h-14 border border-black/15 bg-paper px-4 text-base normal-case tracking-normal text-ink outline-none transition focus:border-ink dark:border-white/15 dark:bg-charcoal dark:text-paper dark:focus:border-paper">
-                <option>Architecture</option>
-                <option>Interior</option>
-                <option>Exterior</option>
-                <option>Landscape</option>
-              </select>
-            </label>
-            <label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-muted">
-              Message
-              <textarea className="min-h-44 resize-y border border-black/15 bg-transparent p-4 text-base normal-case tracking-normal text-ink outline-none transition focus:border-ink dark:border-white/15 dark:text-paper dark:focus:border-paper" />
-            </label>
-            <button
-              type="button"
-              className="h-14 bg-ink px-6 text-xs uppercase tracking-[0.22em] text-paper transition hover:bg-black/75 dark:bg-paper dark:text-ink dark:hover:bg-white/75"
-            >
-              Send inquiry
-            </button>
-          </form>
+          <ContactForm />
         </Reveal>
       </section>
 
-      <section className="mx-auto mt-20 max-w-7xl">
-        <Reveal>
-          <div className="flex min-h-80 items-center justify-center border border-black/10 bg-white text-center dark:border-white/10 dark:bg-[#4a4a4a]">
-            <div>
-              <MapPin className="mx-auto mb-5" size={28} />
-              <p className="text-xs uppercase tracking-[0.28em] text-muted">Map Placeholder</p>
-              <p className="mt-3 font-serif text-3xl">{content.settings.address}</p>
-            </div>
-          </div>
-        </Reveal>
+      <section className="mx-auto mt-20 grid max-w-7xl gap-6 md:grid-cols-2">
+        {offices.map((office, index) => {
+          const map = officeMaps[index];
+
+          return (
+            <Reveal key={`${office}-${index}`} delay={index * 0.05}>
+              <article className="overflow-hidden border border-black/10 bg-white dark:border-white/10 dark:bg-[#4a4a4a]">
+                <div className="p-6">
+                  <p className="text-xs uppercase tracking-[0.28em] text-muted">Office {index + 1}</p>
+                  <p className="mt-3 font-serif text-2xl leading-tight">{office}</p>
+                </div>
+                <div className="aspect-[16/10] bg-paper dark:bg-charcoal">
+                  {map ? (
+                    <iframe src={map} title={`${office} map`} className="h-full w-full" loading="lazy" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-center text-muted">
+                      <div>
+                        <MapPin className="mx-auto mb-4" size={28} />
+                        <p className="text-xs uppercase tracking-[0.24em]">Map not added</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </article>
+            </Reveal>
+          );
+        })}
       </section>
     </main>
   );

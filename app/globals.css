@@ -19,6 +19,10 @@ html {
   overflow-x: hidden;
 }
 
+.admin-route [data-site-chrome] {
+  display: none;
+}
+
 body {
   min-height: 100vh;
   background: #f8f7f4;

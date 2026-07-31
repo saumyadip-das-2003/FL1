@@ -18,7 +18,15 @@ const navItems = [
   { href: "/contact", label: "Contact" }
 ];
 
-export function Navbar() {
+export function Navbar({
+  companyName,
+  tagline,
+  logoUrl
+}: {
+  companyName?: string;
+  tagline?: string;
+  logoUrl?: string;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -34,6 +42,7 @@ export function Navbar() {
 
   return (
     <header
+      data-site-chrome
       className={cn(
         "fixed left-0 right-0 top-0 z-50 border-b transition-all duration-500",
         scrolled || open
@@ -43,7 +52,7 @@ export function Navbar() {
     >
       <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 md:px-8">
         <Link href="/" aria-label="Atelier Northline home">
-          <BrandLogo />
+          <BrandLogo companyName={companyName} tagline={tagline} logoUrl={logoUrl} />
         </Link>
 
         <div className="hidden items-center gap-8 lg:flex">

@@ -3,15 +3,18 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
+import { getYouTubeId } from "@/lib/youtube";
 
 export function Hero({
   headline = "Formal spaces for a changing climate.",
-  tagline = "A client-facing studio prototype for architecture, interiors, exteriors, and landscape portfolios."
+  tagline = "A client-facing studio prototype for architecture, interiors, exteriors, and landscape portfolios.",
+  videoUrl = "https://youtu.be/OP_fVIUTr9Y"
 }: {
   headline?: string;
   tagline?: string;
+  videoUrl?: string;
 }) {
-  const videoId = "OP_fVIUTr9Y";
+  const videoId = getYouTubeId(videoUrl);
 
   return (
     <section className="relative min-h-screen overflow-hidden bg-charcoal text-paper">

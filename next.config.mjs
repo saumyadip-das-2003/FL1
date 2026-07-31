@@ -1,5 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    serverComponentsExternalPackages: ["pdfkit"],
+    outputFileTracingIncludes: {
+      "/admin/catalogue.pdf": ["./node_modules/pdfkit/js/data/**/*"]
+    }
+  },
   images: {
     remotePatterns: [
       {

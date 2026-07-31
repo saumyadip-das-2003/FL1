@@ -4,9 +4,7 @@ import { FeaturedProjects } from "@/components/featured-projects";
 import { FeaturedServices } from "@/components/featured-services";
 import { Hero } from "@/components/hero";
 import { HomeIntro } from "@/components/home-intro";
-import { HomeSocialDock } from "@/components/home-social-dock";
 import { getLiveContent } from "@/lib/live-content";
-import { Facebook, MessageCircle, Phone } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -17,22 +15,25 @@ export default async function Home() {
     { value: content.settings.statProjects, label: "Projects completed" },
     { value: content.settings.statCountries, label: "Countries worked in" }
   ];
-  const socialLinks = [
-    { label: "WhatsApp", href: content.settings.whatsapp, icon: MessageCircle },
-    { label: "Call", href: `tel:${content.settings.phone.replace(/\s+/g, "")}`, icon: Phone },
-    { label: "Facebook", href: content.settings.facebook, icon: Facebook }
-  ];
 
   return (
-    <HomeIntro>
+    <HomeIntro
+      companyName={content.settings.companyName}
+      tagline={content.settings.tagline}
+      logoUrl={content.settings.logoUrl}
+      homeLogoText={content.settings.homeLogoText}
+    >
       <main>
-        <Hero headline={content.settings.homeHeadline} tagline={content.settings.homeTagline} />
+        <Hero
+          headline={content.settings.homeHeadline}
+          tagline={content.settings.homeTagline}
+          videoUrl={content.settings.homeVideoUrl}
+        />
         <FeaturedProjects />
         <FeaturedServices />
         <FeaturedNews />
         <AboutTeaser profile={content.settings.aboutStudioProfile} stats={stats} />
       </main>
-      <HomeSocialDock links={socialLinks} />
     </HomeIntro>
   );
 }

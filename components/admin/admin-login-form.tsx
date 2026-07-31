@@ -3,7 +3,7 @@
 import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { adminTokenStorageKey } from "@/lib/admin-auth";
+import { adminEmailStorageKey, adminTokenStorageKey } from "@/lib/admin-auth";
 
 type FirebaseLoginResponse = {
   idToken?: string;
@@ -46,6 +46,7 @@ export function AdminLoginForm() {
       }
 
       window.localStorage.setItem(adminTokenStorageKey, payload.idToken);
+      window.localStorage.setItem(adminEmailStorageKey, email);
       router.push("/admin");
     } catch (loginError) {
       setError(loginError instanceof Error ? loginError.message : "Login failed.");

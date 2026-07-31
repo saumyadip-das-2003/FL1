@@ -6,6 +6,7 @@ import { LightboxGallery } from "@/components/lightbox-gallery";
 import { ProjectListItem } from "@/components/project-list-item";
 import { Reveal } from "@/components/reveal";
 import { adminProjectToProject, getLiveContent } from "@/lib/live-content";
+import { getYouTubeId } from "@/lib/youtube";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -22,9 +23,7 @@ export default async function ProjectDetailPage({ params }: { params: { slug: st
   const currentIndex = projects.findIndex((item) => item.slug === project.slug);
   const nextProject = projects[(currentIndex + 1) % projects.length] ?? project;
   const projectVideo = project.video ?? "https://youtu.be/OP_fVIUTr9Y";
-  const videoId = projectVideo.includes("youtu.be/")
-    ? projectVideo.split("youtu.be/")[1]?.split(/[?&]/)[0]
-    : projectVideo.split("/embed/")[1]?.split(/[?&]/)[0] ?? "OP_fVIUTr9Y";
+  const videoId = getYouTubeId(projectVideo);
 
   return (
     <main className="bg-paper pt-20 transition-colors dark:bg-charcoal">

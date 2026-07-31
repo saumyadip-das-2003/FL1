@@ -1,4 +1,6 @@
 import { AdminLoginForm } from "@/components/admin/admin-login-form";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function AdminLoginPage() {
   return (
@@ -10,6 +12,12 @@ export default function AdminLoginPage() {
           Login with the Firebase admin account. Without Firebase keys this stays open for local demo mode.
         </p>
         <AdminLoginForm />
+        <Link
+          href="/"
+          className="mt-6 inline-flex items-center justify-center gap-2 text-xs uppercase tracking-[0.18em] text-muted underline underline-offset-4"
+        >
+          <ArrowLeft size={14} /> Back to main website
+        </Link>
       </section>
     </main>
   );

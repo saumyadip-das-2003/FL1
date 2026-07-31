@@ -5,17 +5,7 @@ import { ChevronLeft, ChevronRight, ChevronUp, Minus, Plus } from "lucide-react"
 import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
 import type { Project, ProjectMedia } from "@/lib/data";
-
-const placeholderVideoId = "OP_fVIUTr9Y";
-
-function youtubeEmbedUrl(source: string) {
-  const idMatch =
-    source.match(/youtu\.be\/([^?&]+)/) ??
-    source.match(/[?&]v=([^?&]+)/) ??
-    source.match(/embed\/([^?&]+)/);
-  const id = idMatch?.[1] ?? placeholderVideoId;
-  return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&modestbranding=1&playsinline=1&rel=0`;
-}
+import { youtubeEmbedUrl } from "@/lib/youtube";
 
 function ProjectMark({ title }: { title: string }) {
   const letters = title

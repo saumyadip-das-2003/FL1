@@ -51,6 +51,8 @@ export type AdminContent = {
     companyName: string;
     tagline: string;
     logoUrl: string;
+    homeLogoText: string;
+    homeVideoUrl: string;
     homeHeadline: string;
     homeTagline: string;
     featuredProjectIds: string;
@@ -62,12 +64,14 @@ export type AdminContent = {
     aboutStudioProfile: string;
     aboutMission: string;
     aboutVision: string;
+    aboutHeroImage: string;
     founderMessage: string;
     founderImage: string;
     email: string;
     phone: string;
     address: string;
     offices: string;
+    officeMaps: string;
     whatsapp: string;
     facebook: string;
     instagram: string;
@@ -112,6 +116,8 @@ export function createSeedAdminContent(): AdminContent {
       companyName: "Atelier Northline",
       tagline: "Architecture Studio",
       logoUrl: "",
+      homeLogoText: "Modern Age Studio",
+      homeVideoUrl: "https://youtu.be/OP_fVIUTr9Y",
       homeHeadline: "Formal spaces for a changing climate.",
       homeTagline: "A client-facing studio prototype for architecture, interiors, exteriors, and landscape portfolios.",
       featuredProjectIds: projects.slice(0, 3).map((project) => project.slug).join(", "),
@@ -124,6 +130,7 @@ export function createSeedAdminContent(): AdminContent {
         "Atelier Northline is a multidisciplinary office working across civic architecture, private residences, hospitality interiors, exterior envelopes, and climate-responsive landscapes.",
       aboutMission: "We pursue architecture that is formally clear, materially precise, and generous to daily life.",
       aboutVision: "To shape calm, durable places that help cities adapt with intelligence and grace.",
+      aboutHeroImage: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=2200&q=80",
       founderMessage:
         "Architecture should make complexity feel quietly resolved. This founder message can introduce the real practice, its origins, collaborators, and values.",
       founderImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80",
@@ -131,6 +138,7 @@ export function createSeedAdminContent(): AdminContent {
       phone: "+880 1700 000 000",
       address: "House 18, Road 7, Gulshan, Dhaka",
       offices: "Dhaka / House 18, Road 7, Gulshan\nSingapore / 22 Keong Saik Road\nDubai / Design District, Building 5",
+      officeMaps: "https://maps.google.com/maps?q=Gulshan%20Dhaka&t=&z=13&ie=UTF8&iwloc=&output=embed\n\n",
       whatsapp: "https://wa.me/8801700000000",
       facebook: "https://facebook.com",
       instagram: "https://instagram.com",
