@@ -4,14 +4,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Minus, Plus } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { team } from "@/lib/data";
+import { team as fallbackTeam } from "@/lib/data";
 
-type Person = (typeof team)[number];
+type Person = (typeof fallbackTeam)[number];
 type PeopleFilter = "All" | "Design" | "Interior" | "Landscape" | "Technical";
 
 const peopleFilters: PeopleFilter[] = ["All", "Design", "Interior", "Landscape", "Technical"];
 
-export function PeopleGrid() {
+export function PeopleGrid({ team = fallbackTeam }: { team?: Person[] }) {
   const [activeName, setActiveName] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<PeopleFilter>("All");

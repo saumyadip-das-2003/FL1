@@ -1,29 +1,30 @@
 import Image from "next/image";
 import { Reveal } from "@/components/reveal";
+import { getLiveContent } from "@/lib/live-content";
 
-const sections = [
-  {
-    label: "Mission",
-    title: "We pursue architecture that is formally clear, materially precise, and generous to daily life.",
-    body:
-      "Every commission begins with context: climate, program, construction culture, budget, and the social behaviors the project must support. From that foundation, the work develops through disciplined proportion, long-life materials, and carefully staged transitions between public and private space."
-  },
-  {
-    label: "Vision",
-    title: "To shape calm, durable places that help cities adapt with intelligence and grace.",
-    body:
-      "Our long-term ambition is to connect design excellence with climate responsibility. We imagine buildings, interiors, and landscapes that remain useful, legible, and emotionally resonant as communities and environments continue to change."
-  },
-  {
-    label: "Message from Founder",
-    title: "Architecture should make complexity feel quietly resolved.",
-    body:
-      "Atelier Northline was shaped around a simple belief: the best spaces carry discipline without losing warmth. This placeholder founder message can later introduce the real practice, its origins, collaborators, and the values that guide each commission.",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80"
-  }
-];
+export const dynamic = "force-dynamic";
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const content = await getLiveContent();
+  const sections = [
+    {
+      label: "Mission",
+      title: content.settings.aboutMission,
+      body: content.settings.aboutMission
+    },
+    {
+      label: "Vision",
+      title: content.settings.aboutVision,
+      body: content.settings.aboutVision
+    },
+    {
+      label: "Message from Founder",
+      title: "Message from Founder",
+      body: content.settings.founderMessage,
+      image: content.settings.founderImage
+    }
+  ];
+
   return (
     <main className="bg-paper transition-colors dark:bg-charcoal">
       <section className="px-5 pb-20 pt-32 md:px-8 md:pb-28 md:pt-40">
@@ -36,9 +37,7 @@ export default function AboutPage() {
           </Reveal>
           <Reveal delay={0.1}>
             <p className="text-lg leading-9 text-muted">
-              Atelier Northline is a dummy architecture practice profile created for this prototype. The studio is
-              positioned as a multidisciplinary office working across civic architecture, private residences,
-              hospitality interiors, exterior envelopes, and climate-responsive landscapes.
+              {content.settings.aboutStudioProfile}
             </p>
           </Reveal>
         </div>

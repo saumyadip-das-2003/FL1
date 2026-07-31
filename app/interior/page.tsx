@@ -1,5 +1,11 @@
 import { ProjectsBrowser } from "@/components/projects-browser";
+import { adminProjectToProject, getLiveContent } from "@/lib/live-content";
 
-export default function InteriorPage() {
-  return <ProjectsBrowser initialCategory="Interior" />;
+export const dynamic = "force-dynamic";
+
+export default async function InteriorPage() {
+  const content = await getLiveContent();
+  const projects = content.projects.map(adminProjectToProject);
+
+  return <ProjectsBrowser initialCategory="Interior" projects={projects} />;
 }

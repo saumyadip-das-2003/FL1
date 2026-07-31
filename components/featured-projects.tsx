@@ -1,8 +1,20 @@
 import { ProjectListItem } from "@/components/project-list-item";
 import { Reveal } from "@/components/reveal";
-import { projects } from "@/lib/data";
+import { adminProjectToProject, getLiveContent } from "@/lib/live-content";
+import type { Project } from "@/lib/data";
 
-export function FeaturedProjects() {
+function isProject(project: Project | undefined): project is Project {
+  return Boolean(project);
+}
+
+export async function FeaturedProjects() {
+  const content = await getLiveContent();
+  const projects = content.projects.map(adminProjectToProject);
+  const featuredIds = content.settings.featuredProjectIds.split(",").map((id) => id.trim()).filter(Boolean);
+  const featuredProjects = featuredIds.length
+    ? featuredIds.map((id) => projects.find((project) => project.slug === id)).filter(isProject)
+    : projects.slice(0, 6);
+
   return (
     <section className="bg-paper px-5 py-24 transition-colors dark:bg-charcoal md:px-8 md:py-32">
       <div className="mx-auto max-w-7xl">
@@ -20,7 +32,7 @@ export function FeaturedProjects() {
           </div>
         </Reveal>
         <div className="grid">
-          {projects.slice(0, 6).map((project) => (
+          {featuredProjects.slice(0, 6).map((project) => (
             <ProjectListItem key={project.slug} project={project} />
           ))}
         </div>

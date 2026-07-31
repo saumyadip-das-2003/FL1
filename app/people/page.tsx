@@ -1,7 +1,13 @@
 import { PeopleGrid } from "@/components/people-grid";
 import { Reveal } from "@/components/reveal";
+import { adminPersonToTeamMember, getLiveContent } from "@/lib/live-content";
 
-export default function PeoplePage() {
+export const dynamic = "force-dynamic";
+
+export default async function PeoplePage() {
+  const content = await getLiveContent();
+  const team = content.people.map(adminPersonToTeamMember);
+
   return (
     <main className="bg-paper px-5 pb-24 pt-32 transition-colors dark:bg-charcoal md:px-8 md:pb-32 md:pt-40">
       <section className="mx-auto max-w-7xl">
@@ -12,7 +18,7 @@ export default function PeoplePage() {
           </h1>
         </Reveal>
 
-        <PeopleGrid />
+        <PeopleGrid team={team} />
       </section>
     </main>
   );

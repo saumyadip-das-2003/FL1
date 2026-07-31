@@ -1,52 +1,13 @@
 import Image from "next/image";
 import { Reveal } from "@/components/reveal";
+import { adminServiceTags, getLiveContent } from "@/lib/live-content";
 
-const services = [
-  {
-    title: "Architecture Design & Drafting",
-    image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1400&q=80",
-    description:
-      "Professional architectural drawings and documentation for concept, planning, and presentation stages.",
-    tags: ["AutoCAD", "Revit", "Planning"]
-  },
-  {
-    title: "3D Modeling",
-    image: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1400&q=80",
-    description:
-      "Accurate architectural models for design development, visualization, consultant coordination, and client review.",
-    tags: ["3ds Max", "SketchUp", "Rhino", "Revit"]
-  },
-  {
-    title: "Rendering & Visualization",
-    image: "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1400&q=80",
-    description:
-      "High-quality still renders that communicate materiality, lighting, landscape context, and spatial experience.",
-    tags: ["Lumion", "V-Ray", "Enscape", "D5 Render"]
-  },
-  {
-    title: "Interior Design",
-    image: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1400&q=80",
-    description:
-      "Interior concepts, finish palettes, lighting strategy, furniture planning, and detailed room atmospheres.",
-    tags: ["FF&E", "Lighting", "Material"]
-  },
-  {
-    title: "Exterior & Facade",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1400&q=80",
-    description:
-      "Facade composition, exterior material systems, shading studies, and envelope identity for built projects.",
-    tags: ["Facade", "Envelope", "Climate"]
-  },
-  {
-    title: "Animation & Walkthrough",
-    image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1400&q=80",
-    description:
-      "Cinematic walkthroughs, project films, motion studies, and presentation-ready spatial storytelling.",
-    tags: ["Film", "Motion", "Client Deck"]
-  }
-];
+export const dynamic = "force-dynamic";
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const content = await getLiveContent();
+  const services = content.services;
+
   return (
     <main className="bg-paper px-5 pb-24 pt-32 transition-colors dark:bg-charcoal md:px-8 md:pb-32 md:pt-40">
       <section className="mx-auto max-w-7xl">
@@ -78,7 +39,7 @@ export default function ServicesPage() {
                   <h2 className="font-serif text-3xl leading-tight">{service.title}</h2>
                   <p className="mt-4 text-base leading-8 text-muted">{service.description}</p>
                   <div className="mt-7 flex flex-wrap gap-2">
-                    {service.tags.map((tag) => (
+                    {adminServiceTags(service).map((tag) => (
                       <span
                         key={tag}
                         className="rounded-full border border-black/10 px-3 py-1 text-xs text-ink/80 dark:border-white/15 dark:text-paper/80"

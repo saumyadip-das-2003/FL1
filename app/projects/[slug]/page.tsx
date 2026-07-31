@@ -5,22 +5,26 @@ import { notFound } from "next/navigation";
 import { LightboxGallery } from "@/components/lightbox-gallery";
 import { ProjectListItem } from "@/components/project-list-item";
 import { Reveal } from "@/components/reveal";
-import { getNextProject } from "@/lib/utils";
-import { projects } from "@/lib/data";
+import { adminProjectToProject, getLiveContent } from "@/lib/live-content";
 
-export function generateStaticParams() {
-  return projects.map((project) => ({ slug: project.slug }));
-}
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-export default function ProjectDetailPage({ params }: { params: { slug: string } }) {
+export default async function ProjectDetailPage({ params }: { params: { slug: string } }) {
+  const content = await getLiveContent();
+  const projects = content.projects.map(adminProjectToProject);
   const project = projects.find((item) => item.slug === params.slug);
 
   if (!project) {
     notFound();
   }
 
-  const nextProject = getNextProject(project.slug);
-  const placeholderVideoId = "OP_fVIUTr9Y";
+  const currentIndex = projects.findIndex((item) => item.slug === project.slug);
+  const nextProject = projects[(currentIndex + 1) % projects.length] ?? project;
+  const projectVideo = project.video ?? "https://youtu.be/OP_fVIUTr9Y";
+  const videoId = projectVideo.includes("youtu.be/")
+    ? projectVideo.split("youtu.be/")[1]?.split(/[?&]/)[0]
+    : projectVideo.split("/embed/")[1]?.split(/[?&]/)[0] ?? "OP_fVIUTr9Y";
 
   return (
     <main className="bg-paper pt-20 transition-colors dark:bg-charcoal">
@@ -71,7 +75,7 @@ export default function ProjectDetailPage({ params }: { params: { slug: string }
           </div>
           <div className="aspect-video overflow-hidden bg-black">
             <iframe
-              src={`https://www.youtube.com/embed/${placeholderVideoId}?autoplay=0&mute=1&controls=1&modestbranding=1&rel=0`}
+              src={`https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1&controls=1&modestbranding=1&rel=0`}
               title={`${project.title} video`}
               className="h-full w-full"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

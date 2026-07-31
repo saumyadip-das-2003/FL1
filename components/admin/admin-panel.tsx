@@ -1,8 +1,10 @@
 "use client";
 
-import { Download, Plus, RotateCcw, Save, Trash2 } from "lucide-react";
+import { Download, LogOut, Plus, RotateCcw, Save, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { adminTokenStorageKey } from "@/lib/admin-auth";
 import {
   adminStorageKey,
   createSeedAdminContent,
@@ -112,17 +114,52 @@ function readFileAsDataUrl(file: File) {
 }
 
 export function AdminPanel() {
+  const router = useRouter();
   const [content, setContent] = useState<AdminContent>(() => createSeedAdminContent());
   const [tab, setTab] = useState<Tab>("settings");
   const [selectedId, setSelectedId] = useState<string>("");
   const [savedAt, setSavedAt] = useState("");
+  const [status, setStatus] = useState("Checking admin session...");
+  const [token, setToken] = useState("");
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    const storedToken = window.localStorage.getItem(adminTokenStorageKey);
+    const firebaseEnabled = Boolean(process.env.NEXT_PUBLIC_FIREBASE_API_KEY);
+
+    if (!storedToken && firebaseEnabled) {
+      router.replace("/admin/login");
+      return;
+    }
+
+    setToken(storedToken ?? "");
+
     const saved = window.localStorage.getItem(adminStorageKey);
     if (saved) {
       setContent(JSON.parse(saved) as AdminContent);
     }
-  }, []);
+
+    async function loadRemoteContent() {
+      try {
+        const response = await fetch("/api/admin/content", {
+          headers: storedToken ? { Authorization: `Bearer ${storedToken}` } : undefined
+        });
+
+        if (!response.ok) {
+          throw new Error("Remote content is not available yet.");
+        }
+
+        const payload = (await response.json()) as { content: AdminContent };
+        setContent(payload.content);
+        window.localStorage.setItem(adminStorageKey, JSON.stringify(payload.content));
+        setStatus("Connected to content API.");
+      } catch {
+        setStatus("Using local demo content until Sanity/Firebase keys are added.");
+      }
+    }
+
+    loadRemoteContent();
+  }, [router]);
 
   const selectedItem = useMemo(() => {
     if (tab === "settings") {
@@ -138,9 +175,32 @@ export function AdminPanel() {
     }
   }, [content, selectedId, tab]);
 
-  function saveContent(next = content) {
+  async function saveContent(next = content) {
+    setBusy(true);
     window.localStorage.setItem(adminStorageKey, JSON.stringify(next));
-    setSavedAt(new Date().toLocaleTimeString());
+
+    try {
+      const response = await fetch("/api/admin/content", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify(next)
+      });
+
+      if (!response.ok) {
+        throw new Error("Remote save failed.");
+      }
+
+      const result = (await response.json()) as { mode?: string };
+      setStatus(result.mode === "sanity" ? "Saved to Sanity." : "Saved locally. Add Sanity keys for production storage.");
+    } catch {
+      setStatus("Saved locally only. Check Firebase/Sanity environment keys.");
+    } finally {
+      setSavedAt(new Date().toLocaleTimeString());
+      setBusy(false);
+    }
   }
 
   function updateSettings(key: keyof AdminContent["settings"], value: string) {
@@ -157,13 +217,37 @@ export function AdminPanel() {
     }));
   }
 
+  async function uploadImageFile(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("/api/admin/upload", {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed.");
+      }
+
+      const payload = (await response.json()) as { url: string };
+      setStatus("Image uploaded to Sanity.");
+      return payload.url;
+    } catch {
+      setStatus("Image kept locally for demo. Add Sanity keys for production upload.");
+      return null;
+    }
+  }
+
   async function uploadToItem(key: CollectionKey, id: string, field: string, file?: File) {
     if (!file) {
       return;
     }
 
-    const dataUrl = await readFileAsDataUrl(file);
-    updateItem(key, id, field, dataUrl);
+    const uploadedUrl = await uploadImageFile(file);
+    updateItem(key, id, field, uploadedUrl ?? (await readFileAsDataUrl(file)));
   }
 
   async function uploadToSettings(key: keyof AdminContent["settings"], file?: File) {
@@ -171,8 +255,8 @@ export function AdminPanel() {
       return;
     }
 
-    const dataUrl = await readFileAsDataUrl(file);
-    updateSettings(key, dataUrl);
+    const uploadedUrl = await uploadImageFile(file);
+    updateSettings(key, uploadedUrl ?? (await readFileAsDataUrl(file)));
   }
 
   function updateProjectMedia(projectId: string, mediaId: string, field: keyof AdminMedia, value: string) {
@@ -194,8 +278,8 @@ export function AdminPanel() {
       return;
     }
 
-    const dataUrl = await readFileAsDataUrl(file);
-    updateProjectMedia(projectId, mediaId, "source", dataUrl);
+    const uploadedUrl = await uploadImageFile(file);
+    updateProjectMedia(projectId, mediaId, "source", uploadedUrl ?? (await readFileAsDataUrl(file)));
   }
 
   function addProjectMedia(projectId: string, type: AdminMedia["type"]) {
@@ -246,6 +330,11 @@ export function AdminPanel() {
     setSelectedId("");
   }
 
+  function logout() {
+    window.localStorage.removeItem(adminTokenStorageKey);
+    router.push("/admin/login");
+  }
+
   return (
     <main className="bg-paper px-5 pb-20 pt-28 transition-colors dark:bg-charcoal md:px-8 md:pt-32">
       <div className="mx-auto max-w-7xl">
@@ -259,7 +348,7 @@ export function AdminPanel() {
           </div>
           <div className="flex flex-wrap gap-3">
             <button onClick={() => saveContent()} className="inline-flex items-center gap-2 bg-ink px-5 py-3 text-xs uppercase tracking-[0.18em] text-paper dark:bg-paper dark:text-ink">
-              <Save size={15} /> Save Demo
+              <Save size={15} /> {busy ? "Saving" : "Save"}
             </button>
             <button onClick={resetDemo} className="inline-flex items-center gap-2 border border-black/15 px-5 py-3 text-xs uppercase tracking-[0.18em] dark:border-white/15">
               <RotateCcw size={15} /> Reset
@@ -271,10 +360,16 @@ export function AdminPanel() {
             >
               <Download size={15} /> Export
             </a>
+            <button onClick={logout} className="inline-flex items-center gap-2 border border-black/15 px-5 py-3 text-xs uppercase tracking-[0.18em] dark:border-white/15">
+              <LogOut size={15} /> Logout
+            </button>
           </div>
         </div>
 
-        {savedAt && <p className="mt-4 text-sm text-muted">Last saved locally at {savedAt}</p>}
+        <p className="mt-4 text-sm text-muted">
+          {status}
+          {savedAt ? ` Last saved at ${savedAt}.` : ""}
+        </p>
 
         <div className="mt-8 flex gap-3 overflow-x-auto border-b border-black/10 pb-3 dark:border-white/10">
           {tabs.map((item) => (

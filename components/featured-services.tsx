@@ -2,26 +2,20 @@ import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Reveal } from "@/components/reveal";
+import { getLiveContent } from "@/lib/live-content";
+import type { AdminService } from "@/lib/admin-demo-data";
 
-const services = [
-  {
-    title: "Architecture Design & Drafting",
-    image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80",
-    description: "Professional drawings and documentation for concept, planning, and presentation stages."
-  },
-  {
-    title: "3D Modeling",
-    image: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=80",
-    description: "Accurate architectural models for design development, visualization, and coordination."
-  },
-  {
-    title: "Rendering & Visualization",
-    image: "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1200&q=80",
-    description: "Still renders and spatial imagery that communicate materiality, light, and atmosphere."
-  }
-];
+function isService(service: AdminService | undefined): service is AdminService {
+  return Boolean(service);
+}
 
-export function FeaturedServices() {
+export async function FeaturedServices() {
+  const content = await getLiveContent();
+  const featuredIds = content.settings.featuredServiceIds.split(",").map((id) => id.trim()).filter(Boolean);
+  const services = featuredIds.length
+    ? featuredIds.map((id) => content.services.find((service) => service.id === id)).filter(isService)
+    : content.services.slice(0, 3);
+
   return (
     <section className="bg-white px-5 py-24 transition-colors dark:bg-[#4a4a4a] md:px-8 md:py-28">
       <div className="mx-auto max-w-7xl">

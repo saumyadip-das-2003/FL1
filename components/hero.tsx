@@ -4,7 +4,13 @@ import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
-export function Hero() {
+export function Hero({
+  headline = "Formal spaces for a changing climate.",
+  tagline = "A client-facing studio prototype for architecture, interiors, exteriors, and landscape portfolios."
+}: {
+  headline?: string;
+  tagline?: string;
+}) {
   const videoId = "OP_fVIUTr9Y";
 
   return (
@@ -39,7 +45,7 @@ export function Hero() {
             transition={{ duration: 0.95, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
             className="max-w-5xl font-serif text-5xl leading-[0.98] text-balance md:text-7xl lg:text-8xl"
           >
-            Formal spaces for a changing climate.
+            {headline}
           </motion.h1>
           <motion.div
             initial={{ opacity: 0, y: 28 }}
@@ -48,7 +54,7 @@ export function Hero() {
             className="mt-10 flex flex-col gap-5 md:flex-row md:items-center md:justify-between"
           >
             <p className="max-w-xl text-base leading-8 text-white/72 md:text-lg">
-              A client-facing studio prototype for architecture, interiors, exteriors, and landscape portfolios.
+              {tagline}
             </p>
             <Link
               href="/projects"

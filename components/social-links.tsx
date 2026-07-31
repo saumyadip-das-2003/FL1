@@ -1,13 +1,19 @@
 import { Facebook, MessageCircle, Phone } from "lucide-react";
 import Link from "next/link";
 
-const links = [
+const defaultLinks = [
   { label: "WhatsApp", href: "https://wa.me/8801700000000", icon: MessageCircle },
   { label: "Call", href: "tel:+8801700000000", icon: Phone },
   { label: "Facebook", href: "https://facebook.com", icon: Facebook }
 ];
 
-export function SocialLinks({ compact = false }: { compact?: boolean }) {
+export function SocialLinks({
+  compact = false,
+  links = defaultLinks
+}: {
+  compact?: boolean;
+  links?: { label: string; href: string; icon: typeof MessageCircle }[];
+}) {
   return (
     <div className={compact ? "flex flex-wrap gap-2" : "flex flex-col gap-2"}>
       {links.map((link) => {

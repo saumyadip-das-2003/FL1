@@ -1,9 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Reveal } from "@/components/reveal";
-import { newsItems } from "@/lib/news";
+import { adminNewsToNewsItem, getLiveContent } from "@/lib/live-content";
 
-export default function NewsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function NewsPage() {
+  const content = await getLiveContent();
+  const newsItems = content.news.map(adminNewsToNewsItem);
+
   return (
     <main className="bg-paper px-5 pb-24 pt-32 transition-colors dark:bg-charcoal md:px-8 md:pb-32 md:pt-40">
       <section className="mx-auto max-w-7xl">

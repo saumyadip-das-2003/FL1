@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { ProjectListItem } from "@/components/project-list-item";
-import { projectTaxonomy, projects, type ProjectCategory, type ProjectSection } from "@/lib/data";
+import { projectTaxonomy, projects as fallbackProjects, type Project, type ProjectCategory, type ProjectSection } from "@/lib/data";
 
 const sections = Object.keys(projectTaxonomy) as ProjectSection[];
 
@@ -19,7 +19,13 @@ function sectionFromCategory(category?: ProjectCategory): ProjectSection {
   return "Architecture";
 }
 
-export function ProjectsBrowser({ initialCategory }: { initialCategory?: ProjectCategory }) {
+export function ProjectsBrowser({
+  initialCategory,
+  projects = fallbackProjects
+}: {
+  initialCategory?: ProjectCategory;
+  projects?: Project[];
+}) {
   const [activeSection, setActiveSection] = useState<ProjectSection>(sectionFromCategory(initialCategory));
   const [activeSubsection, setActiveSubsection] = useState<string>("All");
   const [query, setQuery] = useState("");

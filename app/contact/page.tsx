@@ -1,7 +1,12 @@
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Reveal } from "@/components/reveal";
+import { getLiveContent } from "@/lib/live-content";
 
-export default function ContactPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ContactPage() {
+  const content = await getLiveContent();
+
   return (
     <main className="bg-paper px-5 pb-24 pt-32 transition-colors dark:bg-charcoal md:px-8 md:pb-32 md:pt-40">
       <section className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.9fr_1.1fr]">
@@ -12,13 +17,13 @@ export default function ContactPage() {
           </h1>
           <div className="mt-12 grid gap-5 text-sm">
             <p className="flex items-center gap-3">
-              <Mail size={18} /> studio@ateliernorthline.test
+              <Mail size={18} /> {content.settings.email}
             </p>
             <p className="flex items-center gap-3">
-              <Phone size={18} /> +880 1700 000 000
+              <Phone size={18} /> {content.settings.phone}
             </p>
             <p className="flex items-center gap-3">
-              <MapPin size={18} /> House 18, Road 7, Gulshan, Dhaka
+              <MapPin size={18} /> {content.settings.address}
             </p>
           </div>
         </Reveal>
@@ -64,7 +69,7 @@ export default function ContactPage() {
             <div>
               <MapPin className="mx-auto mb-5" size={28} />
               <p className="text-xs uppercase tracking-[0.28em] text-muted">Map Placeholder</p>
-              <p className="mt-3 font-serif text-3xl">Gulshan, Dhaka</p>
+              <p className="mt-3 font-serif text-3xl">{content.settings.address}</p>
             </div>
           </div>
         </Reveal>

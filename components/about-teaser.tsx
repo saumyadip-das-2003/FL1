@@ -4,13 +4,17 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Reveal } from "@/components/reveal";
 
-const stats = [
-  { value: "14", label: "Years active" },
-  { value: "86", label: "Projects completed" },
-  { value: "11", label: "Countries worked in" }
-];
-
-export function AboutTeaser() {
+export function AboutTeaser({
+  profile = "Atelier Northline is a placeholder studio profile for a professional portfolio website. The practice is presented as research-oriented, detail-driven, and internationally conversant while remaining rooted in climate, craft, and civic responsibility.",
+  stats = [
+    { value: "14", label: "Years active" },
+    { value: "86", label: "Projects completed" },
+    { value: "11", label: "Countries worked in" }
+  ]
+}: {
+  profile?: string;
+  stats?: { value: string; label: string }[];
+}) {
   return (
     <section className="border-y border-black/10 bg-white px-5 py-24 transition-colors dark:border-white/10 dark:bg-[#4a4a4a] md:px-8 md:py-32">
       <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[1fr_1.2fr] lg:items-end">
@@ -22,9 +26,7 @@ export function AboutTeaser() {
         </Reveal>
         <Reveal delay={0.12}>
           <p className="text-lg leading-9 text-muted">
-            Atelier Northline is a placeholder studio profile for a professional portfolio website. The practice is
-            presented as research-oriented, detail-driven, and internationally conversant while remaining rooted in
-            climate, craft, and civic responsibility.
+            {profile}
           </p>
           <div className="mt-10 grid grid-cols-3 gap-4 border-y border-black/10 py-8 dark:border-white/10">
             {stats.map((stat, index) => (

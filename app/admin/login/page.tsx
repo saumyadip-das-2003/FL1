@@ -1,5 +1,4 @@
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { AdminLoginForm } from "@/components/admin/admin-login-form";
 
 export default function AdminLoginPage() {
   return (
@@ -8,14 +7,9 @@ export default function AdminLoginPage() {
         <p className="text-xs uppercase tracking-[0.28em] text-muted">Admin Login</p>
         <h1 className="mt-4 font-serif text-4xl leading-tight">Modern Age Studio</h1>
         <p className="mt-5 text-sm leading-7 text-muted">
-          Demo mode is open without a password. Firebase authentication can be connected later for the production admin.
+          Login with the Firebase admin account. Without Firebase keys this stays open for local demo mode.
         </p>
-        <Link
-          href="/admin"
-          className="mt-8 inline-flex w-full items-center justify-center gap-3 bg-ink px-6 py-4 text-xs uppercase tracking-[0.22em] text-paper dark:bg-paper dark:text-ink"
-        >
-          Enter admin panel <ArrowRight size={16} />
-        </Link>
+        <AdminLoginForm />
       </section>
     </main>
   );

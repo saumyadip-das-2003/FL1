@@ -3,13 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Reveal } from "@/components/reveal";
-import { newsItems } from "@/lib/news";
+import { adminNewsToNewsItem, getLiveContent } from "@/lib/live-content";
 
-export function generateStaticParams() {
-  return newsItems.map((item) => ({ slug: item.slug }));
-}
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-export default function NewsDetailPage({ params }: { params: { slug: string } }) {
+export default async function NewsDetailPage({ params }: { params: { slug: string } }) {
+  const content = await getLiveContent();
+  const newsItems = content.news.map(adminNewsToNewsItem);
   const item = newsItems.find((entry) => entry.slug === params.slug);
 
   if (!item) {

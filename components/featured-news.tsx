@@ -2,9 +2,21 @@ import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Reveal } from "@/components/reveal";
-import { newsItems } from "@/lib/news";
+import { adminNewsToNewsItem, getLiveContent } from "@/lib/live-content";
+import type { NewsItem } from "@/lib/news";
 
-export function FeaturedNews() {
+function isNewsItem(item: NewsItem | undefined): item is NewsItem {
+  return Boolean(item);
+}
+
+export async function FeaturedNews() {
+  const content = await getLiveContent();
+  const newsItems = content.news.map(adminNewsToNewsItem);
+  const featuredIds = content.settings.featuredNewsIds.split(",").map((id) => id.trim()).filter(Boolean);
+  const featuredNews = featuredIds.length
+    ? featuredIds.map((id) => newsItems.find((item) => item.slug === id)).filter(isNewsItem)
+    : newsItems.slice(0, 2);
+
   return (
     <section className="bg-paper px-5 py-24 transition-colors dark:bg-charcoal md:px-8 md:py-28">
       <div className="mx-auto max-w-7xl">
@@ -26,7 +38,7 @@ export function FeaturedNews() {
         </Reveal>
 
         <div className="grid gap-6 md:grid-cols-2">
-          {newsItems.slice(0, 2).map((item, index) => (
+          {featuredNews.slice(0, 2).map((item, index) => (
             <Reveal key={item.slug} delay={index * 0.06}>
               <Link href={`/news/${item.slug}`} className="group grid gap-5 border-t border-black/10 pt-6 dark:border-white/10">
                 <div className="relative aspect-[16/9] overflow-hidden bg-black">
