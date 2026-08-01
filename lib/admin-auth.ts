@@ -1,4 +1,5 @@
 export const adminTokenStorageKey = "modern-age-admin-token";
+export const adminRefreshTokenStorageKey = "modern-age-admin-refresh-token";
 export const adminEmailStorageKey = "modern-age-admin-email";
 export const protectedAdminEmail = "studio.modern.age@gmail.com";
 

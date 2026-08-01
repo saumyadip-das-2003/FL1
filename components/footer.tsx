@@ -14,7 +14,7 @@ export async function Footer() {
     <footer data-site-chrome className="border-t border-black/20 bg-neutral-200 px-5 py-16 shadow-[0_-14px_40px_rgba(0,0,0,0.04)] transition-colors dark:border-white/15 dark:bg-[#444444] md:px-8 md:py-20">
       {brandLinks.length > 0 && (
         <div className="mb-12 w-full border-b border-black/10 pb-8 dark:border-white/10">
-          <p className="mb-5 text-xs uppercase tracking-[0.24em] text-muted">Brands & Collaborations</p>
+          <p className="mb-5 text-xs uppercase tracking-[0.24em] text-muted">Partners & Collaborations</p>
           <div className="flex flex-wrap items-center gap-4">
             {brandLinks.map((brand) => (
               <Link
@@ -22,7 +22,7 @@ export async function Footer() {
                 href={brand.href || "#"}
                 target={brand.href ? "_blank" : undefined}
                 rel={brand.href ? "noreferrer" : undefined}
-                className="flex h-16 w-32 items-center justify-center border border-black/10 bg-white p-3 transition hover:opacity-70 dark:border-white/10 dark:bg-[#555555]"
+                className="group relative flex h-16 w-32 items-center justify-center overflow-hidden border border-black/10 bg-white p-3 transition dark:border-white/10 dark:bg-[#555555]"
                 aria-label={brand.name}
               >
                 <Image
@@ -30,8 +30,11 @@ export async function Footer() {
                   alt={brand.name}
                   width={160}
                   height={80}
-                  className="max-h-full w-auto object-contain"
+                  className="max-h-full w-auto object-contain transition duration-300 group-hover:scale-95 group-hover:opacity-25"
                 />
+                <span className="absolute inset-0 flex translate-y-2 items-center justify-center bg-ink/85 px-3 text-center text-[10px] font-semibold uppercase leading-4 tracking-[0.14em] text-paper opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 dark:bg-paper/90 dark:text-ink">
+                  {brand.name}
+                </span>
               </Link>
             ))}
           </div>

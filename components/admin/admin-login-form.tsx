@@ -3,10 +3,11 @@
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { adminEmailStorageKey, adminTokenStorageKey } from "@/lib/admin-auth";
+import { adminEmailStorageKey, adminRefreshTokenStorageKey, adminTokenStorageKey } from "@/lib/admin-auth";
 
 type FirebaseLoginResponse = {
   idToken?: string;
+  refreshToken?: string;
   error?: { message?: string };
 };
 
@@ -49,7 +50,10 @@ export function AdminLoginForm() {
       }
 
       window.localStorage.setItem(adminTokenStorageKey, payload.idToken);
-      window.localStorage.setItem(adminEmailStorageKey, email);
+      if (payload.refreshToken) {
+        window.localStorage.setItem(adminRefreshTokenStorageKey, payload.refreshToken);
+      }
+      window.localStorage.setItem(adminEmailStorageKey, email.trim().toLowerCase());
       router.push("/admin");
     } catch (loginError) {
       setError(loginError instanceof Error ? loginError.message : "Login failed.");

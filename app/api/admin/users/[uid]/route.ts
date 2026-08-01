@@ -11,7 +11,12 @@ async function guard(request: NextRequest) {
   }
 
   const allowed = await verifyProtectedOwnerRequest(bearerToken(request.headers.get("authorization")));
-  return allowed ? null : NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  return allowed
+    ? null
+    : NextResponse.json(
+        { error: `Unauthorized. Log out and log back in as ${protectedAdminEmail}, then refresh this panel.` },
+        { status: 401 }
+      );
 }
 
 function errorResponse(error: unknown, fallback: string, status = 500) {

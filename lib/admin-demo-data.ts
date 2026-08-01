@@ -97,6 +97,13 @@ export type AdminContent = {
     featuredNewsIds: string;
     servicesIntroTitle: string;
     servicesIntroBody: string;
+    serviceShowWorkflow: string;
+    serviceShowWhyChoose: string;
+    serviceShowFreelance: string;
+    serviceShowLocalSupport: string;
+    serviceShowSocialPresence: string;
+    serviceShowTeamCulture: string;
+    serviceShowCta: string;
     serviceWorkflow: string;
     serviceWhyChoose: string;
     serviceFreelanceTitle: string;
@@ -106,13 +113,12 @@ export type AdminContent = {
     serviceLocalSupportBody: string;
     serviceSocialPresenceTitle: string;
     serviceSocialPresenceBody: string;
+    serviceSocialPresenceSocialIds: string;
     serviceTeamCultureTitle: string;
     serviceTeamCultureBody: string;
     serviceCtaTitle: string;
     serviceCtaPrimaryLabel: string;
-    serviceCtaPrimaryHref: string;
     serviceCtaSecondaryLabel: string;
-    serviceCtaSecondaryHref: string;
     statYears: string;
     statProjects: string;
     statCountries: string;
@@ -190,6 +196,13 @@ export function createSeedAdminContent(): AdminContent {
       servicesIntroTitle: "Our expertise",
       servicesIntroBody:
         "From concept drafting to cinematic walkthroughs, we deliver architecture-focused design and visualization services for local and international projects.",
+      serviceShowWorkflow: "true",
+      serviceShowWhyChoose: "true",
+      serviceShowFreelance: "true",
+      serviceShowLocalSupport: "true",
+      serviceShowSocialPresence: "true",
+      serviceShowTeamCulture: "true",
+      serviceShowCta: "true",
       serviceWorkflow: JSON.stringify([
         { id: "workflow-1", title: "Consultation", body: "Understanding goals, scope, and project context." },
         { id: "workflow-2", title: "Requirement Analysis", body: "Reviewing briefs, references, and deliverables." },
@@ -220,14 +233,13 @@ export function createSeedAdminContent(): AdminContent {
         "Bangladesh-based support network with sector-specific specialists for site analysis, project coordination, and local execution support.",
       serviceSocialPresenceTitle: "Social presence",
       serviceSocialPresenceBody: "The studio actively shares work, updates, and project showcases across social platforms.",
+      serviceSocialPresenceSocialIds: "facebook, instagram, linkedin",
       serviceTeamCultureTitle: "Team culture",
       serviceTeamCultureBody:
         "Friendly, humble, and collaborative team culture focused on delivering the best experience for every client.",
       serviceCtaTitle: "Let's Build Something Exceptional Together",
       serviceCtaPrimaryLabel: "Start a Project",
-      serviceCtaPrimaryHref: "https://www.modernagestudio.com/contact",
       serviceCtaSecondaryLabel: "Contact Us",
-      serviceCtaSecondaryHref: "https://www.modernagestudio.com/contact",
       statYears: "14",
       statProjects: "86",
       statCountries: "11",

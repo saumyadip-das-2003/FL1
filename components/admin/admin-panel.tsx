@@ -27,7 +27,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { adminEmailStorageKey, adminTokenStorageKey, protectedAdminEmail } from "@/lib/admin-auth";
+import { adminEmailStorageKey, adminRefreshTokenStorageKey, adminTokenStorageKey, protectedAdminEmail } from "@/lib/admin-auth";
 import {
   adminStorageKey,
   createSeedAdminContent,
@@ -217,6 +217,23 @@ function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
       {...props}
       className="h-11 rounded-md border border-black/10 bg-white px-3 text-sm normal-case tracking-normal text-ink outline-none transition focus:border-ink dark:border-white/10 dark:bg-[#4a4a4a] dark:text-paper"
     />
+  );
+}
+
+function ToggleField({
+  label,
+  checked,
+  onChange
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <label className="flex items-center justify-between gap-4 rounded-md border border-black/10 bg-white px-4 py-3 text-sm font-medium dark:border-white/10 dark:bg-[#4a4a4a]">
+      <span>{label}</span>
+      <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} className="h-4 w-4" />
+    </label>
   );
 }
 
@@ -439,6 +456,14 @@ export function AdminPanel() {
       ...current,
       settings: { ...current.settings, [key]: value }
     }));
+  }
+
+  function settingEnabled(key: keyof AdminContent["settings"]) {
+    return content.settings[key] !== "false";
+  }
+
+  function updateSettingEnabled(key: keyof AdminContent["settings"], value: boolean) {
+    updateSettings(key, value ? "true" : "false");
   }
 
   function projectSubsections() {
@@ -689,14 +714,14 @@ export function AdminPanel() {
     saveSocialLinks(socialLinks().filter((link) => link.id !== id));
   }
 
-  function selectedSocialIds(key: "footerSocialIds" | "quickContactSocialIds") {
+  function selectedSocialIds(key: "footerSocialIds" | "quickContactSocialIds" | "serviceSocialPresenceSocialIds") {
     return content.settings[key]
       .split(",")
       .map((id) => id.trim())
       .filter(Boolean);
   }
 
-  function toggleSelectedSocialId(key: "footerSocialIds" | "quickContactSocialIds", id: string) {
+  function toggleSelectedSocialId(key: "footerSocialIds" | "quickContactSocialIds" | "serviceSocialPresenceSocialIds", id: string) {
     const current = selectedSocialIds(key);
     const next = current.includes(id) ? current.filter((item) => item !== id) : [...current, id];
     updateSettings(key, next.join(", "));
@@ -947,8 +972,43 @@ export function AdminPanel() {
 
   function logout() {
     window.localStorage.removeItem(adminTokenStorageKey);
+    window.localStorage.removeItem(adminRefreshTokenStorageKey);
     window.localStorage.removeItem(adminEmailStorageKey);
     router.push("/admin/login");
+  }
+
+  async function getFreshAdminToken() {
+    const firebaseApiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "";
+    const refreshToken = window.localStorage.getItem(adminRefreshTokenStorageKey) ?? "";
+
+    if (!firebaseApiKey || !refreshToken) {
+      return token;
+    }
+
+    const response = await fetch(`https://securetoken.googleapis.com/v1/token?key=${firebaseApiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "refresh_token",
+        refresh_token: refreshToken
+      })
+    });
+    const payload = (await response.json()) as {
+      id_token?: string;
+      refresh_token?: string;
+      error?: { message?: string };
+    };
+
+    if (!response.ok || !payload.id_token) {
+      throw new Error(payload.error?.message ?? "Login session expired. Log out and log in again.");
+    }
+
+    window.localStorage.setItem(adminTokenStorageKey, payload.id_token);
+    if (payload.refresh_token) {
+      window.localStorage.setItem(adminRefreshTokenStorageKey, payload.refresh_token);
+    }
+    setToken(payload.id_token);
+    return payload.id_token;
   }
 
   async function changeAdminPassword() {
@@ -987,7 +1047,7 @@ export function AdminPanel() {
           returnSecureToken: true
         })
       });
-      const signInPayload = (await signInResponse.json()) as { idToken?: string; error?: { message?: string } };
+      const signInPayload = (await signInResponse.json()) as { idToken?: string; refreshToken?: string; error?: { message?: string } };
 
       if (!signInResponse.ok || !signInPayload.idToken) {
         throw new Error("Current password is incorrect.");
@@ -1002,13 +1062,16 @@ export function AdminPanel() {
           returnSecureToken: true
         })
       });
-      const payload = (await response.json()) as { idToken?: string; error?: { message?: string } };
+      const payload = (await response.json()) as { idToken?: string; refreshToken?: string; error?: { message?: string } };
 
       if (!response.ok || !payload.idToken) {
         throw new Error(payload.error?.message ?? "Password update failed.");
       }
 
       window.localStorage.setItem(adminTokenStorageKey, payload.idToken);
+      if (payload.refreshToken ?? signInPayload.refreshToken) {
+        window.localStorage.setItem(adminRefreshTokenStorageKey, payload.refreshToken ?? signInPayload.refreshToken ?? "");
+      }
       setToken(payload.idToken);
       setCurrentPassword("");
       setNewPassword("");
@@ -1030,8 +1093,9 @@ export function AdminPanel() {
     setUserStatus("Loading admin users...");
 
     try {
+      const freshToken = await getFreshAdminToken();
       const response = await fetch("/api/admin/users", {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${freshToken}` }
       });
       const payload = await readAdminApiResponse<{ users?: AdminUser[]; protectedEmail?: string }>(response);
 
@@ -1058,11 +1122,12 @@ export function AdminPanel() {
     setUserStatus("Adding admin user...");
 
     try {
+      const freshToken = await getFreshAdminToken();
       const response = await fetch("/api/admin/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${freshToken}`
         },
         body: JSON.stringify({ email: newAdminEmail, password: newAdminPassword })
       });
@@ -1103,11 +1168,12 @@ export function AdminPanel() {
     setUserStatus("Updating admin user...");
 
     try {
+      const freshToken = await getFreshAdminToken();
       const response = await fetch(`/api/admin/users/${user.uid}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${freshToken}`
         },
         body: JSON.stringify({
           email: emailChanged ? nextEmail : undefined,
@@ -1147,9 +1213,10 @@ export function AdminPanel() {
     setUserStatus("Deleting admin user...");
 
     try {
+      const freshToken = await getFreshAdminToken();
       const response = await fetch(`/api/admin/users/${user.uid}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${freshToken}` }
       });
       const payload = await readAdminApiResponse<{ ok?: boolean }>(response);
 
@@ -1489,6 +1556,34 @@ export function AdminPanel() {
     );
   }
 
+  function renderServiceSocialPresenceSelector() {
+    const links = socialLinks();
+    const selected = selectedSocialIds("serviceSocialPresenceSocialIds");
+
+    return (
+      <div className="mt-5 rounded-lg border border-black/10 p-4 dark:border-white/10">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Social Presence Links</p>
+        <p className="mt-2 text-sm leading-6 text-muted">
+          Select which accounts from the main Contact social list appear in the Services Social Presence block.
+        </p>
+        <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+          {links.map((link) => (
+            <label key={`service-social-${link.id}`} className="flex items-center justify-between gap-4 rounded-md border border-black/10 px-3 py-3 text-sm dark:border-white/10">
+              <span>{link.platform}</span>
+              <input
+                type="checkbox"
+                checked={selected.includes(link.id)}
+                onChange={() => toggleSelectedSocialId("serviceSocialPresenceSocialIds", link.id)}
+                className="h-4 w-4"
+              />
+            </label>
+          ))}
+          {links.length === 0 && <p className="text-sm text-muted">Add social links in Contact first.</p>}
+        </div>
+      </div>
+    );
+  }
+
   function renderBrandLinksEditor() {
     const brands = brandLinks();
 
@@ -1496,9 +1591,9 @@ export function AdminPanel() {
       <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Footer Brands & Collaborations</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Footer Partners & Collaborations</p>
             <p className="mt-2 text-sm leading-6 text-muted">
-              Add collaborator or brand logos shown in the footer. Each logo can link to that brand's website.
+              Add partner or collaborator logos shown in the footer. Each logo can link to that partner's website.
             </p>
           </div>
           <button
@@ -1506,7 +1601,7 @@ export function AdminPanel() {
             onClick={addBrandLink}
             className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-3 text-xs uppercase tracking-[0.14em] text-paper dark:bg-paper dark:text-ink"
           >
-            <Plus size={15} /> Add Brand
+            <Plus size={15} /> Add Partner
           </button>
         </div>
 
@@ -1516,7 +1611,7 @@ export function AdminPanel() {
               <MediaPreview type="image" source={brand.logo} title={brand.name} />
               <div className="grid gap-4">
                 <div className="grid gap-4 md:grid-cols-2">
-                  <Field label="Brand name">
+                  <Field label="Partner name">
                     <TextInput value={brand.name} onChange={(event) => updateBrandLink(brand.id, "name", event.target.value)} />
                   </Field>
                   <Field label="Clickable link">
@@ -1539,7 +1634,7 @@ export function AdminPanel() {
           ))}
           {brands.length === 0 && (
             <p className="rounded-md bg-neutral-50 p-4 text-sm text-muted dark:bg-neutral-700/40">
-              No footer brands added yet.
+              No footer partners added yet.
             </p>
           )}
         </div>
@@ -1603,6 +1698,19 @@ export function AdminPanel() {
           </div>
         </div>
 
+        <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
+          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-muted">Section Visibility</p>
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <ToggleField label="Show Workflow" checked={settingEnabled("serviceShowWorkflow")} onChange={(checked) => updateSettingEnabled("serviceShowWorkflow", checked)} />
+            <ToggleField label="Show Why Choose Us" checked={settingEnabled("serviceShowWhyChoose")} onChange={(checked) => updateSettingEnabled("serviceShowWhyChoose", checked)} />
+            <ToggleField label="Show Freelance Services" checked={settingEnabled("serviceShowFreelance")} onChange={(checked) => updateSettingEnabled("serviceShowFreelance", checked)} />
+            <ToggleField label="Show Local Support" checked={settingEnabled("serviceShowLocalSupport")} onChange={(checked) => updateSettingEnabled("serviceShowLocalSupport", checked)} />
+            <ToggleField label="Show Social Presence" checked={settingEnabled("serviceShowSocialPresence")} onChange={(checked) => updateSettingEnabled("serviceShowSocialPresence", checked)} />
+            <ToggleField label="Show Team Culture" checked={settingEnabled("serviceShowTeamCulture")} onChange={(checked) => updateSettingEnabled("serviceShowTeamCulture", checked)} />
+            <ToggleField label="Show Contact CTA" checked={settingEnabled("serviceShowCta")} onChange={(checked) => updateSettingEnabled("serviceShowCta", checked)} />
+          </div>
+        </div>
+
         {renderServiceTextItemsEditor({ title: "Workflow Steps", settingKey: "serviceWorkflow" })}
         {renderServiceTextItemsEditor({ title: "Why Choose Us", settingKey: "serviceWhyChoose" })}
 
@@ -1652,10 +1760,12 @@ export function AdminPanel() {
             "serviceTeamCultureBody",
             "serviceCtaTitle",
             "serviceCtaPrimaryLabel",
-            "serviceCtaPrimaryHref",
-            "serviceCtaSecondaryLabel",
-            "serviceCtaSecondaryHref"
+            "serviceCtaSecondaryLabel"
           ])}
+          {renderServiceSocialPresenceSelector()}
+          <p className="mt-4 rounded-md bg-neutral-50 p-3 text-sm text-muted dark:bg-neutral-700/40">
+            Start a Project and Contact Us buttons always open the internal /contact page in this codebase.
+          </p>
         </div>
       </div>
     );
@@ -1945,8 +2055,14 @@ export function AdminPanel() {
     if (tab === "services") {
       return (
         <div className="grid gap-8">
-          {renderServicePageSettingsEditor()}
           {renderCollection("services")}
+          <div className="grid gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Services Page Extra Sections</p>
+              <h2 className="mt-2 font-serif text-3xl">Page content below service cards</h2>
+            </div>
+            {renderServicePageSettingsEditor()}
+          </div>
         </div>
       );
     }

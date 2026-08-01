@@ -40,7 +40,7 @@ function parseIds(value?: string) {
     .filter(Boolean);
 }
 
-export function selectedSocialLinks(content: AdminContent, key: "footerSocialIds" | "quickContactSocialIds") {
+export function selectedSocialLinks(content: AdminContent, key: "footerSocialIds" | "quickContactSocialIds" | "serviceSocialPresenceSocialIds") {
   const links = parseSocialLinks(content);
   const selectedIds = parseIds(content.settings[key]);
 

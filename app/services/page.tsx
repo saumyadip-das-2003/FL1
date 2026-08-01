@@ -1,9 +1,24 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Reveal } from "@/components/reveal";
+import { SocialLinks } from "@/components/social-links";
 import { adminServiceTags, getLiveContent, parseLinkItems, parseTextItems } from "@/lib/live-content";
+import { selectedSocialLinks } from "@/lib/social-platforms";
+import type { AdminLinkItem, AdminSocialLink } from "@/lib/admin-demo-data";
 
 export const dynamic = "force-dynamic";
+
+function isShown(value?: string) {
+  return value !== "false";
+}
+
+type SupportCard = {
+  show: boolean;
+  title: string;
+  body: string;
+  links: AdminLinkItem[];
+  socialLinks: AdminSocialLink[];
+};
 
 export default async function ServicesPage() {
   const content = await getLiveContent();
@@ -11,6 +26,30 @@ export default async function ServicesPage() {
   const workflow = parseTextItems(content.settings.serviceWorkflow);
   const whyChoose = parseTextItems(content.settings.serviceWhyChoose);
   const freelanceLinks = parseLinkItems(content.settings.serviceFreelanceLinks);
+  const socialPresenceLinks = selectedSocialLinks(content, "serviceSocialPresenceSocialIds");
+  const supportCards: SupportCard[] = [
+    {
+      show: isShown(content.settings.serviceShowFreelance),
+      title: content.settings.serviceFreelanceTitle,
+      body: content.settings.serviceFreelanceBody,
+      links: freelanceLinks,
+      socialLinks: []
+    },
+    {
+      show: isShown(content.settings.serviceShowLocalSupport),
+      title: content.settings.serviceLocalSupportTitle,
+      body: content.settings.serviceLocalSupportBody,
+      links: [],
+      socialLinks: []
+    },
+    {
+      show: isShown(content.settings.serviceShowSocialPresence),
+      title: content.settings.serviceSocialPresenceTitle,
+      body: content.settings.serviceSocialPresenceBody,
+      links: [],
+      socialLinks: socialPresenceLinks
+    }
+  ].filter((item) => item.show);
 
   return (
     <main className="bg-paper px-5 pb-24 pt-32 transition-colors dark:bg-charcoal md:px-8 md:pb-32 md:pt-40">
@@ -57,56 +96,45 @@ export default async function ServicesPage() {
           ))}
         </div>
 
-        <Reveal>
-          <section className="mt-24 border-t border-black/10 pt-16 dark:border-white/10">
-            <p className="text-xs uppercase tracking-[0.28em] text-muted">Our workflow</p>
-            <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {workflow.map((step, index) => (
-                <article key={step.id} className="border border-black/10 bg-white p-6 dark:border-white/10 dark:bg-[#4a4a4a]">
-                  <p className="text-xs uppercase tracking-[0.24em] text-muted">Step {String(index + 1).padStart(2, "0")}</p>
-                  <h2 className="mt-5 font-serif text-3xl leading-tight">{step.title}</h2>
-                  <p className="mt-4 text-sm leading-7 text-muted">{step.body}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-        </Reveal>
+        {isShown(content.settings.serviceShowWorkflow) && workflow.length > 0 && (
+          <Reveal>
+            <section className="mt-24 border-t border-black/10 pt-16 dark:border-white/10">
+              <p className="text-xs uppercase tracking-[0.28em] text-muted">Our workflow</p>
+              <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                {workflow.map((step, index) => (
+                  <article key={step.id} className="border border-black/10 bg-white p-6 dark:border-white/10 dark:bg-[#4a4a4a]">
+                    <p className="text-xs uppercase tracking-[0.24em] text-muted">Step {String(index + 1).padStart(2, "0")}</p>
+                    <h2 className="mt-5 font-serif text-3xl leading-tight">{step.title}</h2>
+                    <p className="mt-4 text-sm leading-7 text-muted">{step.body}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+          </Reveal>
+        )}
 
-        <Reveal>
-          <section className="mt-24 grid gap-10 border-t border-black/10 pt-16 dark:border-white/10 lg:grid-cols-[0.55fr_1.45fr]">
-            <div>
-              <p className="text-xs uppercase tracking-[0.28em] text-muted">Why choose us</p>
-              <h2 className="mt-5 font-serif text-4xl leading-tight md:text-5xl">Built for clear delivery.</h2>
-            </div>
-            <div className="grid gap-5 md:grid-cols-2">
-              {whyChoose.map((item) => (
-                <article key={item.id} className="border-t border-black/10 pt-5 dark:border-white/10">
-                  <h3 className="font-serif text-2xl leading-tight">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-muted">{item.body}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-        </Reveal>
+        {isShown(content.settings.serviceShowWhyChoose) && whyChoose.length > 0 && (
+          <Reveal>
+            <section className="mt-24 grid gap-10 border-t border-black/10 pt-16 dark:border-white/10 lg:grid-cols-[0.55fr_1.45fr]">
+              <div>
+                <p className="text-xs uppercase tracking-[0.28em] text-muted">Why choose us</p>
+                <h2 className="mt-5 font-serif text-4xl leading-tight md:text-5xl">Built for clear delivery.</h2>
+              </div>
+              <div className="grid gap-5 md:grid-cols-2">
+                {whyChoose.map((item) => (
+                  <article key={item.id} className="border-t border-black/10 pt-5 dark:border-white/10">
+                    <h3 className="font-serif text-2xl leading-tight">{item.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-muted">{item.body}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+          </Reveal>
+        )}
 
-        <section className="mt-24 grid gap-6 md:grid-cols-3">
-          {[
-            {
-              title: content.settings.serviceFreelanceTitle,
-              body: content.settings.serviceFreelanceBody,
-              links: freelanceLinks
-            },
-            {
-              title: content.settings.serviceLocalSupportTitle,
-              body: content.settings.serviceLocalSupportBody,
-              links: []
-            },
-            {
-              title: content.settings.serviceSocialPresenceTitle,
-              body: content.settings.serviceSocialPresenceBody,
-              links: []
-            }
-          ].map((item, index) => (
+        {supportCards.length > 0 && (
+          <section className="mt-24 grid gap-6 md:grid-cols-3">
+            {supportCards.map((item, index) => (
             <Reveal key={item.title} delay={index * 0.05}>
               <article className="min-h-full border border-black/10 bg-white p-7 dark:border-white/10 dark:bg-[#4a4a4a]">
                 <h2 className="font-serif text-3xl leading-tight">{item.title}</h2>
@@ -120,28 +148,44 @@ export default async function ServicesPage() {
                     ))}
                   </div>
                 )}
+                {item.socialLinks.length > 0 && (
+                  <div className="mt-6">
+                    <SocialLinks compact links={item.socialLinks} />
+                  </div>
+                )}
               </article>
             </Reveal>
-          ))}
-        </section>
-
-        <Reveal>
-          <section className="mt-24 grid gap-8 border-y border-black/10 py-14 dark:border-white/10 md:grid-cols-[1fr_auto] md:items-center">
-            <div>
-              <p className="text-xs uppercase tracking-[0.28em] text-muted">{content.settings.serviceTeamCultureTitle}</p>
-              <p className="mt-5 max-w-3xl text-lg leading-9 text-muted">{content.settings.serviceTeamCultureBody}</p>
-              <h2 className="mt-10 font-serif text-4xl leading-tight md:text-5xl">{content.settings.serviceCtaTitle}</h2>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <Link href={content.settings.serviceCtaPrimaryHref} className="border border-black/20 px-6 py-4 text-xs uppercase tracking-[0.22em] transition hover:bg-ink hover:text-paper dark:border-white/20 dark:hover:bg-paper dark:hover:text-ink">
-                {content.settings.serviceCtaPrimaryLabel}
-              </Link>
-              <Link href={content.settings.serviceCtaSecondaryHref} className="border border-black/20 px-6 py-4 text-xs uppercase tracking-[0.22em] transition hover:bg-ink hover:text-paper dark:border-white/20 dark:hover:bg-paper dark:hover:text-ink">
-                {content.settings.serviceCtaSecondaryLabel}
-              </Link>
-            </div>
+            ))}
           </section>
-        </Reveal>
+        )}
+
+        {(isShown(content.settings.serviceShowTeamCulture) || isShown(content.settings.serviceShowCta)) && (
+          <Reveal>
+            <section className="mt-24 grid gap-8 border-y border-black/10 py-14 dark:border-white/10 md:grid-cols-[1fr_auto] md:items-center">
+            <div>
+              {isShown(content.settings.serviceShowTeamCulture) && (
+                <>
+                  <p className="text-xs uppercase tracking-[0.28em] text-muted">{content.settings.serviceTeamCultureTitle}</p>
+                  <p className="mt-5 max-w-3xl text-lg leading-9 text-muted">{content.settings.serviceTeamCultureBody}</p>
+                </>
+              )}
+              {isShown(content.settings.serviceShowCta) && (
+                <h2 className="mt-10 font-serif text-4xl leading-tight md:text-5xl">{content.settings.serviceCtaTitle}</h2>
+              )}
+            </div>
+            {isShown(content.settings.serviceShowCta) && (
+              <div className="flex flex-wrap gap-3">
+                <Link href="/contact" className="border border-black/20 px-6 py-4 text-xs uppercase tracking-[0.22em] transition hover:bg-ink hover:text-paper dark:border-white/20 dark:hover:bg-paper dark:hover:text-ink">
+                  {content.settings.serviceCtaPrimaryLabel}
+                </Link>
+                <Link href="/contact" className="border border-black/20 px-6 py-4 text-xs uppercase tracking-[0.22em] transition hover:bg-ink hover:text-paper dark:border-white/20 dark:hover:bg-paper dark:hover:text-ink">
+                  {content.settings.serviceCtaSecondaryLabel}
+                </Link>
+              </div>
+            )}
+            </section>
+          </Reveal>
+        )}
       </section>
     </main>
   );
