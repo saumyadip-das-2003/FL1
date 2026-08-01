@@ -7,9 +7,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Project, ProjectMedia } from "@/lib/data";
 import { youtubeEmbedUrl } from "@/lib/youtube";
 
-const loopCount = 7;
-const middleLoop = Math.floor(loopCount / 2);
-
 function ProjectMark({ title }: { title: string }) {
   const letters = title
     .split(" ")
@@ -80,16 +77,8 @@ export function ProjectListItem({ project }: { project: Project }) {
     ],
     [mediaItems]
   );
-  const loopedSlides = useMemo(
-    () =>
-      Array.from({ length: loopCount }, (_, loop) =>
-        baseSlides.map((slide, baseIndex) => ({ ...slide, loop, baseIndex }))
-      ).flat(),
-    [baseSlides]
-  );
   const stripRef = useRef<HTMLDivElement>(null);
   const dragState = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 });
-  const scrollEndTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!expanded) {
@@ -97,9 +86,13 @@ export function ProjectListItem({ project }: { project: Project }) {
     }
 
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => scrollToBaseIndex(0, "auto"));
+      requestAnimationFrame(() => {
+        if (stripRef.current) {
+          stripRef.current.scrollTo({ left: 0, behavior: "auto" });
+        }
+      });
     });
-  }, [expanded, baseSlides.length]);
+  }, [expanded]);
 
   function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
     if (event.pointerType !== "mouse") {
@@ -158,7 +151,6 @@ export function ProjectListItem({ project }: { project: Project }) {
     strip.style.scrollSnapType = "";
     if (nearest?.slide) {
       strip.scrollTo({ left: centeredOffset(nearest.slide), behavior: "smooth" });
-      window.setTimeout(() => settleInfiniteLoop("auto"), 360);
     }
   }
 
@@ -169,20 +161,12 @@ export function ProjectListItem({ project }: { project: Project }) {
     }
 
     const current = Number(nearest.slide.dataset.baseIndex ?? 0);
-    const currentLoop = Number(nearest.slide.dataset.loop ?? 1);
     const next =
       direction === "next"
-        ? (current + 1) % baseSlides.length
-        : (current - 1 + baseSlides.length) % baseSlides.length;
-    const targetLoop =
-      direction === "next" && current === baseSlides.length - 1
-        ? currentLoop + 1
-        : direction === "previous" && current === 0
-          ? currentLoop - 1
-          : currentLoop;
+        ? Math.min(current + 1, baseSlides.length - 1)
+        : Math.max(current - 1, 0);
 
-    scrollToLoopBaseIndex(Math.max(0, Math.min(loopCount - 1, targetLoop)), next, "smooth");
-    window.setTimeout(() => settleInfiniteLoop("auto"), 520);
+    scrollToBaseIndex(next, "smooth");
   }
 
   function nearestSlide() {
@@ -218,60 +202,14 @@ export function ProjectListItem({ project }: { project: Project }) {
   }
 
   function scrollToBaseIndex(baseIndex: number, behavior: ScrollBehavior) {
-    scrollToLoopBaseIndex(middleLoop, baseIndex, behavior);
-  }
-
-  function scrollToLoopBaseIndex(loop: number, baseIndex: number, behavior: ScrollBehavior) {
     if (!stripRef.current) {
       return;
     }
 
-    const target = stripRef.current.querySelector<HTMLElement>(`[data-loop="${loop}"][data-base-index="${baseIndex}"]`);
+    const target = stripRef.current.querySelector<HTMLElement>(`[data-base-index="${baseIndex}"]`);
     if (target) {
       stripRef.current.scrollTo({ left: centeredOffset(target), behavior });
     }
-  }
-
-  function settleInfiniteLoop(behavior: ScrollBehavior = "auto") {
-    const nearest = nearestSlide();
-    if (!nearest || !stripRef.current) {
-      return;
-    }
-
-    const loop = Number(nearest.slide.dataset.loop ?? 1);
-    const baseIndex = Number(nearest.slide.dataset.baseIndex ?? 0);
-
-    if (loop !== middleLoop) {
-      scrollToBaseIndex(baseIndex, behavior);
-    }
-  }
-
-  function recenterLoopTrack() {
-    if (!stripRef.current || baseSlides.length === 0) {
-      return;
-    }
-
-    const strip = stripRef.current;
-    const loopWidth = strip.scrollWidth / loopCount;
-    const currentLoop = Math.floor(strip.scrollLeft / loopWidth);
-
-    if (currentLoop <= 1 || currentLoop >= loopCount - 2) {
-      strip.scrollLeft += (middleLoop - currentLoop) * loopWidth;
-    }
-  }
-
-  function handleStripScroll() {
-    recenterLoopTrack();
-
-    if (scrollEndTimer.current) {
-      clearTimeout(scrollEndTimer.current);
-    }
-
-    if (isDragging) {
-      return;
-    }
-
-    scrollEndTimer.current = setTimeout(() => settleInfiniteLoop("auto"), 180);
   }
 
   function captionFor(index: number) {
@@ -285,12 +223,11 @@ export function ProjectListItem({ project }: { project: Project }) {
     return captions[index] ?? `${project.title} project image ${index + 1}.`;
   }
 
-  function renderSlide(slide: (typeof loopedSlides)[number]) {
+  function renderSlide(slide: (typeof baseSlides)[number] & { baseIndex: number }) {
     if (slide.kind === "meta") {
       return (
         <section
           data-slide
-          data-loop={slide.loop}
           data-base-index={slide.baseIndex}
           className="flex h-full w-[82vw] max-w-[380px] shrink-0 snap-center items-center bg-white px-8 text-center text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[380px]"
         >
@@ -316,7 +253,6 @@ export function ProjectListItem({ project }: { project: Project }) {
       return (
         <section
           data-slide
-          data-loop={slide.loop}
           data-base-index={slide.baseIndex}
           className="no-scrollbar flex h-full w-[82vw] max-w-[560px] shrink-0 snap-center items-center overflow-y-auto bg-white px-8 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[560px]"
         >
@@ -333,7 +269,6 @@ export function ProjectListItem({ project }: { project: Project }) {
       return (
         <section
           data-slide
-          data-loop={slide.loop}
           data-base-index={slide.baseIndex}
           className="flex h-full w-[76vw] max-w-[440px] shrink-0 snap-center items-center bg-white px-8 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[440px]"
         >
@@ -350,7 +285,6 @@ export function ProjectListItem({ project }: { project: Project }) {
     return (
       <section
         data-slide
-        data-loop={slide.loop}
         data-base-index={slide.baseIndex}
         className="relative h-full w-[92vw] max-w-[1280px] shrink-0 snap-center overflow-hidden bg-black md:w-[72vw]"
       >
@@ -362,7 +296,7 @@ export function ProjectListItem({ project }: { project: Project }) {
             sizes="(min-width: 1024px) 72vw, 92vw"
             className="object-cover"
             draggable={false}
-            priority={slide.index === 0 && slide.loop === 1}
+            priority={slide.index === 0}
           />
         ) : (
           <iframe
@@ -481,15 +415,14 @@ export function ProjectListItem({ project }: { project: Project }) {
                 onPointerUp={stopDragging}
                 onPointerCancel={stopDragging}
                 onPointerLeave={stopDragging}
-                onScroll={handleStripScroll}
                 style={{ touchAction: "pan-x", WebkitOverflowScrolling: "touch" }}
                 className={`no-scrollbar flex h-[500px] cursor-grab select-none gap-4 overflow-x-auto overflow-y-hidden px-[max(20px,calc((100vw-1680px)/2+40px))] py-6 active:cursor-grabbing md:h-[640px] md:gap-6 md:py-8 ${
                   isDragging ? "snap-none scroll-auto" : "snap-x snap-mandatory scroll-smooth"
                 }`}
               >
-                {loopedSlides.map((slide) => (
-                  <div key={`${slide.loop}-${slide.id}`} className="contents">
-                    {renderSlide(slide)}
+                {baseSlides.map((slide, baseIndex) => (
+                  <div key={slide.id} className="contents">
+                    {renderSlide({ ...slide, baseIndex })}
                   </div>
                 ))}
               </div>
