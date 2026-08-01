@@ -13,6 +13,7 @@ export type AdminProject = {
   title: string;
   location: string;
   year: string;
+  status: string;
   section: string;
   subsection: string;
   image: string;
@@ -80,6 +81,7 @@ export type AdminContent = {
     instagram: string;
     x: string;
     linkedin: string;
+    defaultAdminUserIds: string;
   };
   projects: AdminProject[];
   services: AdminService[];
@@ -146,13 +148,15 @@ export function createSeedAdminContent(): AdminContent {
       facebook: "https://facebook.com",
       instagram: "https://instagram.com",
       x: "https://x.com",
-      linkedin: "https://linkedin.com"
+      linkedin: "https://linkedin.com",
+      defaultAdminUserIds: ""
     },
     projects: projects.map((project) => ({
       id: project.slug,
       title: project.title,
       location: project.location,
       year: project.year,
+      status: "Concept",
       section: project.section ?? project.category,
       subsection: project.subsection ?? "",
       image: project.image,

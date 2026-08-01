@@ -32,6 +32,7 @@ export function adminProjectToProject(project: AdminProject): Project {
     title: project.title,
     location: project.location,
     year: project.year,
+    status: project.status,
     category: categoryFromSection(project.section),
     section: project.section as ProjectSection,
     subsection: project.subsection,

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { adminEmailStorageKey, adminTokenStorageKey } from "@/lib/admin-auth";
@@ -15,7 +15,10 @@ export function AdminLoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [resetStatus, setResetStatus] = useState("");
   const [busy, setBusy] = useState(false);
+  const [resetBusy, setResetBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const firebaseApiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -55,6 +58,45 @@ export function AdminLoginForm() {
     }
   }
 
+  async function sendPasswordReset() {
+    setError("");
+    setResetStatus("");
+
+    if (!firebaseApiKey) {
+      setResetStatus("Password reset is available after Firebase keys are configured.");
+      return;
+    }
+
+    if (!email.trim()) {
+      setError("Enter the admin email first, then request a reset link.");
+      return;
+    }
+
+    setResetBusy(true);
+
+    try {
+      const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${firebaseApiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          requestType: "PASSWORD_RESET",
+          email
+        })
+      });
+      const payload = (await response.json()) as FirebaseLoginResponse;
+
+      if (!response.ok) {
+        throw new Error(payload.error?.message ?? "Password reset failed.");
+      }
+
+      setResetStatus("Password reset email sent. Check the admin inbox.");
+    } catch (resetError) {
+      setError(resetError instanceof Error ? resetError.message : "Password reset failed.");
+    } finally {
+      setResetBusy(false);
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit} className="mt-8 grid gap-4 text-left">
       <label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-muted">
@@ -69,15 +111,34 @@ export function AdminLoginForm() {
       </label>
       <label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-muted">
         Password
-        <input
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          className="h-12 border border-black/15 bg-paper px-4 text-base normal-case tracking-normal text-ink outline-none dark:border-white/15 dark:bg-charcoal dark:text-paper"
-          required={Boolean(firebaseApiKey)}
-        />
+        <span className="flex h-12 items-center border border-black/15 bg-paper dark:border-white/15 dark:bg-charcoal">
+          <input
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            className="h-full min-w-0 flex-1 bg-transparent px-4 text-base normal-case tracking-normal text-ink outline-none dark:text-paper"
+            required={Boolean(firebaseApiKey)}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((current) => !current)}
+            className="flex h-full w-12 items-center justify-center text-muted transition hover:text-ink dark:hover:text-paper"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </span>
       </label>
       {error && <p className="text-sm text-red-600">{error}</p>}
+      {resetStatus && <p className="text-sm text-muted">{resetStatus}</p>}
+      <button
+        type="button"
+        onClick={sendPasswordReset}
+        disabled={resetBusy}
+        className="justify-self-start text-xs uppercase tracking-[0.18em] text-muted underline underline-offset-4 transition hover:text-ink disabled:opacity-60 dark:hover:text-paper"
+      >
+        {resetBusy ? "Sending reset email" : "Forgot password?"}
+      </button>
       <button
         type="submit"
         disabled={busy}

@@ -38,7 +38,7 @@ function ProjectMeta({ project }: { project: Project }) {
       </div>
       <div>
         <dt className="text-xs uppercase tracking-[0.16em] text-muted">Status</dt>
-        <dd className="mt-1 uppercase">Concept</dd>
+        <dd className="mt-1 uppercase">{project.status || "Concept"}</dd>
       </div>
     </dl>
   );

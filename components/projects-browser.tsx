@@ -29,7 +29,15 @@ export function ProjectsBrowser({
   const [activeSection, setActiveSection] = useState<ProjectSection>(sectionFromCategory(initialCategory));
   const [activeSubsection, setActiveSubsection] = useState<string>("All");
   const [query, setQuery] = useState("");
-  const subsections = projectTaxonomy[activeSection];
+  const subsections = useMemo(() => {
+    const staticSubsections = projectTaxonomy[activeSection] ?? [];
+    const liveSubsections = projects
+      .filter((project) => (project.section ?? sectionFromCategory(project.category)) === activeSection)
+      .map((project) => project.subsection?.trim())
+      .filter((subsection): subsection is string => Boolean(subsection));
+
+    return Array.from(new Set([...staticSubsections, ...liveSubsections]));
+  }, [activeSection, projects]);
 
   const visibleProjects = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -56,7 +64,7 @@ export function ProjectsBrowser({
 
       return matchesSection && matchesSubsection && matchesQuery;
     });
-  }, [activeSection, activeSubsection, query]);
+  }, [activeSection, activeSubsection, projects, query]);
 
   return (
     <section className="bg-paper px-5 pb-24 pt-32 transition-colors dark:bg-charcoal md:px-8 md:pb-32 md:pt-40">
