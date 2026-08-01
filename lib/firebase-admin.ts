@@ -24,8 +24,12 @@ function getServiceAccount() {
 }
 
 export function isFirebaseAdminConfigured() {
-  const account = getServiceAccount();
-  return Boolean(account.projectId && account.clientEmail && account.privateKey);
+  try {
+    const account = getServiceAccount();
+    return Boolean(account.projectId && account.clientEmail && account.privateKey);
+  } catch {
+    return false;
+  }
 }
 
 export function getFirebaseAdminAuth() {

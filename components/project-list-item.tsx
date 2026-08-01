@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, ChevronUp, Minus, Plus } from "lucide-react";
 import Image from "next/image";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Project, ProjectMedia } from "@/lib/data";
 import { youtubeEmbedUrl } from "@/lib/youtube";
 
@@ -66,8 +66,34 @@ export function ProjectListItem({ project }: { project: Project }) {
       }
     ];
   }, [images, project.media, project.title, project.video]);
+  const baseSlides = useMemo(
+    () => [
+      { id: "meta", kind: "meta" as const },
+      { id: "overview", kind: "overview" as const },
+      ...mediaItems.flatMap((media, index) => [
+        { id: `media-${index}`, kind: "media" as const, media, index },
+        { id: `caption-${index}`, kind: "caption" as const, media, index }
+      ])
+    ],
+    [mediaItems]
+  );
+  const loopedSlides = useMemo(
+    () => [0, 1, 2].flatMap((loop) => baseSlides.map((slide, baseIndex) => ({ ...slide, loop, baseIndex }))),
+    [baseSlides]
+  );
   const stripRef = useRef<HTMLDivElement>(null);
   const dragState = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 });
+  const scrollEndTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!expanded) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      scrollToBaseIndex(0, "auto");
+    });
+  }, [expanded, baseSlides.length]);
 
   function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
     if (event.pointerType !== "mouse") {
@@ -133,19 +159,81 @@ export function ProjectListItem({ project }: { project: Project }) {
     strip.style.scrollSnapType = "";
     if (nearest.slide) {
       strip.scrollTo({ left: nearest.slide.offsetLeft, behavior: "smooth" });
+      window.setTimeout(() => settleInfiniteLoop("auto"), 360);
     }
   }
 
   function slideBy(direction: "previous" | "next") {
+    const nearest = nearestSlide();
+    if (!nearest || baseSlides.length === 0) {
+      return;
+    }
+
+    const current = Number(nearest.slide.dataset.baseIndex ?? 0);
+    const next =
+      direction === "next"
+        ? (current + 1) % baseSlides.length
+        : (current - 1 + baseSlides.length) % baseSlides.length;
+
+    scrollToBaseIndex(next, "smooth");
+  }
+
+  function nearestSlide() {
+    if (!stripRef.current) {
+      return null;
+    }
+
+    const strip = stripRef.current;
+    const slides = Array.from(strip.querySelectorAll<HTMLElement>("[data-slide]"));
+
+    if (!slides.length) {
+      return null;
+    }
+
+    return slides.reduce(
+      (closest, slide) => {
+        const distance = Math.abs(slide.offsetLeft - strip.scrollLeft);
+        return distance < closest.distance ? { slide, distance } : closest;
+      },
+      { slide: slides[0], distance: Number.POSITIVE_INFINITY }
+    );
+  }
+
+  function scrollToBaseIndex(baseIndex: number, behavior: ScrollBehavior) {
     if (!stripRef.current) {
       return;
     }
 
-    const distance = Math.round(stripRef.current.clientWidth * 0.82);
-    stripRef.current.scrollBy({
-      left: direction === "next" ? distance : -distance,
-      behavior: "smooth"
-    });
+    const target = stripRef.current.querySelector<HTMLElement>(`[data-loop="1"][data-base-index="${baseIndex}"]`);
+    if (target) {
+      stripRef.current.scrollTo({ left: target.offsetLeft, behavior });
+    }
+  }
+
+  function settleInfiniteLoop(behavior: ScrollBehavior = "auto") {
+    const nearest = nearestSlide();
+    if (!nearest || !stripRef.current) {
+      return;
+    }
+
+    const loop = Number(nearest.slide.dataset.loop ?? 1);
+    const baseIndex = Number(nearest.slide.dataset.baseIndex ?? 0);
+
+    if (loop !== 1) {
+      scrollToBaseIndex(baseIndex, behavior);
+    }
+  }
+
+  function handleStripScroll() {
+    if (isDragging) {
+      return;
+    }
+
+    if (scrollEndTimer.current) {
+      clearTimeout(scrollEndTimer.current);
+    }
+
+    scrollEndTimer.current = setTimeout(() => settleInfiniteLoop("auto"), 180);
   }
 
   function captionFor(index: number) {
@@ -157,6 +245,101 @@ export function ProjectListItem({ project }: { project: Project }) {
     ];
 
     return captions[index] ?? `${project.title} project image ${index + 1}.`;
+  }
+
+  function renderSlide(slide: (typeof loopedSlides)[number]) {
+    if (slide.kind === "meta") {
+      return (
+        <section
+          data-slide
+          data-loop={slide.loop}
+          data-base-index={slide.baseIndex}
+          className="flex h-full w-[78vw] max-w-[360px] shrink-0 snap-center items-center bg-white px-8 text-center text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[360px]"
+        >
+          <div className="w-full">
+            <ProjectMark title={project.title} />
+            <h2 className="mt-7 font-sans text-2xl leading-tight tracking-normal">{project.title}</h2>
+            <p className="mt-3 text-sm uppercase tracking-normal text-muted">{project.location}</p>
+            <ProjectMeta project={project} />
+            <button
+              type="button"
+              onClick={() => setExpanded(false)}
+              className="mx-auto mt-8 flex h-10 w-10 items-center justify-center border border-black/15 transition hover:bg-ink hover:text-paper dark:border-white/15 dark:hover:bg-paper dark:hover:text-ink"
+              aria-label={`Minimize ${project.title}`}
+            >
+              <Minus size={18} />
+            </button>
+          </div>
+        </section>
+      );
+    }
+
+    if (slide.kind === "overview") {
+      return (
+        <section
+          data-slide
+          data-loop={slide.loop}
+          data-base-index={slide.baseIndex}
+          className="no-scrollbar flex h-full w-[78vw] max-w-[480px] shrink-0 snap-center items-center overflow-y-auto bg-white px-8 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[480px]"
+        >
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-muted">Project Caption</p>
+            <p className="mt-5 text-xl leading-9 text-ink dark:text-paper">{project.excerpt}</p>
+            <p className="mt-5 text-base leading-8 text-ink/85 dark:text-paper/85">{project.description}</p>
+          </div>
+        </section>
+      );
+    }
+
+    if (slide.kind === "caption") {
+      return (
+        <section
+          data-slide
+          data-loop={slide.loop}
+          data-base-index={slide.baseIndex}
+          className="flex h-full w-[72vw] max-w-[380px] shrink-0 snap-center items-center bg-white px-8 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[380px]"
+        >
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-muted">
+              {slide.media.type === "image" ? "Image Caption" : "Video Caption"}
+            </p>
+            <p className="mt-5 text-xl leading-9">{slide.media.caption}</p>
+          </div>
+        </section>
+      );
+    }
+
+    return (
+      <section
+        data-slide
+        data-loop={slide.loop}
+        data-base-index={slide.baseIndex}
+        className="relative h-full w-[86vw] max-w-[960px] shrink-0 snap-center overflow-hidden bg-black md:w-[960px]"
+      >
+        {slide.media.type === "image" ? (
+          <Image
+            src={slide.media.source}
+            alt={`${project.title} media ${slide.index + 1}`}
+            fill
+            sizes="(min-width: 1024px) 960px, 86vw"
+            className="object-cover"
+            draggable={false}
+            priority={slide.index === 0 && slide.loop === 1}
+          />
+        ) : (
+          <iframe
+            src={youtubeEmbedUrl(slide.media.source)}
+            title={`${project.title} media video ${slide.index + 1}`}
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowFullScreen
+            className={isDragging ? "pointer-events-none h-full w-full" : "h-full w-full"}
+          />
+        )}
+        <div className="absolute bottom-4 left-4 bg-black/70 px-3 py-2 text-xs uppercase tracking-[0.18em] text-paper">
+          {slide.media.type} {slide.index + 1} / {mediaItems.length}
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -224,108 +407,52 @@ export function ProjectListItem({ project }: { project: Project }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.985, y: -10 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="mx-auto max-w-5xl overflow-hidden"
+            className="mx-auto w-full max-w-[1500px] overflow-hidden px-2 md:px-6"
           >
-            <div className="grid gap-5 bg-white text-ink dark:bg-[#4a4a4a] dark:text-paper md:grid-cols-[210px_minmax(0,840px)] md:items-stretch">
-              <aside className="px-5 text-center md:px-0 md:pt-1">
-                <ProjectMark title={project.title} />
-                <h2 className="mt-6 font-sans text-xl leading-tight tracking-normal">{project.title}</h2>
-                <p className="mt-3 text-sm uppercase tracking-normal text-muted">{project.location}</p>
-                <ProjectMeta project={project} />
-                <button
-                  type="button"
-                  onClick={() => setExpanded(false)}
-                  className="mx-auto mt-8 flex h-10 w-10 items-center justify-center border border-black/15 transition hover:bg-ink hover:text-paper dark:border-white/15 dark:hover:bg-paper dark:hover:text-ink"
-                  aria-label={`Minimize ${project.title}`}
-                >
-                  <Minus size={18} />
-                </button>
-              </aside>
+            <div className="relative min-w-0 overflow-hidden border border-black/10 bg-white text-ink dark:border-white/10 dark:bg-[#4a4a4a] dark:text-paper">
+              <button
+                type="button"
+                onClick={() => setExpanded(false)}
+                className="absolute right-4 top-4 z-20 flex h-11 w-11 items-center justify-center border border-black/15 bg-white/90 backdrop-blur transition hover:bg-ink hover:text-paper dark:border-white/15 dark:bg-charcoal/90 dark:hover:bg-paper dark:hover:text-ink"
+                aria-label={`Minimize ${project.title}`}
+              >
+                <ChevronUp size={19} />
+              </button>
+              <button
+                type="button"
+                onClick={() => slideBy("previous")}
+                className="absolute bottom-0 left-0 top-0 z-10 flex w-20 items-center justify-center bg-gradient-to-r from-black/24 to-transparent text-paper opacity-0 transition hover:opacity-100"
+                aria-label={`Previous ${project.title} media`}
+              >
+                <ChevronLeft size={30} />
+              </button>
+              <button
+                type="button"
+                onClick={() => slideBy("next")}
+                className="absolute bottom-0 right-0 top-0 z-10 flex w-20 items-center justify-center bg-gradient-to-l from-black/24 to-transparent text-paper opacity-0 transition hover:opacity-100"
+                aria-label={`Next ${project.title} media`}
+              >
+                <ChevronRight size={30} />
+              </button>
 
-              <div className="relative min-w-0 overflow-hidden border border-black/10 dark:border-white/10">
-                  <button
-                    type="button"
-                    onClick={() => setExpanded(false)}
-                    className="absolute right-3 top-3 z-20 flex h-10 w-10 items-center justify-center border border-black/15 bg-white/90 backdrop-blur transition hover:bg-ink hover:text-paper dark:border-white/15 dark:bg-charcoal/90 dark:hover:bg-paper dark:hover:text-ink"
-                    aria-label={`Minimize ${project.title}`}
-                  >
-                    <ChevronUp size={18} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => slideBy("previous")}
-                    className="absolute bottom-0 left-0 top-0 z-10 flex w-14 items-center justify-center bg-gradient-to-r from-black/18 to-transparent text-paper opacity-0 transition hover:opacity-100"
-                    aria-label={`Previous ${project.title} media`}
-                  >
-                    <ChevronLeft size={24} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => slideBy("next")}
-                    className="absolute bottom-0 right-0 top-0 z-10 flex w-14 items-center justify-center bg-gradient-to-l from-black/18 to-transparent text-paper opacity-0 transition hover:opacity-100"
-                    aria-label={`Next ${project.title} media`}
-                  >
-                    <ChevronRight size={24} />
-                  </button>
-
-                  <div
-                    ref={stripRef}
-                    onPointerDown={onPointerDown}
-                    onPointerMove={onPointerMove}
-                  onPointerUp={stopDragging}
-                  onPointerCancel={stopDragging}
-                  onPointerLeave={stopDragging}
-                  style={{ touchAction: "auto", WebkitOverflowScrolling: "touch" }}
-                  className={`no-scrollbar flex h-[380px] cursor-grab select-none gap-4 overflow-x-auto overflow-y-hidden p-4 active:cursor-grabbing md:h-[520px] md:gap-5 md:p-5 ${
-                    isDragging ? "snap-none scroll-auto" : "snap-x snap-mandatory scroll-smooth"
-                  }`}
-                >
-                    <section data-slide className="no-scrollbar flex h-full w-[76vw] max-w-[430px] shrink-0 snap-center items-center overflow-y-auto bg-white px-6 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[430px]">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.22em] text-muted">Project Caption</p>
-                        <p className="mt-5 text-lg leading-8 text-ink dark:text-paper">{project.excerpt}</p>
-                        <p className="mt-5 text-base leading-7 text-ink/85 dark:text-paper/85">
-                          {project.description}
-                        </p>
-                      </div>
-                    </section>
-                    {mediaItems.map((media, index) => (
-                      <div key={`${media.type}-${media.source}-${index}`} className="contents">
-                        <section data-slide className="relative h-full w-[78vw] max-w-[680px] shrink-0 snap-center overflow-hidden bg-black md:w-[680px]">
-                          {media.type === "image" ? (
-                            <Image
-                              src={media.source}
-                              alt={`${project.title} media ${index + 1}`}
-                              fill
-                              sizes="(min-width: 768px) 680px, 78vw"
-                              className="object-cover"
-                              draggable={false}
-                              priority={index === 0}
-                            />
-                          ) : (
-                            <iframe
-                              src={youtubeEmbedUrl(media.source)}
-                              title={`${project.title} media video ${index + 1}`}
-                              allow="autoplay; encrypted-media; picture-in-picture"
-                              allowFullScreen
-                              className={isDragging ? "pointer-events-none h-full w-full" : "h-full w-full"}
-                            />
-                          )}
-                          <div className="absolute bottom-4 left-4 bg-black/70 px-3 py-2 text-xs uppercase tracking-[0.18em] text-paper">
-                            {media.type} {index + 1} / {mediaItems.length}
-                          </div>
-                        </section>
-                        <section data-slide className="flex h-full w-[68vw] max-w-[340px] shrink-0 snap-center items-center bg-white px-6 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[340px]">
-                          <div>
-                            <p className="text-xs uppercase tracking-[0.22em] text-muted">
-                              {media.type === "image" ? "Image Caption" : "Video Caption"}
-                            </p>
-                            <p className="mt-5 text-lg leading-8">{media.caption}</p>
-                          </div>
-                        </section>
-                      </div>
-                    ))}
+              <div
+                ref={stripRef}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={stopDragging}
+                onPointerCancel={stopDragging}
+                onPointerLeave={stopDragging}
+                onScroll={handleStripScroll}
+                style={{ touchAction: "pan-x", WebkitOverflowScrolling: "touch" }}
+                className={`no-scrollbar flex h-[520px] cursor-grab select-none gap-5 overflow-x-auto overflow-y-hidden p-5 active:cursor-grabbing md:h-[720px] md:gap-6 md:p-6 ${
+                  isDragging ? "snap-none scroll-auto" : "snap-x snap-mandatory scroll-smooth"
+                }`}
+              >
+                {loopedSlides.map((slide) => (
+                  <div key={`${slide.loop}-${slide.id}`} className="contents">
+                    {renderSlide(slide)}
                   </div>
+                ))}
               </div>
             </div>
           </motion.div>

@@ -44,6 +44,26 @@ export const projectTaxonomy: Record<ProjectSection, string[]> = {
   Products: ["Lighting", "Furniture", "Consumer Products", "Mobility", "Installations"]
 };
 
+export function normalizeProjectTaxonomy(value?: string): Record<ProjectSection, string[]> {
+  try {
+    const parsed = value ? (JSON.parse(value) as Partial<Record<ProjectSection, string[]>>) : {};
+
+    return {
+      Architecture: Array.isArray(parsed.Architecture) ? parsed.Architecture : projectTaxonomy.Architecture,
+      Interiors: Array.isArray(parsed.Interiors) ? parsed.Interiors : projectTaxonomy.Interiors,
+      Landscape: Array.isArray(parsed.Landscape) ? parsed.Landscape : projectTaxonomy.Landscape,
+      Planning: Array.isArray(parsed.Planning) ? parsed.Planning : projectTaxonomy.Planning,
+      Products: Array.isArray(parsed.Products) ? parsed.Products : projectTaxonomy.Products
+    };
+  } catch {
+    return projectTaxonomy;
+  }
+}
+
+export function serializeProjectTaxonomy(value: Record<ProjectSection, string[]>) {
+  return JSON.stringify(value);
+}
+
 export const projects: Project[] = [
   {
     slug: "meridian-pavilion",

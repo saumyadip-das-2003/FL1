@@ -6,8 +6,13 @@ import { ProjectListItem } from "@/components/project-list-item";
 import { projectTaxonomy, projects as fallbackProjects, type Project, type ProjectCategory, type ProjectSection } from "@/lib/data";
 
 const sections = Object.keys(projectTaxonomy) as ProjectSection[];
+type SectionFilter = ProjectSection | "All";
 
-function sectionFromCategory(category?: ProjectCategory): ProjectSection {
+function sectionFromCategory(category?: ProjectCategory): SectionFilter {
+  if (!category) {
+    return "All";
+  }
+
   if (category === "Interior") {
     return "Interiors";
   }
@@ -21,30 +26,36 @@ function sectionFromCategory(category?: ProjectCategory): ProjectSection {
 
 export function ProjectsBrowser({
   initialCategory,
-  projects = fallbackProjects
+  projects = fallbackProjects,
+  projectSubsections = projectTaxonomy
 }: {
   initialCategory?: ProjectCategory;
   projects?: Project[];
+  projectSubsections?: Record<ProjectSection, string[]>;
 }) {
-  const [activeSection, setActiveSection] = useState<ProjectSection>(sectionFromCategory(initialCategory));
+  const [activeSection, setActiveSection] = useState<SectionFilter>(sectionFromCategory(initialCategory));
   const [activeSubsection, setActiveSubsection] = useState<string>("All");
   const [query, setQuery] = useState("");
   const subsections = useMemo(() => {
-    const staticSubsections = projectTaxonomy[activeSection] ?? [];
+    if (activeSection === "All") {
+      return [];
+    }
+
+    const staticSubsections = projectSubsections[activeSection] ?? [];
     const liveSubsections = projects
       .filter((project) => (project.section ?? sectionFromCategory(project.category)) === activeSection)
       .map((project) => project.subsection?.trim())
       .filter((subsection): subsection is string => Boolean(subsection));
 
     return Array.from(new Set([...staticSubsections, ...liveSubsections]));
-  }, [activeSection, projects]);
+  }, [activeSection, projectSubsections, projects]);
 
   const visibleProjects = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
     return projects.filter((project) => {
       const section = project.section ?? sectionFromCategory(project.category);
-      const matchesSection = section === activeSection;
+      const matchesSection = activeSection === "All" || section === activeSection;
       const matchesSubsection = activeSubsection === "All" || project.subsection === activeSubsection;
       const matchesQuery =
         normalizedQuery.length === 0 ||
@@ -79,7 +90,7 @@ export function ProjectsBrowser({
         <div className="mb-12 grid gap-8">
           <div className="border-y border-black/10 py-5 dark:border-white/10">
             <div className="grid grid-cols-2 gap-x-8 gap-y-5 md:grid-cols-5">
-              {sections.map((section) => (
+              {(["All", ...sections] as SectionFilter[]).map((section) => (
                 <button
                   key={section}
                   type="button"
@@ -108,11 +119,11 @@ export function ProjectsBrowser({
                 transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                 className="mt-7 flex flex-wrap justify-center gap-x-10 gap-y-4"
               >
-                {subsections.map((subsection) => (
+                {["All", ...subsections].map((subsection) => (
                   <button
                     key={subsection}
                     type="button"
-                    onClick={() => setActiveSubsection(activeSubsection === subsection ? "All" : subsection)}
+                    onClick={() => setActiveSubsection(subsection)}
                     className={`text-sm transition hover:text-ink dark:hover:text-paper md:text-base ${
                       activeSubsection === subsection ? "text-ink dark:text-paper" : "text-muted"
                     }`}

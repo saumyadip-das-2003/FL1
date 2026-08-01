@@ -13,52 +13,64 @@ async function guard(request: NextRequest) {
   return allowed ? null : NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }
 
+function errorResponse(error: unknown, fallback: string, status = 500) {
+  return NextResponse.json({ error: error instanceof Error ? error.message : fallback }, { status });
+}
+
 export async function PATCH(request: NextRequest, { params }: { params: { uid: string } }) {
-  const blocked = await guard(request);
-  if (blocked) {
-    return blocked;
-  }
-
-  const body = (await request.json()) as { email?: string; password?: string; disabled?: boolean };
-  const update: { email?: string; password?: string; disabled?: boolean } = {};
-
-  if (body.email?.trim()) {
-    update.email = body.email.trim();
-  }
-
-  if (body.password) {
-    if (body.password.length < 6) {
-      return NextResponse.json({ error: "Password must be at least 6 characters." }, { status: 400 });
+  try {
+    const blocked = await guard(request);
+    if (blocked) {
+      return blocked;
     }
-    update.password = body.password;
-  }
 
-  if (typeof body.disabled === "boolean") {
-    update.disabled = body.disabled;
-  }
+    const body = (await request.json()) as { email?: string; password?: string; disabled?: boolean };
+    const update: { email?: string; password?: string; disabled?: boolean } = {};
 
-  if (!Object.keys(update).length) {
-    return NextResponse.json({ error: "No user changes provided." }, { status: 400 });
-  }
-
-  const user = await getFirebaseAdminAuth().updateUser(params.uid, update);
-  return NextResponse.json({
-    user: {
-      uid: user.uid,
-      email: user.email ?? "",
-      disabled: user.disabled,
-      createdAt: user.metadata.creationTime,
-      lastSignInAt: user.metadata.lastSignInTime
+    if (body.email?.trim()) {
+      update.email = body.email.trim();
     }
-  });
+
+    if (body.password) {
+      if (body.password.length < 6) {
+        return NextResponse.json({ error: "Password must be at least 6 characters." }, { status: 400 });
+      }
+      update.password = body.password;
+    }
+
+    if (typeof body.disabled === "boolean") {
+      update.disabled = body.disabled;
+    }
+
+    if (!Object.keys(update).length) {
+      return NextResponse.json({ error: "No user changes provided." }, { status: 400 });
+    }
+
+    const user = await getFirebaseAdminAuth().updateUser(params.uid, update);
+    return NextResponse.json({
+      user: {
+        uid: user.uid,
+        email: user.email ?? "",
+        disabled: user.disabled,
+        createdAt: user.metadata.creationTime,
+        lastSignInAt: user.metadata.lastSignInTime
+      }
+    });
+  } catch (error) {
+    return errorResponse(error, "Unable to update admin user.");
+  }
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: { uid: string } }) {
-  const blocked = await guard(request);
-  if (blocked) {
-    return blocked;
-  }
+  try {
+    const blocked = await guard(request);
+    if (blocked) {
+      return blocked;
+    }
 
-  await getFirebaseAdminAuth().deleteUser(params.uid);
-  return NextResponse.json({ ok: true });
+    await getFirebaseAdminAuth().deleteUser(params.uid);
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return errorResponse(error, "Unable to delete admin user.");
+  }
 }

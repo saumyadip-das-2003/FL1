@@ -1,4 +1,4 @@
-import { projects, team } from "@/lib/data";
+import { projectTaxonomy, projects, serializeProjectTaxonomy, team } from "@/lib/data";
 import { newsItems } from "@/lib/news";
 
 export type AdminMedia = {
@@ -82,6 +82,7 @@ export type AdminContent = {
     x: string;
     linkedin: string;
     defaultAdminUserIds: string;
+    projectSubsections: string;
   };
   projects: AdminProject[];
   services: AdminService[];
@@ -149,7 +150,8 @@ export function createSeedAdminContent(): AdminContent {
       instagram: "https://instagram.com",
       x: "https://x.com",
       linkedin: "https://linkedin.com",
-      defaultAdminUserIds: ""
+      defaultAdminUserIds: "",
+      projectSubsections: serializeProjectTaxonomy(projectTaxonomy)
     },
     projects: projects.map((project) => ({
       id: project.slug,

@@ -37,7 +37,7 @@ import {
   type AdminProject,
   type AdminService
 } from "@/lib/admin-demo-data";
-import { projectTaxonomy, type ProjectSection } from "@/lib/data";
+import { normalizeProjectTaxonomy, serializeProjectTaxonomy, projectTaxonomy, type ProjectSection } from "@/lib/data";
 import { youtubeEmbedUrl } from "@/lib/youtube";
 
 type Tab = "general" | "home" | "projects" | "services" | "news" | "people" | "about" | "contact" | "settings";
@@ -146,6 +146,21 @@ function normalizeContent(content: AdminContent): AdminContent {
       ...person
     }))
   };
+}
+
+async function readAdminApiResponse<T>(response: Response): Promise<T & { error?: string }> {
+  const contentType = response.headers.get("content-type") ?? "";
+
+  if (contentType.includes("application/json")) {
+    return (await response.json()) as T & { error?: string };
+  }
+
+  const text = await response.text();
+  return {
+    error: text.includes("<!DOCTYPE")
+      ? "Admin user API returned an HTML error page. Check Firebase Admin service account environment variables and redeploy."
+      : text || "Admin user API returned an unexpected response."
+  } as T & { error?: string };
 }
 
 function itemTitle(item: EditableItem) {
@@ -392,6 +407,43 @@ export function AdminPanel() {
       ...current,
       settings: { ...current.settings, [key]: value }
     }));
+  }
+
+  function projectSubsections() {
+    return normalizeProjectTaxonomy(content.settings.projectSubsections);
+  }
+
+  function saveProjectSubsections(next: Record<ProjectSection, string[]>) {
+    updateSettings("projectSubsections", serializeProjectTaxonomy(next));
+  }
+
+  function addProjectSubsection(section: ProjectSection, subsection: string, projectId?: string) {
+    const value = subsection.trim();
+    if (!value) {
+      return;
+    }
+
+    const current = projectSubsections();
+    const next = {
+      ...current,
+      [section]: Array.from(new Set([...(current[section] ?? []), value]))
+    };
+
+    saveProjectSubsections(next);
+    if (projectId) {
+      updateItem("projects", projectId, "subsection", value);
+    }
+    setCustomSubsection("");
+  }
+
+  function removeProjectSubsection(section: ProjectSection, subsection: string) {
+    const current = projectSubsections();
+    const next = {
+      ...current,
+      [section]: (current[section] ?? []).filter((item) => item !== subsection)
+    };
+
+    saveProjectSubsections(next);
   }
 
   function updateItem(key: CollectionKey, id: string, field: string, value: string) {
@@ -718,7 +770,7 @@ export function AdminPanel() {
       const response = await fetch("/api/admin/users", {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const payload = (await response.json()) as { users?: AdminUser[]; error?: string };
+      const payload = await readAdminApiResponse<{ users?: AdminUser[] }>(response);
 
       if (!response.ok || !payload.users) {
         throw new Error(payload.error ?? "Unable to load admin users.");
@@ -751,7 +803,7 @@ export function AdminPanel() {
         },
         body: JSON.stringify({ email: newAdminEmail, password: newAdminPassword })
       });
-      const payload = (await response.json()) as { user?: AdminUser; error?: string };
+      const payload = await readAdminApiResponse<{ user?: AdminUser }>(response);
 
       if (!response.ok || !payload.user) {
         throw new Error(payload.error ?? "Unable to add admin user.");
@@ -793,7 +845,7 @@ export function AdminPanel() {
           password: nextPassword || undefined
         })
       });
-      const payload = (await response.json()) as { user?: AdminUser; error?: string };
+      const payload = await readAdminApiResponse<{ user?: AdminUser }>(response);
 
       if (!response.ok || !payload.user) {
         throw new Error(payload.error ?? "Unable to update admin user.");
@@ -851,7 +903,7 @@ export function AdminPanel() {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
-      const payload = (await response.json()) as { ok?: boolean; error?: string };
+      const payload = await readAdminApiResponse<{ ok?: boolean }>(response);
 
       if (!response.ok || !payload.ok) {
         throw new Error(payload.error ?? "Unable to delete admin user.");
@@ -1356,7 +1408,7 @@ export function AdminPanel() {
 
   function renderProjectEditor(project: AdminProject) {
     const section = project.section as ProjectSection;
-    const subsectionOptions = projectTaxonomy[section] ?? [];
+    const subsectionOptions = projectSubsections()[section] ?? [];
 
     return (
       <div className="grid gap-6">
@@ -1385,18 +1437,17 @@ export function AdminPanel() {
           </Field>
           <Field label="Subsection">
             <div className="grid grid-cols-[1fr_auto] gap-2">
-              <SelectInput value={subsectionOptions.includes(project.subsection) ? project.subsection : "custom"} onChange={(event) => updateItem("projects", project.id, "subsection", event.target.value)}>
+              <SelectInput value={project.subsection ? (subsectionOptions.includes(project.subsection) ? project.subsection : "custom") : ""} onChange={(event) => updateItem("projects", project.id, "subsection", event.target.value)}>
+                <option value="">All / Not specified</option>
                 {subsectionOptions.map((item) => (
                   <option key={item}>{item}</option>
                 ))}
                 <option value="custom">Custom...</option>
               </SelectInput>
               <button
+                type="button"
                 onClick={() => {
-                  if (customSubsection.trim()) {
-                    updateItem("projects", project.id, "subsection", customSubsection.trim());
-                    setCustomSubsection("");
-                  }
+                  addProjectSubsection(section, customSubsection, project.id);
                 }}
                 className="rounded-md border border-black/10 px-3 dark:border-white/10"
                 aria-label="Add custom subsection"
@@ -1405,6 +1456,23 @@ export function AdminPanel() {
               </button>
             </div>
             <TextInput placeholder="Custom subsection" value={customSubsection} onChange={(event) => setCustomSubsection(event.target.value)} />
+            {subsectionOptions.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {subsectionOptions.map((item) => (
+                  <span key={item} className="inline-flex items-center gap-2 rounded-full border border-black/10 px-3 py-1 text-xs normal-case tracking-normal text-ink dark:border-white/10 dark:text-paper">
+                    {item}
+                    <button
+                      type="button"
+                      onClick={() => removeProjectSubsection(section, item)}
+                      className="text-muted transition hover:text-red-600"
+                      aria-label={`Remove ${item} subsection`}
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </Field>
         </div>
         <Field label="Description">
