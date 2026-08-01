@@ -411,7 +411,8 @@ export function ProjectListItem({ project }: { project: Project }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.985, y: -10 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden px-0"
+            className="relative w-screen overflow-hidden px-0"
+            style={{ marginLeft: "calc(50% - 50vw)" }}
           >
             <div className="relative min-w-0 overflow-hidden border-y border-black/10 bg-white text-ink dark:border-white/10 dark:bg-[#4a4a4a] dark:text-paper">
               <button
