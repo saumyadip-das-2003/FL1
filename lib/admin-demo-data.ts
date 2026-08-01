@@ -44,6 +44,9 @@ export type AdminPerson = {
   role: string;
   image: string;
   bio: string;
+  studio: string;
+  office: string;
+  profile: string;
 };
 
 export type AdminContent = {
@@ -190,7 +193,10 @@ export function createSeedAdminContent(): AdminContent {
       name: person.name,
       role: person.role,
       image: person.image,
-      bio: person.bio
+      bio: person.bio,
+      studio: "Atelier Northline",
+      office: "Dhaka / Singapore",
+      profile: "Placeholder employee details"
     }))
   };
 }

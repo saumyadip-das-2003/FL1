@@ -92,7 +92,10 @@ const emptyItem: Record<CollectionKey, EditableItem> = {
     name: "New Team Member",
     role: "Architect",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80",
-    bio: "Short biography goes here."
+    bio: "Short biography goes here.",
+    studio: "Modern Age Studio",
+    office: "Dhaka",
+    profile: "Employee profile details go here."
   }
 };
 
@@ -124,7 +127,10 @@ function normalizeContent(content: AdminContent): AdminContent {
     projects: content.projects ?? seed.projects,
     services: content.services ?? seed.services,
     news: content.news ?? seed.news,
-    people: content.people ?? seed.people
+    people: (content.people?.length ? content.people : seed.people).map((person, index) => ({
+      ...seed.people[index % seed.people.length],
+      ...person
+    }))
   };
 }
 
@@ -1261,6 +1267,17 @@ export function AdminPanel() {
           </Field>
         </div>
         <Field label="Bio"><TextArea value={person.bio} onChange={(event) => updateItem("people", person.id, "bio", event.target.value)} /></Field>
+        <div className="grid gap-5 md:grid-cols-2">
+          <Field label="Studio">
+            <TextInput value={person.studio} onChange={(event) => updateItem("people", person.id, "studio", event.target.value)} />
+          </Field>
+          <Field label="Office">
+            <TextInput value={person.office} onChange={(event) => updateItem("people", person.id, "office", event.target.value)} />
+          </Field>
+        </div>
+        <Field label="Profile details">
+          <TextArea value={person.profile} onChange={(event) => updateItem("people", person.id, "profile", event.target.value)} />
+        </Field>
         <Field label="Photo">
           <TextInput value={person.image} onChange={(event) => updateItem("people", person.id, "image", event.target.value)} />
           {renderDropZone("Upload photo", (file) => uploadToItem("people", person.id, "image", file), person.image)}

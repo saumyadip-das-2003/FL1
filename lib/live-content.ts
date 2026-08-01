@@ -81,6 +81,9 @@ export function adminPersonToTeamMember(person: AdminPerson) {
     name: person.name,
     role: person.role,
     image: person.image,
-    bio: person.bio
+    bio: person.bio,
+    studio: person.studio,
+    office: person.office,
+    profile: person.profile
   };
 }

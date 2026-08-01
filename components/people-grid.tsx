@@ -6,7 +6,11 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { team as fallbackTeam } from "@/lib/data";
 
-type Person = (typeof fallbackTeam)[number];
+type Person = (typeof fallbackTeam)[number] & {
+  studio?: string;
+  office?: string;
+  profile?: string;
+};
 type PeopleFilter = "All" | "Design" | "Interior" | "Landscape" | "Technical";
 
 const peopleFilters: PeopleFilter[] = ["All", "Design", "Interior", "Landscape", "Technical"];
@@ -20,7 +24,7 @@ export function PeopleGrid({ team = fallbackTeam }: { team?: Person[] }) {
     const normalizedQuery = query.trim().toLowerCase();
 
     return team.filter((member) => {
-      const searchable = [member.name, member.role, member.bio].join(" ").toLowerCase();
+      const searchable = [member.name, member.role, member.bio, member.studio, member.office, member.profile].join(" ").toLowerCase();
       const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
       const matchesFilter =
         filter === "All" ||
@@ -126,15 +130,15 @@ export function PeopleGrid({ team = fallbackTeam }: { team?: Person[] }) {
                         <div className="mt-8 grid gap-4 border-y border-black/10 py-6 text-sm dark:border-white/10">
                           <p className="flex justify-between gap-5">
                             <span className="text-muted">Studio</span>
-                            <span>Atelier Northline</span>
+                            <span>{member.studio || "Atelier Northline"}</span>
                           </p>
                           <p className="flex justify-between gap-5">
                             <span className="text-muted">Office</span>
-                            <span>Dhaka / Singapore</span>
+                            <span>{member.office || "Dhaka / Singapore"}</span>
                           </p>
                           <p className="flex justify-between gap-5">
                             <span className="text-muted">Profile</span>
-                            <span>Placeholder employee details</span>
+                            <span>{member.profile || "Placeholder employee details"}</span>
                           </p>
                         </div>
                       </div>
