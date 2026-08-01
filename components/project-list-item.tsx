@@ -7,6 +7,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Project, ProjectMedia } from "@/lib/data";
 import { youtubeEmbedUrl } from "@/lib/youtube";
 
+const loopCount = 7;
+const middleLoop = Math.floor(loopCount / 2);
+
 function ProjectMark({ title }: { title: string }) {
   const letters = title
     .split(" ")
@@ -78,7 +81,10 @@ export function ProjectListItem({ project }: { project: Project }) {
     [mediaItems]
   );
   const loopedSlides = useMemo(
-    () => [0, 1, 2].flatMap((loop) => baseSlides.map((slide, baseIndex) => ({ ...slide, loop, baseIndex }))),
+    () =>
+      Array.from({ length: loopCount }, (_, loop) =>
+        baseSlides.map((slide, baseIndex) => ({ ...slide, loop, baseIndex }))
+      ).flat(),
     [baseSlides]
   );
   const stripRef = useRef<HTMLDivElement>(null);
@@ -175,7 +181,7 @@ export function ProjectListItem({ project }: { project: Project }) {
           ? currentLoop - 1
           : currentLoop;
 
-    scrollToLoopBaseIndex(Math.max(0, Math.min(2, targetLoop)), next, "smooth");
+    scrollToLoopBaseIndex(Math.max(0, Math.min(loopCount - 1, targetLoop)), next, "smooth");
     window.setTimeout(() => settleInfiniteLoop("auto"), 520);
   }
 
@@ -212,7 +218,7 @@ export function ProjectListItem({ project }: { project: Project }) {
   }
 
   function scrollToBaseIndex(baseIndex: number, behavior: ScrollBehavior) {
-    scrollToLoopBaseIndex(1, baseIndex, behavior);
+    scrollToLoopBaseIndex(middleLoop, baseIndex, behavior);
   }
 
   function scrollToLoopBaseIndex(loop: number, baseIndex: number, behavior: ScrollBehavior) {
@@ -235,18 +241,34 @@ export function ProjectListItem({ project }: { project: Project }) {
     const loop = Number(nearest.slide.dataset.loop ?? 1);
     const baseIndex = Number(nearest.slide.dataset.baseIndex ?? 0);
 
-    if (loop !== 1) {
+    if (loop !== middleLoop) {
       scrollToBaseIndex(baseIndex, behavior);
     }
   }
 
-  function handleStripScroll() {
-    if (isDragging) {
+  function recenterLoopTrack() {
+    if (!stripRef.current || baseSlides.length === 0) {
       return;
     }
 
+    const strip = stripRef.current;
+    const loopWidth = strip.scrollWidth / loopCount;
+    const currentLoop = Math.floor(strip.scrollLeft / loopWidth);
+
+    if (currentLoop <= 1 || currentLoop >= loopCount - 2) {
+      strip.scrollLeft += (middleLoop - currentLoop) * loopWidth;
+    }
+  }
+
+  function handleStripScroll() {
+    recenterLoopTrack();
+
     if (scrollEndTimer.current) {
       clearTimeout(scrollEndTimer.current);
+    }
+
+    if (isDragging) {
+      return;
     }
 
     scrollEndTimer.current = setTimeout(() => settleInfiniteLoop("auto"), 180);
