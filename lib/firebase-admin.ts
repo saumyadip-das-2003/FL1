@@ -60,6 +60,19 @@ export async function verifyAdminRequest(token?: string) {
   }
 }
 
+export async function verifyProtectedOwnerRequest(token?: string) {
+  if (!token) {
+    return false;
+  }
+
+  try {
+    const decoded = await getFirebaseAdminAuth().verifyIdToken(token);
+    return decoded.email?.toLowerCase() === protectedAdminEmail;
+  } catch {
+    return false;
+  }
+}
+
 export async function protectedAdminUid() {
   try {
     const user = await getFirebaseAdminAuth().getUserByEmail(protectedAdminEmail);

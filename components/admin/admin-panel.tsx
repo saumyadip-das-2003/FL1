@@ -322,6 +322,7 @@ export function AdminPanel() {
   const [userEmailDrafts, setUserEmailDrafts] = useState<Record<string, string>>({});
   const [userPasswordDrafts, setUserPasswordDrafts] = useState<Record<string, string>>({});
   const [visibleUserPasswords, setVisibleUserPasswords] = useState<Record<string, boolean>>({});
+  const isProtectedOwnerSession = adminEmail.trim().toLowerCase() === protectedAdminEmail;
 
   useEffect(() => {
     const storedToken = window.localStorage.getItem(adminTokenStorageKey);
@@ -382,10 +383,10 @@ export function AdminPanel() {
   }, [tab]);
 
   useEffect(() => {
-    if (tab === "settings" && token && !usersLoaded) {
+    if (tab === "settings" && token && isProtectedOwnerSession && !usersLoaded) {
       loadAdminUsers();
     }
-  }, [tab, token, usersLoaded]);
+  }, [tab, token, usersLoaded, isProtectedOwnerSession]);
 
   useEffect(() => {
     function handleSaveShortcut(event: KeyboardEvent) {
@@ -1535,12 +1536,13 @@ export function AdminPanel() {
             {passwordStatus && <p className="mt-3 text-sm text-muted">{passwordStatus}</p>}
           </div>
 
+          {isProtectedOwnerSession && (
           <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Manage Users</p>
                 <p className="mt-2 text-sm leading-6 text-muted">
-                  Add, update, disable, or delete Firebase admin users. The protected owner account cannot be deleted, disabled, or renamed.
+                  Add, update, disable, or delete Firebase admin users. The protected owner account is hidden from this list.
                 </p>
               </div>
               <button
@@ -1645,6 +1647,7 @@ export function AdminPanel() {
             </div>
             {userStatus && <p className="mt-3 text-sm text-muted">{userStatus}</p>}
           </div>
+          )}
 
           <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Website Maintenance</p>
@@ -2261,6 +2264,9 @@ export function AdminPanel() {
 
         <section className="p-5 md:p-8">
           <div className="mb-5 rounded-lg border border-black/10 bg-white p-4 text-sm text-muted dark:border-white/10 dark:bg-[#4a4a4a]">
+            <span className="mr-3 inline-flex rounded-full border border-black/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-ink dark:border-white/10 dark:text-paper">
+              {isProtectedOwnerSession ? "Super Admin" : "Admin"}
+            </span>
             {status}
             {savedAt ? ` Last saved at ${savedAt}.` : ""}
             <Link href="/" className="ml-3 underline">View site</Link>
