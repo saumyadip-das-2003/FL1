@@ -50,6 +50,27 @@ export type AdminPerson = {
   profile: string;
 };
 
+export type AdminAboutMessage = {
+  id: string;
+  name: string;
+  role: string;
+  image: string;
+  message: string;
+};
+
+export type AdminSocialLink = {
+  id: string;
+  platform: string;
+  href: string;
+};
+
+export type AdminBrandLink = {
+  id: string;
+  name: string;
+  logo: string;
+  href: string;
+};
+
 export type AdminContent = {
   settings: {
     companyName: string;
@@ -71,6 +92,7 @@ export type AdminContent = {
     aboutHeroImage: string;
     founderMessage: string;
     founderImage: string;
+    aboutMessages: string;
     email: string;
     phone: string;
     address: string;
@@ -81,6 +103,10 @@ export type AdminContent = {
     instagram: string;
     x: string;
     linkedin: string;
+    socialLinks: string;
+    footerSocialIds: string;
+    quickContactSocialIds: string;
+    brandLinks: string;
     projectSubsections: string;
   };
   projects: AdminProject[];
@@ -139,6 +165,16 @@ export function createSeedAdminContent(): AdminContent {
       founderMessage:
         "Architecture should make complexity feel quietly resolved. This founder message can introduce the real practice, its origins, collaborators, and values.",
       founderImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80",
+      aboutMessages: JSON.stringify([
+        {
+          id: "founder-message",
+          name: "Nadia Rahman",
+          role: "Founder & Principal Architect",
+          image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80",
+          message:
+            "Architecture should make complexity feel quietly resolved. This message can introduce the real practice, its origins, collaborators, and values."
+        }
+      ]),
       email: "studio@ateliernorthline.test",
       phone: "+880 1700 000 000",
       address: "House 18, Road 7, Gulshan, Dhaka",
@@ -149,6 +185,21 @@ export function createSeedAdminContent(): AdminContent {
       instagram: "https://instagram.com",
       x: "https://x.com",
       linkedin: "https://linkedin.com",
+      socialLinks: JSON.stringify([
+        { id: "whatsapp", platform: "WhatsApp", href: "https://wa.me/8801700000000" },
+        { id: "call", platform: "Call", href: "tel:+8801700000000" },
+        { id: "facebook", platform: "Facebook", href: "https://facebook.com" }
+      ]),
+      footerSocialIds: "whatsapp, call, facebook",
+      quickContactSocialIds: "whatsapp, call, facebook",
+      brandLinks: JSON.stringify([
+        {
+          id: "collab-atelier",
+          name: "Collaborating Studio",
+          logo: "https://picsum.photos/seed/brand-logo-1/240/120",
+          href: "https://example.com"
+        }
+      ]),
       projectSubsections: serializeProjectTaxonomy(projectTaxonomy)
     },
     projects: projects.map((project) => ({

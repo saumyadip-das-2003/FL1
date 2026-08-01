@@ -1,5 +1,6 @@
 import { AboutTeaser } from "@/components/about-teaser";
 import { FeaturedNews } from "@/components/featured-news";
+import { FeaturedPeople } from "@/components/featured-people";
 import { FeaturedProjects } from "@/components/featured-projects";
 import { FeaturedServices } from "@/components/featured-services";
 import { Hero } from "@/components/hero";
@@ -32,6 +33,7 @@ export default async function Home() {
         <FeaturedProjects />
         <FeaturedServices />
         <FeaturedNews />
+        <FeaturedPeople />
         <AboutTeaser profile={content.settings.aboutStudioProfile} stats={stats} />
       </main>
     </HomeIntro>

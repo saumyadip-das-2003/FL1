@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { AdminSocialLink } from "@/lib/admin-demo-data";
 
 function WhatsAppLogo() {
   return (
@@ -24,33 +25,100 @@ function FacebookLogo() {
   );
 }
 
+function InstagramLogo() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-white">
+      <path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm0 2A3.8 3.8 0 0 0 4 7.8v8.4A3.8 3.8 0 0 0 7.8 20h8.4a3.8 3.8 0 0 0 3.8-3.8V7.8A3.8 3.8 0 0 0 16.2 4H7.8Zm8.7 2.3a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z" />
+    </svg>
+  );
+}
+
+function XLogo() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-white">
+      <path d="M18.9 2h3.1l-6.8 7.8L23.2 22h-6.3l-4.9-7.4L6.4 22H3.2l7.3-8.4L2.8 2h6.4l4.4 6.7L18.9 2Zm-1.1 17.9h1.7L8.2 4H6.4l11.4 15.9Z" />
+    </svg>
+  );
+}
+
+function LinkedInLogo() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-white">
+      <path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5a2.5 2.5 0 0 1-.02-5ZM3 9.75h4V21H3V9.75Zm6.25 0h3.84v1.54h.05c.54-.96 1.86-1.98 3.83-1.98 4.1 0 4.86 2.7 4.86 6.21V21h-4v-4.86c0-1.16-.02-2.65-1.62-2.65-1.62 0-1.87 1.27-1.87 2.57V21h-4V9.75Z" />
+    </svg>
+  );
+}
+
+function YouTubeLogo() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-white">
+      <path d="M21.6 7.2s-.2-1.5-.8-2.1c-.8-.8-1.6-.8-2-.9C16 4 12 4 12 4s-4 0-6.8.2c-.4.1-1.2.1-2 .9-.6.6-.8 2.1-.8 2.1S2 9 2 10.9v1.8c0 1.9.4 3.7.4 3.7s.2 1.5.8 2.1c.8.8 1.9.8 2.4.9 1.7.2 6.4.2 6.4.2s4 0 6.8-.2c.4-.1 1.2-.1 2-.9.6-.6.8-2.1.8-2.1s.4-1.8.4-3.7v-1.8c0-1.9-.4-3.7-.4-3.7ZM10 15.4V8.9l5.8 3.3L10 15.4Z" />
+    </svg>
+  );
+}
+
+function GenericLogo() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-white">
+      <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm3.9 6.1h-2a11.8 11.8 0 0 0-.8-2.6 8.1 8.1 0 0 1 2.8 2.6ZM12 4.1c.4.6.9 1.9 1.2 4h-2.4c.3-2.1.8-3.4 1.2-4ZM4.3 14a8.6 8.6 0 0 1 0-4h3.4a16.7 16.7 0 0 0 0 4H4.3Zm.8 1.9h3.1c.2 1 .5 1.9.8 2.6a8.1 8.1 0 0 1-3.9-2.6Zm3.1-7.8H5.1A8.1 8.1 0 0 1 9 5.5c-.3.7-.6 1.6-.8 2.6ZM12 19.9c-.4-.6-.9-1.9-1.2-4h2.4c-.3 2.1-.8 3.4-1.2 4Zm1.6-5.9h-3.2a14.7 14.7 0 0 1 0-4h3.2a14.7 14.7 0 0 1 0 4Zm1.4 4.5c.3-.7.6-1.6.8-2.6h3.1a8.1 8.1 0 0 1-3.9 2.6Zm1.3-4.5a16.7 16.7 0 0 0 0-4h3.4a8.6 8.6 0 0 1 0 4h-3.4Z" />
+    </svg>
+  );
+}
+
+const platformMap = {
+  WhatsApp: { icon: WhatsAppLogo, color: "bg-[#25D366]" },
+  Call: { icon: PhoneLogo, color: "bg-[#0A84FF]" },
+  Facebook: { icon: FacebookLogo, color: "bg-[#1877F2]" },
+  Instagram: { icon: InstagramLogo, color: "bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#FCAF45]" },
+  X: { icon: XLogo, color: "bg-black" },
+  LinkedIn: { icon: LinkedInLogo, color: "bg-[#0A66C2]" },
+  YouTube: { icon: YouTubeLogo, color: "bg-[#FF0000]" },
+  TikTok: { icon: GenericLogo, color: "bg-black" },
+  Telegram: { icon: GenericLogo, color: "bg-[#26A5E4]" },
+  Pinterest: { icon: GenericLogo, color: "bg-[#E60023]" },
+  Email: { icon: GenericLogo, color: "bg-[#555555]" }
+};
+
 const defaultLinks = [
-  { label: "WhatsApp", href: "https://wa.me/8801700000000", icon: WhatsAppLogo, color: "bg-[#25D366]" },
-  { label: "Call", href: "tel:+8801700000000", icon: PhoneLogo, color: "bg-[#0A84FF]" },
-  { label: "Facebook", href: "https://facebook.com", icon: FacebookLogo, color: "bg-[#1877F2]" }
+  { platform: "WhatsApp", href: "https://wa.me/8801700000000" },
+  { platform: "Call", href: "tel:+8801700000000" },
+  { platform: "Facebook", href: "https://facebook.com" }
 ];
+
+function normalizeHref(link: Pick<AdminSocialLink, "platform" | "href">) {
+  if (link.platform === "Call" && !link.href.startsWith("tel:")) {
+    return `tel:${link.href.replace(/\s+/g, "")}`;
+  }
+
+  if (link.platform === "Email" && !link.href.startsWith("mailto:")) {
+    return `mailto:${link.href}`;
+  }
+
+  return link.href;
+}
 
 export function SocialLinks({
   compact = false,
   links = defaultLinks
 }: {
   compact?: boolean;
-  links?: { label: string; href: string; icon?: typeof WhatsAppLogo; color?: string }[];
+  links?: Pick<AdminSocialLink, "platform" | "href">[];
 }) {
   return (
     <div className={compact ? "flex flex-wrap gap-2" : "flex flex-col gap-2"}>
       {links.map((link) => {
-        const Icon = link.icon ?? defaultLinks.find((item) => item.label === link.label)?.icon ?? PhoneLogo;
-        const color = link.color ?? defaultLinks.find((item) => item.label === link.label)?.color ?? "bg-ink";
+        const platform = platformMap[link.platform as keyof typeof platformMap] ?? { icon: GenericLogo, color: "bg-ink" };
+        const href = normalizeHref(link);
+        const Icon = platform.icon;
 
         return (
           <Link
-            key={link.label}
-            href={link.href}
-            aria-label={link.label}
-            target={link.href.startsWith("tel:") ? undefined : "_blank"}
-            rel={link.href.startsWith("tel:") ? undefined : "noreferrer"}
-            className={`flex h-11 w-11 items-center justify-center border border-white/30 ${color} shadow-sm transition hover:scale-105`}
+            key={`${link.platform}-${link.href}`}
+            href={href}
+            aria-label={link.platform}
+            target={href.startsWith("tel:") || href.startsWith("mailto:") ? undefined : "_blank"}
+            rel={href.startsWith("tel:") || href.startsWith("mailto:") ? undefined : "noreferrer"}
+            className={`flex h-11 w-11 items-center justify-center border border-white/30 ${platform.color} shadow-sm transition hover:scale-105`}
           >
             <Icon />
           </Link>

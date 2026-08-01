@@ -1,4 +1,4 @@
-import { createSeedAdminContent, type AdminContent, type AdminNews, type AdminPerson, type AdminProject, type AdminService } from "@/lib/admin-demo-data";
+import { createSeedAdminContent, type AdminAboutMessage, type AdminContent, type AdminNews, type AdminPerson, type AdminProject, type AdminService } from "@/lib/admin-demo-data";
 import { getSanityContent } from "@/lib/sanity-http";
 import type { Project, ProjectCategory, ProjectSection } from "@/lib/data";
 import type { NewsItem } from "@/lib/news";
@@ -87,4 +87,31 @@ export function adminPersonToTeamMember(person: AdminPerson) {
     office: person.office,
     profile: person.profile
   };
+}
+
+export function parseAboutMessages(content: AdminContent): AdminAboutMessage[] {
+  try {
+    const parsed = JSON.parse(content.settings.aboutMessages || "[]") as AdminAboutMessage[];
+    if (Array.isArray(parsed) && parsed.length) {
+      return parsed.map((message) => ({
+        id: message.id,
+        name: message.name,
+        role: message.role,
+        image: message.image,
+        message: message.message
+      }));
+    }
+  } catch {
+    // Fall back to the legacy single founder fields below.
+  }
+
+  return [
+    {
+      id: "founder-message",
+      name: "Founder",
+      role: "Founder",
+      image: content.settings.founderImage,
+      message: content.settings.founderMessage
+    }
+  ];
 }

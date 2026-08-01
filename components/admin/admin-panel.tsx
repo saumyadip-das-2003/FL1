@@ -27,23 +27,35 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { adminEmailStorageKey, adminTokenStorageKey } from "@/lib/admin-auth";
+import { adminEmailStorageKey, adminTokenStorageKey, protectedAdminEmail } from "@/lib/admin-auth";
 import {
   adminStorageKey,
   createSeedAdminContent,
   type AdminContent,
+  type AdminAboutMessage,
   type AdminMedia,
   type AdminNews,
   type AdminPerson,
   type AdminProject,
-  type AdminService
+  type AdminService,
+  type AdminSocialLink,
+  type AdminBrandLink
 } from "@/lib/admin-demo-data";
 import { normalizeProjectTaxonomy, serializeProjectTaxonomy, projectTaxonomy, type ProjectSection } from "@/lib/data";
+import { socialPlatforms } from "@/lib/social-platforms";
 import { youtubeEmbedUrl } from "@/lib/youtube";
 
 type Tab = "general" | "home" | "projects" | "services" | "news" | "people" | "about" | "contact" | "settings";
 type CollectionKey = "projects" | "services" | "news" | "people";
 type EditableItem = AdminProject | AdminService | AdminNews | AdminPerson;
+type AdminUser = {
+  uid: string;
+  email: string;
+  disabled: boolean;
+  protected: boolean;
+  createdAt?: string;
+  lastSignInAt?: string;
+};
 
 const sidebarItems: { id: Tab; label: string; icon: typeof Settings }[] = [
   { id: "general", label: "General", icon: Settings },
@@ -58,7 +70,25 @@ const sidebarItems: { id: Tab; label: string; icon: typeof Settings }[] = [
 ];
 
 const projectSections = Object.keys(projectTaxonomy) as ProjectSection[];
-const serviceCategories = ["Architecture Design", "3D Modeling", "Rendering", "Interior", "Exterior", "Animation"];
+const serviceCategories = [
+  "Architecture Design",
+  "Drafting",
+  "Planning",
+  "3D Modeling",
+  "Rendering",
+  "Visualization",
+  "Interior",
+  "Exterior",
+  "Animation",
+  "AutoCAD",
+  "Revit",
+  "SketchUp",
+  "Rhino",
+  "Lumion",
+  "V-Ray",
+  "Enscape",
+  "D5 Render"
+];
 const peopleRoles = ["Founding Partner", "Design Director", "Project Architect", "Interior Lead", "Landscape Architect", "Visualization Artist", "Technical Architect"];
 const newsCategories = ["Studio", "Projects", "Awards", "Research", "Press"];
 
@@ -139,6 +169,21 @@ function normalizeContent(content: AdminContent): AdminContent {
       ...person
     }))
   };
+}
+
+async function readAdminApiResponse<T>(response: Response): Promise<T & { error?: string }> {
+  const contentType = response.headers.get("content-type") ?? "";
+
+  if (contentType.includes("application/json")) {
+    return (await response.json()) as T & { error?: string };
+  }
+
+  const text = await response.text();
+  return {
+    error: text.includes("<!DOCTYPE")
+      ? "Admin user API returned an HTML error page. Check Firebase Admin service account environment variables and redeploy."
+      : text || "Admin user API returned an unexpected response."
+  } as T & { error?: string };
 }
 
 function itemTitle(item: EditableItem) {
@@ -268,6 +313,15 @@ export function AdminPanel() {
     new: false,
     confirm: false
   });
+  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
+  const [usersLoaded, setUsersLoaded] = useState(false);
+  const [userStatus, setUserStatus] = useState("");
+  const [newAdminEmail, setNewAdminEmail] = useState("");
+  const [newAdminPassword, setNewAdminPassword] = useState("");
+  const [showNewAdminPassword, setShowNewAdminPassword] = useState(false);
+  const [userEmailDrafts, setUserEmailDrafts] = useState<Record<string, string>>({});
+  const [userPasswordDrafts, setUserPasswordDrafts] = useState<Record<string, string>>({});
+  const [visibleUserPasswords, setVisibleUserPasswords] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const storedToken = window.localStorage.getItem(adminTokenStorageKey);
@@ -326,6 +380,12 @@ export function AdminPanel() {
   useEffect(() => {
     setCollectionQuery("");
   }, [tab]);
+
+  useEffect(() => {
+    if (tab === "settings" && token && !usersLoaded) {
+      loadAdminUsers();
+    }
+  }, [tab, token, usersLoaded]);
 
   useEffect(() => {
     function handleSaveShortcut(event: KeyboardEvent) {
@@ -525,6 +585,168 @@ export function AdminPanel() {
           : item
       )
     }));
+  }
+
+  function aboutMessages() {
+    try {
+      const parsed = JSON.parse(content.settings.aboutMessages || "[]") as AdminAboutMessage[];
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch {
+      // Use the legacy founder fields below.
+    }
+
+    return [
+      {
+        id: "founder-message",
+        name: "Founder",
+        role: "Founder",
+        image: content.settings.founderImage,
+        message: content.settings.founderMessage
+      }
+    ];
+  }
+
+  function saveAboutMessages(messages: AdminAboutMessage[]) {
+    updateSettings("aboutMessages", JSON.stringify(messages, null, 2));
+  }
+
+  function addAboutMessage() {
+    saveAboutMessages([
+      ...aboutMessages(),
+      {
+        id: makeId("about-message"),
+        name: "New Message",
+        role: "Studio Leadership",
+        image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80",
+        message: "Add this person's message here."
+      }
+    ]);
+  }
+
+  function updateAboutMessage(id: string, field: keyof AdminAboutMessage, value: string) {
+    saveAboutMessages(aboutMessages().map((message) => (message.id === id ? { ...message, [field]: value } : message)));
+  }
+
+  function deleteAboutMessage(id: string) {
+    saveAboutMessages(aboutMessages().filter((message) => message.id !== id));
+  }
+
+  async function uploadAboutMessageImage(id: string, file?: File) {
+    if (!file) {
+      return;
+    }
+
+    const localPreview = await readFileAsDataUrl(file);
+    updateAboutMessage(id, "image", localPreview);
+    const uploadedUrl = await uploadImageFile(file);
+    if (uploadedUrl) {
+      updateAboutMessage(id, "image", uploadedUrl);
+    }
+  }
+
+  function socialLinks() {
+    try {
+      const parsed = JSON.parse(content.settings.socialLinks || "[]") as AdminSocialLink[];
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch {
+      // Use legacy social fields below.
+    }
+
+    return [
+      { id: "whatsapp", platform: "WhatsApp", href: content.settings.whatsapp },
+      { id: "call", platform: "Call", href: `tel:${content.settings.phone.replace(/\s+/g, "")}` },
+      { id: "facebook", platform: "Facebook", href: content.settings.facebook }
+    ];
+  }
+
+  function saveSocialLinks(links: AdminSocialLink[]) {
+    updateSettings("socialLinks", JSON.stringify(links, null, 2));
+  }
+
+  function addSocialLink() {
+    saveSocialLinks([
+      ...socialLinks(),
+      {
+        id: makeId("social-link"),
+        platform: "Instagram",
+        href: "https://instagram.com"
+      }
+    ]);
+  }
+
+  function updateSocialLink(id: string, field: keyof AdminSocialLink, value: string) {
+    saveSocialLinks(socialLinks().map((link) => (link.id === id ? { ...link, [field]: value } : link)));
+  }
+
+  function deleteSocialLink(id: string) {
+    saveSocialLinks(socialLinks().filter((link) => link.id !== id));
+  }
+
+  function selectedSocialIds(key: "footerSocialIds" | "quickContactSocialIds") {
+    return content.settings[key]
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean);
+  }
+
+  function toggleSelectedSocialId(key: "footerSocialIds" | "quickContactSocialIds", id: string) {
+    const current = selectedSocialIds(key);
+    const next = current.includes(id) ? current.filter((item) => item !== id) : [...current, id];
+    updateSettings(key, next.join(", "));
+  }
+
+  function brandLinks() {
+    try {
+      const parsed = JSON.parse(content.settings.brandLinks || "[]") as AdminBrandLink[];
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch {
+      // Ignore malformed brand JSON.
+    }
+
+    return [];
+  }
+
+  function saveBrandLinks(links: AdminBrandLink[]) {
+    updateSettings("brandLinks", JSON.stringify(links, null, 2));
+  }
+
+  function addBrandLink() {
+    saveBrandLinks([
+      ...brandLinks(),
+      {
+        id: makeId("brand-link"),
+        name: "New Brand",
+        logo: "https://picsum.photos/seed/brand-logo/240/120",
+        href: "https://example.com"
+      }
+    ]);
+  }
+
+  function updateBrandLink(id: string, field: keyof AdminBrandLink, value: string) {
+    saveBrandLinks(brandLinks().map((brand) => (brand.id === id ? { ...brand, [field]: value } : brand)));
+  }
+
+  function deleteBrandLink(id: string) {
+    saveBrandLinks(brandLinks().filter((brand) => brand.id !== id));
+  }
+
+  async function uploadBrandLogo(id: string, file?: File) {
+    if (!file) {
+      return;
+    }
+
+    const localPreview = await readFileAsDataUrl(file);
+    updateBrandLink(id, "logo", localPreview);
+    const uploadedUrl = await uploadImageFile(file);
+    if (uploadedUrl) {
+      updateBrandLink(id, "logo", uploadedUrl);
+    }
   }
 
   function updateProjectMedia(projectId: string, mediaId: string, field: keyof AdminMedia, value: string) {
@@ -739,6 +961,151 @@ export function AdminPanel() {
     }
   }
 
+  async function loadAdminUsers() {
+    if (!token) {
+      setUserStatus("Login with Firebase before managing users.");
+      return;
+    }
+
+    setUserStatus("Loading admin users...");
+
+    try {
+      const response = await fetch("/api/admin/users", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const payload = await readAdminApiResponse<{ users?: AdminUser[]; protectedEmail?: string }>(response);
+
+      if (!response.ok || !payload.users) {
+        throw new Error(payload.error ?? "Unable to load admin users.");
+      }
+
+      setAdminUsers(payload.users);
+      setUserEmailDrafts(Object.fromEntries(payload.users.map((user) => [user.uid, user.email])));
+      setUsersLoaded(true);
+      setUserStatus(`Loaded ${payload.users.length} admin user${payload.users.length === 1 ? "" : "s"}.`);
+    } catch (error) {
+      setUserStatus(error instanceof Error ? error.message : "Unable to load admin users.");
+    }
+  }
+
+  async function addAdminUser() {
+    if (!newAdminEmail.trim() || newAdminPassword.length < 6) {
+      setUserStatus("Email and a minimum 6 character password are required.");
+      return;
+    }
+
+    setBusy(true);
+    setUserStatus("Adding admin user...");
+
+    try {
+      const response = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ email: newAdminEmail, password: newAdminPassword })
+      });
+      const payload = await readAdminApiResponse<{ user?: AdminUser }>(response);
+
+      if (!response.ok || !payload.user) {
+        throw new Error(payload.error ?? "Unable to add admin user.");
+      }
+
+      setNewAdminEmail("");
+      setNewAdminPassword("");
+      setAdminUsers((current) => [payload.user as AdminUser, ...current]);
+      setUserEmailDrafts((current) => ({ ...current, [payload.user?.uid ?? ""]: payload.user?.email ?? "" }));
+      setUserStatus("Admin user added.");
+    } catch (error) {
+      setUserStatus(error instanceof Error ? error.message : "Unable to add admin user.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function updateAdminUser(user: AdminUser, disabled?: boolean) {
+    const nextEmail = userEmailDrafts[user.uid]?.trim() ?? user.email;
+    const nextPassword = userPasswordDrafts[user.uid] ?? "";
+    const emailChanged = nextEmail && nextEmail !== user.email;
+
+    if (user.protected && emailChanged) {
+      setUserStatus(`${protectedAdminEmail} is protected, so its email cannot be changed.`);
+      return;
+    }
+
+    if (!emailChanged && !nextPassword && typeof disabled !== "boolean") {
+      setUserStatus("Add an email/password change or toggle user status first.");
+      return;
+    }
+
+    setBusy(true);
+    setUserStatus("Updating admin user...");
+
+    try {
+      const response = await fetch(`/api/admin/users/${user.uid}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          email: emailChanged ? nextEmail : undefined,
+          password: nextPassword || undefined,
+          disabled
+        })
+      });
+      const payload = await readAdminApiResponse<{ user?: AdminUser }>(response);
+
+      if (!response.ok || !payload.user) {
+        throw new Error(payload.error ?? "Unable to update admin user.");
+      }
+
+      setAdminUsers((current) => current.map((item) => (item.uid === user.uid ? (payload.user as AdminUser) : item)));
+      setUserPasswordDrafts((current) => ({ ...current, [user.uid]: "" }));
+      setUserEmailDrafts((current) => ({ ...current, [user.uid]: payload.user?.email ?? "" }));
+      setUserStatus(payload.user.email === adminEmail ? "User updated. Log out and log back in if you changed your own email." : "Admin user updated.");
+    } catch (error) {
+      setUserStatus(error instanceof Error ? error.message : "Unable to update admin user.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteAdminUser(user: AdminUser) {
+    if (user.protected) {
+      setUserStatus(`${protectedAdminEmail} is protected and cannot be deleted.`);
+      return;
+    }
+
+    const confirmed = window.confirm(`Delete admin user ${user.email}? This cannot be undone.`);
+    if (!confirmed) {
+      return;
+    }
+
+    setBusy(true);
+    setUserStatus("Deleting admin user...");
+
+    try {
+      const response = await fetch(`/api/admin/users/${user.uid}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const payload = await readAdminApiResponse<{ ok?: boolean }>(response);
+
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error ?? "Unable to delete admin user.");
+      }
+
+      setAdminUsers((current) => current.filter((item) => item.uid !== user.uid));
+      setUserStatus("Admin user deleted.");
+    } catch (error) {
+      setUserStatus(error instanceof Error ? error.message : "Unable to delete admin user.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function getFeaturedIds(key: "featuredProjectIds" | "featuredServiceIds" | "featuredNewsIds") {
     return content.settings[key]
       .split(",")
@@ -886,9 +1253,236 @@ export function AdminPanel() {
     );
   }
 
+  function renderAboutMessagesEditor() {
+    const messages = aboutMessages();
+
+    return (
+      <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">About Page Messages</p>
+            <p className="mt-2 text-sm leading-6 text-muted">
+              Add founder, partner, or employee messages with a portrait, name, title, and message.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={addAboutMessage}
+            className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-3 text-xs uppercase tracking-[0.14em] text-paper dark:bg-paper dark:text-ink"
+          >
+            <Plus size={15} /> Add Message
+          </button>
+        </div>
+
+        <div className="grid gap-4">
+          {messages.map((message, index) => (
+            <div key={message.id} className="grid gap-4 rounded-lg border border-black/10 p-4 dark:border-white/10 lg:grid-cols-[180px_1fr]">
+              <div>
+                <MediaPreview type="image" source={message.image} title={message.name} />
+                <div className="mt-3 flex items-center justify-between gap-2">
+                  <p className="text-xs uppercase tracking-[0.16em] text-muted">Message {index + 1}</p>
+                  <button
+                    type="button"
+                    onClick={() => deleteAboutMessage(message.id)}
+                    className="rounded border border-red-500/30 p-2 text-red-600"
+                    aria-label={`Delete message from ${message.name}`}
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label="Name">
+                    <TextInput value={message.name} onChange={(event) => updateAboutMessage(message.id, "name", event.target.value)} />
+                  </Field>
+                  <Field label="Role / title">
+                    <TextInput value={message.role} onChange={(event) => updateAboutMessage(message.id, "role", event.target.value)} />
+                  </Field>
+                </div>
+                <Field label="Portrait image">
+                  <TextInput value={message.image} onChange={(event) => updateAboutMessage(message.id, "image", event.target.value)} />
+                  {renderDropZone("Upload portrait", (file) => uploadAboutMessageImage(message.id, file), message.image)}
+                </Field>
+                <Field label="Message">
+                  <TextArea value={message.message} onChange={(event) => updateAboutMessage(message.id, "message", event.target.value)} />
+                </Field>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  function renderSocialLinksEditor() {
+    const links = socialLinks();
+
+    return (
+      <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Social Media Links</p>
+            <p className="mt-2 text-sm leading-6 text-muted">
+              Choose the platform and paste the public profile link. These links appear in Contact, footer, and quick contact buttons.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={addSocialLink}
+            className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-3 text-xs uppercase tracking-[0.14em] text-paper dark:bg-paper dark:text-ink"
+          >
+            <Plus size={15} /> Add Social
+          </button>
+        </div>
+
+        <div className="grid gap-3">
+          {links.map((link) => (
+            <div key={link.id} className="grid gap-3 rounded-lg border border-black/10 p-4 dark:border-white/10 md:grid-cols-[220px_1fr_auto] md:items-end">
+              <Field label="Platform">
+                <SelectInput value={link.platform} onChange={(event) => updateSocialLink(link.id, "platform", event.target.value)}>
+                  {socialPlatforms.map((platform) => (
+                    <option key={platform}>{platform}</option>
+                  ))}
+                </SelectInput>
+              </Field>
+              <Field label="Link / phone / email">
+                <TextInput
+                  value={link.href}
+                  onChange={(event) => updateSocialLink(link.id, "href", event.target.value)}
+                  placeholder="https://..., tel:+880..., or email@example.com"
+                />
+              </Field>
+              <button
+                type="button"
+                onClick={() => deleteSocialLink(link.id)}
+                className="h-11 rounded-md border border-red-500/30 px-4 text-xs uppercase tracking-[0.14em] text-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+          {links.length === 0 && (
+            <p className="rounded-md bg-neutral-50 p-4 text-sm text-muted dark:bg-neutral-700/40">
+              No social media links added yet.
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  function renderSocialPlacementEditor() {
+    const links = socialLinks();
+    const footerIds = selectedSocialIds("footerSocialIds");
+    const quickIds = selectedSocialIds("quickContactSocialIds");
+
+    return (
+      <div className="grid gap-6 lg:grid-cols-2">
+        {[
+          {
+            title: "Footer Social Media",
+            description: "Select which social links appear in the footer contact area.",
+            key: "footerSocialIds" as const,
+            selected: footerIds
+          },
+          {
+            title: "Quick Contacts",
+            description: "Select which social links appear in the floating quick-contact buttons.",
+            key: "quickContactSocialIds" as const,
+            selected: quickIds
+          }
+        ].map((group) => (
+          <div key={group.key} className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">{group.title}</p>
+            <p className="mt-2 text-sm leading-6 text-muted">{group.description}</p>
+            <div className="mt-5 grid gap-2">
+              {links.map((link) => (
+                <label key={`${group.key}-${link.id}`} className="flex items-center justify-between gap-4 rounded-md border border-black/10 px-3 py-3 text-sm dark:border-white/10">
+                  <span>{link.platform}</span>
+                  <input
+                    type="checkbox"
+                    checked={group.selected.includes(link.id)}
+                    onChange={() => toggleSelectedSocialId(group.key, link.id)}
+                    className="h-4 w-4"
+                  />
+                </label>
+              ))}
+              {links.length === 0 && <p className="text-sm text-muted">Add social links in Contact first.</p>}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  function renderBrandLinksEditor() {
+    const brands = brandLinks();
+
+    return (
+      <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Footer Brands & Collaborations</p>
+            <p className="mt-2 text-sm leading-6 text-muted">
+              Add collaborator or brand logos shown in the footer. Each logo can link to that brand's website.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={addBrandLink}
+            className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-3 text-xs uppercase tracking-[0.14em] text-paper dark:bg-paper dark:text-ink"
+          >
+            <Plus size={15} /> Add Brand
+          </button>
+        </div>
+
+        <div className="grid gap-4">
+          {brands.map((brand) => (
+            <div key={brand.id} className="grid gap-4 rounded-lg border border-black/10 p-4 dark:border-white/10 lg:grid-cols-[180px_1fr_auto] lg:items-start">
+              <MediaPreview type="image" source={brand.logo} title={brand.name} />
+              <div className="grid gap-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label="Brand name">
+                    <TextInput value={brand.name} onChange={(event) => updateBrandLink(brand.id, "name", event.target.value)} />
+                  </Field>
+                  <Field label="Clickable link">
+                    <TextInput value={brand.href} onChange={(event) => updateBrandLink(brand.id, "href", event.target.value)} />
+                  </Field>
+                </div>
+                <Field label="Logo">
+                  <TextInput value={brand.logo} onChange={(event) => updateBrandLink(brand.id, "logo", event.target.value)} />
+                  {renderDropZone("Upload logo", (file) => uploadBrandLogo(brand.id, file), brand.logo)}
+                </Field>
+              </div>
+              <button
+                type="button"
+                onClick={() => deleteBrandLink(brand.id)}
+                className="h-11 rounded-md border border-red-500/30 px-4 text-xs uppercase tracking-[0.14em] text-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+          {brands.length === 0 && (
+            <p className="rounded-md bg-neutral-50 p-4 text-sm text-muted dark:bg-neutral-700/40">
+              No footer brands added yet.
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   function renderPanel() {
     if (tab === "general") {
-      return renderSettingsFields(["companyName", "tagline", "logoUrl", "homeLogoText"]);
+      return (
+        <div className="grid gap-6">
+          {renderSettingsFields(["companyName", "tagline", "logoUrl", "homeLogoText"])}
+          {renderSocialPlacementEditor()}
+          {renderBrandLinksEditor()}
+        </div>
+      );
     }
 
     if (tab === "settings") {
@@ -898,6 +1492,9 @@ export function AdminPanel() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Admin Password</p>
             <p className="mt-2 text-sm leading-6 text-muted">
               Change the Firebase admin login password for {adminEmail || "the currently logged-in account"}.
+            </p>
+            <p className="mt-2 text-sm leading-6 text-muted">
+              Protected owner account: <span className="font-medium text-ink dark:text-paper">{protectedAdminEmail}</span>. This account must not be deleted.
             </p>
             <div className="mt-5 grid gap-5 md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
               <Field label="Current password">
@@ -939,6 +1536,117 @@ export function AdminPanel() {
           </div>
 
           <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Manage Users</p>
+                <p className="mt-2 text-sm leading-6 text-muted">
+                  Add, update, disable, or delete Firebase admin users. The protected owner account cannot be deleted, disabled, or renamed.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={loadAdminUsers}
+                className="h-11 rounded-md border border-black/10 px-4 text-xs uppercase tracking-[0.14em] dark:border-white/10"
+              >
+                Refresh
+              </button>
+            </div>
+
+            <div className="mt-5 grid gap-5 rounded-lg border border-black/10 p-4 dark:border-white/10 md:grid-cols-[1fr_1fr_auto] md:items-end">
+              <Field label="New admin email">
+                <TextInput
+                  type="email"
+                  value={newAdminEmail}
+                  onChange={(event) => setNewAdminEmail(event.target.value)}
+                  placeholder="name@example.com"
+                />
+              </Field>
+              <Field label="New admin password">
+                <PasswordInput
+                  visible={showNewAdminPassword}
+                  onToggle={() => setShowNewAdminPassword((current) => !current)}
+                  value={newAdminPassword}
+                  onChange={(event) => setNewAdminPassword(event.target.value)}
+                  placeholder="Minimum 6 characters"
+                />
+              </Field>
+              <button
+                type="button"
+                onClick={addAdminUser}
+                className="h-11 rounded-md bg-ink px-5 text-xs uppercase tracking-[0.14em] text-paper dark:bg-paper dark:text-ink"
+              >
+                Add Admin
+              </button>
+            </div>
+
+            <div className="mt-5 grid gap-3">
+              {adminUsers.map((user) => (
+                <div key={user.uid} className="grid gap-3 rounded-lg border border-black/10 p-4 dark:border-white/10 xl:grid-cols-[1fr_1fr_auto] xl:items-end">
+                  <Field label="Email">
+                    <TextInput
+                      type="email"
+                      value={userEmailDrafts[user.uid] ?? user.email}
+                      disabled={user.protected}
+                      onChange={(event) => setUserEmailDrafts((current) => ({ ...current, [user.uid]: event.target.value }))}
+                    />
+                  </Field>
+                  <Field label="New password">
+                    <PasswordInput
+                      visible={Boolean(visibleUserPasswords[user.uid])}
+                      onToggle={() => setVisibleUserPasswords((current) => ({ ...current, [user.uid]: !current[user.uid] }))}
+                      value={userPasswordDrafts[user.uid] ?? ""}
+                      onChange={(event) => setUserPasswordDrafts((current) => ({ ...current, [user.uid]: event.target.value }))}
+                      placeholder="Leave blank to keep current"
+                    />
+                  </Field>
+                  <div className="flex flex-wrap gap-2">
+                    {user.protected && (
+                      <span className="inline-flex h-11 items-center rounded-md border border-emerald-500/30 px-4 text-xs uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-300">
+                        Protected
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => updateAdminUser(user)}
+                      className="h-11 rounded-md bg-ink px-4 text-xs uppercase tracking-[0.14em] text-paper dark:bg-paper dark:text-ink"
+                    >
+                      Save User
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => updateAdminUser(user, !user.disabled)}
+                      disabled={user.protected}
+                      className="h-11 rounded-md border border-black/10 px-4 text-xs uppercase tracking-[0.14em] disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10"
+                    >
+                      {user.disabled ? "Enable" : "Disable"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteAdminUser(user)}
+                      disabled={user.protected}
+                      className="h-11 rounded-md border border-red-500/30 px-4 text-xs uppercase tracking-[0.14em] text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted xl:col-span-3">
+                    UID: {user.uid}
+                    {user.email === adminEmail ? " / Current session" : ""}
+                    {user.disabled ? " / Disabled" : ""}
+                    {user.lastSignInAt ? ` / Last login: ${user.lastSignInAt}` : ""}
+                  </p>
+                </div>
+              ))}
+              {adminUsers.length === 0 && (
+                <p className="rounded-md bg-neutral-50 p-4 text-sm text-muted dark:bg-neutral-700/40">
+                  {usersLoaded ? "No admin users found." : "Click refresh after Firebase Admin service credentials are configured."}
+                </p>
+              )}
+            </div>
+            {userStatus && <p className="mt-3 text-sm text-muted">{userStatus}</p>}
+          </div>
+
+          <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Website Maintenance</p>
             <p className="mt-2 text-sm leading-6 text-muted">
               Use these controls for client handoff, backups, and checking the public website.
@@ -974,7 +1682,7 @@ export function AdminPanel() {
     if (tab === "home") {
       return (
         <div className="grid gap-6">
-          {renderSettingsFields(["homeHeadline", "homeTagline", "homeVideoUrl", "statYears", "statProjects", "statCountries", "whatsapp", "facebook"])}
+          {renderSettingsFields(["homeHeadline", "homeTagline", "homeVideoUrl", "statYears", "statProjects", "statCountries"])}
           <div className="grid gap-5 xl:grid-cols-3">
             {renderFeaturedSelector(
               "Featured Projects",
@@ -1009,13 +1717,19 @@ export function AdminPanel() {
     }
 
     if (tab === "about") {
-      return renderSettingsFields(["aboutStudioProfile", "aboutMission", "aboutVision", "aboutHeroImage", "founderMessage"]);
+      return (
+        <div className="grid gap-6">
+          {renderSettingsFields(["aboutStudioProfile", "aboutMission", "aboutVision", "aboutHeroImage"])}
+          {renderAboutMessagesEditor()}
+        </div>
+      );
     }
 
     if (tab === "contact") {
       return (
         <div className="grid gap-6">
-          {renderSettingsFields(["email", "phone", "address", "whatsapp", "facebook"])}
+          {renderSettingsFields(["email", "phone", "address"])}
+          {renderSocialLinksEditor()}
           <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Offices and Maps</p>
             <p className="mt-2 text-sm leading-6 text-muted">
@@ -1311,16 +2025,45 @@ export function AdminPanel() {
   }
 
   function renderServiceEditor(service: AdminService) {
+    const selectedTags = service.tags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+    const availableTags = serviceCategories.filter((tag) => !selectedTags.includes(tag));
+    const saveTags = (tags: string[]) => updateItem("services", service.id, "tags", tags.join(", "));
+
     return (
       <div className="grid gap-5">
         <div className="grid gap-5 md:grid-cols-2">
           <Field label="Service title"><TextInput value={service.title} onChange={(event) => updateItem("services", service.id, "title", event.target.value)} /></Field>
           <Field label="Category / tags">
-            <SelectInput value={serviceCategories.includes(service.tags.split(",")[0]?.trim()) ? service.tags.split(",")[0]?.trim() : "custom"} onChange={(event) => updateItem("services", service.id, "tags", event.target.value)}>
-              {serviceCategories.map((item) => <option key={item}>{item}</option>)}
-              <option value="custom">Custom...</option>
+            <SelectInput
+              value=""
+              onChange={(event) => {
+                if (event.target.value) {
+                  saveTags([...selectedTags, event.target.value]);
+                }
+              }}
+            >
+              <option value="">Select tag to add</option>
+              {availableTags.map((item) => <option key={item}>{item}</option>)}
             </SelectInput>
-            <TextInput value={service.tags} onChange={(event) => updateItem("services", service.id, "tags", event.target.value)} />
+            <div className="flex min-h-11 flex-wrap gap-2 rounded-md border border-black/10 bg-white p-2 dark:border-white/10 dark:bg-[#4a4a4a]">
+              {selectedTags.map((tag) => (
+                <span key={tag} className="inline-flex items-center gap-2 rounded-full border border-black/10 px-3 py-1 text-xs normal-case tracking-normal dark:border-white/10">
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => saveTags(selectedTags.filter((item) => item !== tag))}
+                    className="text-muted transition hover:text-red-600"
+                    aria-label={`Remove ${tag}`}
+                  >
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
+              {selectedTags.length === 0 && <span className="px-1 py-1 text-sm normal-case tracking-normal text-muted">No tags selected</span>}
+            </div>
           </Field>
         </div>
         <Field label="Description"><TextArea value={service.description} onChange={(event) => updateItem("services", service.id, "description", event.target.value)} /></Field>

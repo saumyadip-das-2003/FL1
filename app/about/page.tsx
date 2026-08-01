@@ -1,11 +1,12 @@
 import Image from "next/image";
 import { Reveal } from "@/components/reveal";
-import { getLiveContent } from "@/lib/live-content";
+import { getLiveContent, parseAboutMessages } from "@/lib/live-content";
 
 export const dynamic = "force-dynamic";
 
 export default async function AboutPage() {
   const content = await getLiveContent();
+  const messages = parseAboutMessages(content);
   const sections = [
     {
       label: "Mission",
@@ -16,11 +17,6 @@ export default async function AboutPage() {
       label: "Vision",
       title: content.settings.aboutVision,
       body: content.settings.aboutVision
-    },
-    {
-      label: "Message from Founder",
-      title: "Message from Founder",
-      body: content.settings.founderMessage
     }
   ];
 
@@ -72,6 +68,34 @@ export default async function AboutPage() {
               </Reveal>
             </div>
           ))}
+
+          <div className="grid gap-10 border-t border-black/10 pt-12 dark:border-white/10 lg:grid-cols-[0.7fr_1.3fr]">
+            <Reveal>
+              <p className="text-xs uppercase tracking-[0.28em] text-muted">Messages</p>
+            </Reveal>
+            <div className="grid gap-12">
+              {messages.map((message, index) => (
+                <Reveal key={message.id} delay={index * 0.06}>
+                  <article className="grid gap-8 md:grid-cols-[260px_1fr] md:items-start">
+                    <div className="relative aspect-[4/5] overflow-hidden bg-black">
+                      <Image
+                        src={message.image}
+                        alt={message.name}
+                        fill
+                        sizes="(min-width: 768px) 260px, 100vw"
+                        className="object-cover grayscale"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-serif text-3xl leading-tight text-balance md:text-5xl">{message.name}</p>
+                      <p className="mt-3 text-xs uppercase tracking-[0.24em] text-muted">{message.role}</p>
+                      <p className="mt-8 max-w-3xl text-lg leading-9 text-muted">{message.message}</p>
+                    </div>
+                  </article>
+                </Reveal>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
     </main>

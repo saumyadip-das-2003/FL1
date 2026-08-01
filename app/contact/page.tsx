@@ -2,6 +2,8 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import { Reveal } from "@/components/reveal";
 import { getLiveContent } from "@/lib/live-content";
 import { ContactForm } from "@/components/contact-form";
+import { SocialLinks } from "@/components/social-links";
+import { parseSocialLinks } from "@/lib/social-platforms";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +11,7 @@ export default async function ContactPage() {
   const content = await getLiveContent();
   const offices = content.settings.offices.split(/\n+/).map((office) => office.trim()).filter(Boolean);
   const officeMaps = (content.settings.officeMaps ?? "").split(/\n+/).map((map) => map.trim());
+  const socialLinks = parseSocialLinks(content);
 
   return (
     <main className="bg-paper px-5 pb-24 pt-32 transition-colors dark:bg-charcoal md:px-8 md:pb-32 md:pt-40">
@@ -35,7 +38,18 @@ export default async function ContactPage() {
         </Reveal>
 
         <Reveal delay={0.1}>
-          <ContactForm />
+          <div>
+            <ContactForm />
+            <div className="mt-10 border-t border-black/10 pt-8 dark:border-white/10">
+              <p className="text-xs uppercase tracking-[0.28em] text-muted">Social Media</p>
+              <p className="mt-3 max-w-xl text-sm leading-7 text-muted">
+                Follow the studio across active channels for project updates, process notes, and announcements.
+              </p>
+              <div className="mt-5">
+                <SocialLinks compact links={socialLinks} />
+              </div>
+            </div>
+          </div>
         </Reveal>
       </section>
 

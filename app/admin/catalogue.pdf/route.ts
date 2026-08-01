@@ -1,6 +1,6 @@
 import PDFDocument from "pdfkit";
 import { createSeedAdminContent, type AdminContent, type AdminNews, type AdminPerson, type AdminProject, type AdminService } from "@/lib/admin-demo-data";
-import { adminNewsToNewsItem, adminServiceTags, getLiveContent } from "@/lib/live-content";
+import { adminNewsToNewsItem, adminServiceTags, getLiveContent, parseAboutMessages } from "@/lib/live-content";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -246,7 +246,10 @@ async function buildCataloguePdf() {
   doc.moveDown(0.5);
   bodyText(doc, `Vision: ${line(content.settings.aboutVision)}`);
   doc.moveDown(0.5);
-  bodyText(doc, `Message from Founder: ${line(content.settings.founderMessage)}`);
+  parseAboutMessages(content).forEach((message) => {
+    bodyText(doc, `${line(message.name)} / ${line(message.role)}: ${line(message.message)}`);
+    doc.moveDown(0.5);
+  });
   doc.moveDown(1.2);
   const statY = doc.y;
   [

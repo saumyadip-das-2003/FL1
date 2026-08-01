@@ -8,6 +8,7 @@ import { PageTransition } from "@/components/page-transition";
 import { HomeSocialDock } from "@/components/home-social-dock";
 import { SiteChromeVisibility } from "@/components/site-chrome-visibility";
 import { getLiveContent } from "@/lib/live-content";
+import { selectedSocialLinks } from "@/lib/social-platforms";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -52,11 +53,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const content = await getLiveContent();
-  const socialLinks = [
-    { label: "WhatsApp", href: content.settings.whatsapp },
-    { label: "Call", href: `tel:${content.settings.phone.replace(/\s+/g, "")}` },
-    { label: "Facebook", href: content.settings.facebook }
-  ];
+  const socialLinks = selectedSocialLinks(content, "quickContactSocialIds");
 
   return (
     <html lang="en" suppressHydrationWarning>
