@@ -99,6 +99,10 @@ export function ProjectListItem({ project }: { project: Project }) {
       return;
     }
 
+    if ((event.target as HTMLElement).closest("button, a, input, textarea, select, iframe")) {
+      return;
+    }
+
     if (!stripRef.current) {
       return;
     }
