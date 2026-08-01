@@ -91,7 +91,7 @@ export function ProjectListItem({ project }: { project: Project }) {
     }
 
     requestAnimationFrame(() => {
-      scrollToBaseIndex(0, "auto");
+      requestAnimationFrame(() => scrollToBaseIndex(0, "auto"));
     });
   }, [expanded, baseSlides.length]);
 
@@ -146,19 +146,12 @@ export function ProjectListItem({ project }: { project: Project }) {
 
     dragState.current.active = false;
     const strip = stripRef.current;
-    const slides = Array.from(strip.querySelectorAll<HTMLElement>("[data-slide]"));
-    const nearest = slides.reduce(
-      (closest, slide) => {
-        const distance = Math.abs(slide.offsetLeft - strip.scrollLeft);
-        return distance < closest.distance ? { slide, distance } : closest;
-      },
-      { slide: slides[0], distance: Number.POSITIVE_INFINITY }
-    );
+    const nearest = nearestSlide();
 
     setIsDragging(false);
     strip.style.scrollSnapType = "";
-    if (nearest.slide) {
-      strip.scrollTo({ left: nearest.slide.offsetLeft, behavior: "smooth" });
+    if (nearest?.slide) {
+      strip.scrollTo({ left: centeredOffset(nearest.slide), behavior: "smooth" });
       window.setTimeout(() => settleInfiniteLoop("auto"), 360);
     }
   }
@@ -190,13 +183,24 @@ export function ProjectListItem({ project }: { project: Project }) {
       return null;
     }
 
+    const viewportCenter = strip.scrollLeft + strip.clientWidth / 2;
+
     return slides.reduce(
       (closest, slide) => {
-        const distance = Math.abs(slide.offsetLeft - strip.scrollLeft);
+        const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
+        const distance = Math.abs(slideCenter - viewportCenter);
         return distance < closest.distance ? { slide, distance } : closest;
       },
       { slide: slides[0], distance: Number.POSITIVE_INFINITY }
     );
+  }
+
+  function centeredOffset(slide: HTMLElement) {
+    if (!stripRef.current) {
+      return slide.offsetLeft;
+    }
+
+    return slide.offsetLeft - (stripRef.current.clientWidth - slide.offsetWidth) / 2;
   }
 
   function scrollToBaseIndex(baseIndex: number, behavior: ScrollBehavior) {
@@ -206,7 +210,7 @@ export function ProjectListItem({ project }: { project: Project }) {
 
     const target = stripRef.current.querySelector<HTMLElement>(`[data-loop="1"][data-base-index="${baseIndex}"]`);
     if (target) {
-      stripRef.current.scrollTo({ left: target.offsetLeft, behavior });
+      stripRef.current.scrollTo({ left: centeredOffset(target), behavior });
     }
   }
 
@@ -407,7 +411,7 @@ export function ProjectListItem({ project }: { project: Project }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.985, y: -10 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="mx-auto w-full max-w-[1500px] overflow-hidden px-2 md:px-6"
+            className="relative left-1/2 w-[min(1500px,calc(100vw-48px))] -translate-x-1/2 overflow-hidden px-0"
           >
             <div className="relative min-w-0 overflow-hidden border border-black/10 bg-white text-ink dark:border-white/10 dark:bg-[#4a4a4a] dark:text-paper">
               <button

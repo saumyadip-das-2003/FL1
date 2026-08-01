@@ -81,7 +81,6 @@ export type AdminContent = {
     instagram: string;
     x: string;
     linkedin: string;
-    defaultAdminUserIds: string;
     projectSubsections: string;
   };
   projects: AdminProject[];
@@ -150,7 +149,6 @@ export function createSeedAdminContent(): AdminContent {
       instagram: "https://instagram.com",
       x: "https://x.com",
       linkedin: "https://linkedin.com",
-      defaultAdminUserIds: "",
       projectSubsections: serializeProjectTaxonomy(projectTaxonomy)
     },
     projects: projects.map((project) => ({

@@ -3,6 +3,7 @@
 import {
   ArrowDown,
   ArrowUp,
+  ChevronUp,
   Download,
   Eye,
   EyeOff,
@@ -43,14 +44,6 @@ import { youtubeEmbedUrl } from "@/lib/youtube";
 type Tab = "general" | "home" | "projects" | "services" | "news" | "people" | "about" | "contact" | "settings";
 type CollectionKey = "projects" | "services" | "news" | "people";
 type EditableItem = AdminProject | AdminService | AdminNews | AdminPerson;
-type AdminUser = {
-  uid: string;
-  email: string;
-  disabled: boolean;
-  createdAt?: string;
-  lastSignInAt?: string;
-};
-type UserAction = { type: "delete" | "default"; user: AdminUser } | null;
 
 const sidebarItems: { id: Tab; label: string; icon: typeof Settings }[] = [
   { id: "general", label: "General", icon: Settings },
@@ -146,21 +139,6 @@ function normalizeContent(content: AdminContent): AdminContent {
       ...person
     }))
   };
-}
-
-async function readAdminApiResponse<T>(response: Response): Promise<T & { error?: string }> {
-  const contentType = response.headers.get("content-type") ?? "";
-
-  if (contentType.includes("application/json")) {
-    return (await response.json()) as T & { error?: string };
-  }
-
-  const text = await response.text();
-  return {
-    error: text.includes("<!DOCTYPE")
-      ? "Admin user API returned an HTML error page. Check Firebase Admin service account environment variables and redeploy."
-      : text || "Admin user API returned an unexpected response."
-  } as T & { error?: string };
 }
 
 function itemTitle(item: EditableItem) {
@@ -275,24 +253,21 @@ export function AdminPanel() {
   const [busy, setBusy] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [customSubsection, setCustomSubsection] = useState("");
+  const [openSubsectionMenuId, setOpenSubsectionMenuId] = useState("");
   const [draggedItemId, setDraggedItemId] = useState("");
   const [draggedMediaId, setDraggedMediaId] = useState("");
   const [collectionQuery, setCollectionQuery] = useState("");
   const [featuredQuery, setFeaturedQuery] = useState<Record<string, string>>({});
   const [adminEmail, setAdminEmail] = useState("");
-  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
-  const [usersLoaded, setUsersLoaded] = useState(false);
-  const [userStatus, setUserStatus] = useState("");
-  const [newAdminEmail, setNewAdminEmail] = useState("");
-  const [newAdminPassword, setNewAdminPassword] = useState("");
-  const [showNewAdminPassword, setShowNewAdminPassword] = useState(false);
-  const [userEmailDrafts, setUserEmailDrafts] = useState<Record<string, string>>({});
-  const [userPasswordDrafts, setUserPasswordDrafts] = useState<Record<string, string>>({});
-  const [visibleUserPasswords, setVisibleUserPasswords] = useState<Record<string, boolean>>({});
-  const [userAction, setUserAction] = useState<UserAction>(null);
-  const [userActionPassword, setUserActionPassword] = useState("");
-  const [showUserActionPassword, setShowUserActionPassword] = useState(false);
-  const [userActionStatus, setUserActionStatus] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordStatus, setPasswordStatus] = useState("");
+  const [visiblePasswords, setVisiblePasswords] = useState<Record<"current" | "new" | "confirm", boolean>>({
+    current: false,
+    new: false,
+    confirm: false
+  });
 
   useEffect(() => {
     const storedToken = window.localStorage.getItem(adminTokenStorageKey);
@@ -351,12 +326,6 @@ export function AdminPanel() {
   useEffect(() => {
     setCollectionQuery("");
   }, [tab]);
-
-  useEffect(() => {
-    if (tab === "settings" && token && !usersLoaded) {
-      loadAdminUsers();
-    }
-  }, [tab, token, usersLoaded]);
 
   useEffect(() => {
     function handleSaveShortcut(event: KeyboardEvent) {
@@ -700,241 +669,74 @@ export function AdminPanel() {
     router.push("/admin/login");
   }
 
-  function defaultAdminIds() {
-    return content.settings.defaultAdminUserIds
-      .split(",")
-      .map((id) => id.trim())
-      .filter(Boolean);
-  }
-
-  function isDefaultAdmin(user: AdminUser) {
-    return user.email === adminEmail || defaultAdminIds().includes(user.uid);
-  }
-
-  function openUserAction(type: "delete" | "default", user: AdminUser) {
-    if (type === "delete" && isDefaultAdmin(user)) {
-      setUserStatus("Default admin users cannot be deleted.");
-      return;
-    }
-
-    if (type === "default" && isDefaultAdmin(user)) {
-      setUserStatus("This user is already protected as a default admin.");
-      return;
-    }
-
-    setUserAction({ type, user });
-    setUserActionPassword("");
-    setShowUserActionPassword(false);
-    setUserActionStatus("");
-  }
-
-  function closeUserAction() {
-    setUserAction(null);
-    setUserActionPassword("");
-    setShowUserActionPassword(false);
-    setUserActionStatus("");
-  }
-
-  async function verifyUserPassword(user: AdminUser, password: string) {
+  async function changeAdminPassword() {
     const firebaseApiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "";
 
-    if (!firebaseApiKey) {
-      throw new Error("Firebase login key is not configured.");
-    }
-
-    const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseApiKey}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: user.email,
-        password,
-        returnSecureToken: true
-      })
-    });
-    const payload = (await response.json()) as { idToken?: string; error?: { message?: string } };
-
-    if (!response.ok || !payload.idToken) {
-      throw new Error("Password verification failed for that user.");
-    }
-  }
-
-  async function loadAdminUsers() {
-    if (!token) {
-      setUserStatus("Login with Firebase before managing users.");
+    if (!firebaseApiKey || !token || !adminEmail) {
+      setPasswordStatus("Firebase login is not active in this session.");
       return;
     }
 
-    setUserStatus("Loading admin users...");
-
-    try {
-      const response = await fetch("/api/admin/users", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const payload = await readAdminApiResponse<{ users?: AdminUser[] }>(response);
-
-      if (!response.ok || !payload.users) {
-        throw new Error(payload.error ?? "Unable to load admin users.");
-      }
-
-      setAdminUsers(payload.users);
-      setUserEmailDrafts(Object.fromEntries(payload.users.map((user) => [user.uid, user.email])));
-      setUsersLoaded(true);
-      setUserStatus(`Loaded ${payload.users.length} admin user${payload.users.length === 1 ? "" : "s"}.`);
-    } catch (error) {
-      setUserStatus(error instanceof Error ? error.message : "Unable to load admin users.");
+    if (!currentPassword) {
+      setPasswordStatus("Current password is required.");
+      return;
     }
-  }
 
-  async function addAdminUser() {
-    if (!newAdminEmail.trim() || newAdminPassword.length < 6) {
-      setUserStatus("Email and a minimum 6 character password are required.");
+    if (newPassword.length < 6) {
+      setPasswordStatus("Password must be at least 6 characters.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordStatus("Passwords do not match.");
       return;
     }
 
     setBusy(true);
-    setUserStatus("Adding admin user...");
+    setPasswordStatus("Updating password...");
 
     try {
-      const response = await fetch("/api/admin/users", {
+      const signInResponse = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseApiKey}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ email: newAdminEmail, password: newAdminPassword })
-      });
-      const payload = await readAdminApiResponse<{ user?: AdminUser }>(response);
-
-      if (!response.ok || !payload.user) {
-        throw new Error(payload.error ?? "Unable to add admin user.");
-      }
-
-      setNewAdminEmail("");
-      setNewAdminPassword("");
-      setAdminUsers((current) => [payload.user as AdminUser, ...current]);
-      setUserEmailDrafts((current) => ({ ...current, [payload.user?.uid ?? ""]: payload.user?.email ?? "" }));
-      setUserStatus("Admin user added.");
-    } catch (error) {
-      setUserStatus(error instanceof Error ? error.message : "Unable to add admin user.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function updateAdminUser(user: AdminUser) {
-    const nextEmail = userEmailDrafts[user.uid]?.trim() ?? user.email;
-    const nextPassword = userPasswordDrafts[user.uid] ?? "";
-
-    if (!nextEmail && !nextPassword) {
-      setUserStatus("Add an email or password change first.");
-      return;
-    }
-
-    setBusy(true);
-    setUserStatus("Updating admin user...");
-
-    try {
-      const response = await fetch(`/api/admin/users/${user.uid}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: nextEmail,
-          password: nextPassword || undefined
+          email: adminEmail,
+          password: currentPassword,
+          returnSecureToken: true
         })
       });
-      const payload = await readAdminApiResponse<{ user?: AdminUser }>(response);
+      const signInPayload = (await signInResponse.json()) as { idToken?: string; error?: { message?: string } };
 
-      if (!response.ok || !payload.user) {
-        throw new Error(payload.error ?? "Unable to update admin user.");
+      if (!signInResponse.ok || !signInPayload.idToken) {
+        throw new Error("Current password is incorrect.");
       }
 
-      setAdminUsers((current) => current.map((item) => (item.uid === user.uid ? (payload.user as AdminUser) : item)));
-      setUserPasswordDrafts((current) => ({ ...current, [user.uid]: "" }));
-      setUserEmailDrafts((current) => ({ ...current, [user.uid]: payload.user?.email ?? "" }));
-      setUserStatus(payload.user.email === adminEmail ? "User updated. Log out and log back in if you changed your own email." : "Admin user updated.");
-    } catch (error) {
-      setUserStatus(error instanceof Error ? error.message : "Unable to update admin user.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function makeDefaultAdmin(user: AdminUser) {
-    setBusy(true);
-    setUserActionStatus("Saving default admin...");
-
-    try {
-      await verifyUserPassword(user, userActionPassword);
-      const nextIds = Array.from(new Set([...defaultAdminIds(), user.uid]));
-      const nextContent = {
-        ...content,
-        settings: {
-          ...content.settings,
-          defaultAdminUserIds: nextIds.join(", ")
-        }
-      };
-
-      setContent(nextContent);
-      await saveContent(nextContent);
-      setUserStatus(`${user.email} is now protected as a default admin.`);
-      closeUserAction();
-    } catch (error) {
-      setUserActionStatus(error instanceof Error ? error.message : "Unable to make default admin.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function deleteAdminUser(user: AdminUser) {
-    if (isDefaultAdmin(user)) {
-      setUserActionStatus("Default admin users cannot be deleted.");
-      return;
-    }
-
-    setBusy(true);
-    setUserActionStatus("Deleting admin user...");
-
-    try {
-      await verifyUserPassword(user, userActionPassword);
-      const response = await fetch(`/api/admin/users/${user.uid}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:update?key=${firebaseApiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          idToken: signInPayload.idToken,
+          password: newPassword,
+          returnSecureToken: true
+        })
       });
-      const payload = await readAdminApiResponse<{ ok?: boolean }>(response);
+      const payload = (await response.json()) as { idToken?: string; error?: { message?: string } };
 
-      if (!response.ok || !payload.ok) {
-        throw new Error(payload.error ?? "Unable to delete admin user.");
+      if (!response.ok || !payload.idToken) {
+        throw new Error(payload.error?.message ?? "Password update failed.");
       }
 
-      setAdminUsers((current) => current.filter((item) => item.uid !== user.uid));
-      setUserStatus("Admin user deleted.");
-      closeUserAction();
+      window.localStorage.setItem(adminTokenStorageKey, payload.idToken);
+      setToken(payload.idToken);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordStatus("Password updated successfully.");
     } catch (error) {
-      setUserActionStatus(error instanceof Error ? error.message : "Unable to delete admin user.");
+      setPasswordStatus(error instanceof Error ? error.message : "Password update failed.");
     } finally {
       setBusy(false);
     }
-  }
-
-  async function confirmUserAction() {
-    if (!userAction) {
-      return;
-    }
-
-    if (!userActionPassword) {
-      setUserActionStatus("Enter this user's password to continue.");
-      return;
-    }
-
-    if (userAction.type === "delete") {
-      await deleteAdminUser(userAction.user);
-      return;
-    }
-
-    await makeDefaultAdmin(userAction.user);
   }
 
   function getFeaturedIds(key: "featuredProjectIds" | "featuredServiceIds" | "featuredNewsIds") {
@@ -1093,120 +895,47 @@ export function AdminPanel() {
       return (
         <div className="grid gap-6">
           <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Manage Users</p>
-                <p className="mt-2 text-sm leading-6 text-muted">
-                  Add, delete, and update Firebase admin users. Changing an email is possible; if it is your own email, log out and log back in after saving.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={loadAdminUsers}
-                className="rounded-md border border-black/10 px-4 py-2 text-xs uppercase tracking-[0.14em] dark:border-white/10"
-              >
-                Refresh
-              </button>
-            </div>
-            <div className="mt-5 grid gap-5 rounded-lg border border-black/10 bg-neutral-50 p-4 dark:border-white/10 dark:bg-neutral-700/30 md:grid-cols-[1fr_1fr_auto] md:items-end">
-              <Field label="New admin email">
-                <TextInput
-                  type="email"
-                  value={newAdminEmail}
-                  onChange={(event) => setNewAdminEmail(event.target.value)}
-                  placeholder="admin@example.com"
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Admin Password</p>
+            <p className="mt-2 text-sm leading-6 text-muted">
+              Change the Firebase admin login password for {adminEmail || "the currently logged-in account"}.
+            </p>
+            <div className="mt-5 grid gap-5 md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
+              <Field label="Current password">
+                <PasswordInput
+                  visible={visiblePasswords.current}
+                  onToggle={() => setVisiblePasswords((current) => ({ ...current, current: !current.current }))}
+                  value={currentPassword}
+                  onChange={(event) => setCurrentPassword(event.target.value)}
+                  placeholder="Existing password"
                 />
               </Field>
-              <Field label="New admin password">
+              <Field label="New password">
                 <PasswordInput
-                  visible={showNewAdminPassword}
-                  onToggle={() => setShowNewAdminPassword((current) => !current)}
-                  value={newAdminPassword}
-                  onChange={(event) => setNewAdminPassword(event.target.value)}
+                  visible={visiblePasswords.new}
+                  onToggle={() => setVisiblePasswords((current) => ({ ...current, new: !current.new }))}
+                  value={newPassword}
+                  onChange={(event) => setNewPassword(event.target.value)}
                   placeholder="Minimum 6 characters"
                 />
               </Field>
+              <Field label="Confirm password">
+                <PasswordInput
+                  visible={visiblePasswords.confirm}
+                  onToggle={() => setVisiblePasswords((current) => ({ ...current, confirm: !current.confirm }))}
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  placeholder="Repeat password"
+                />
+              </Field>
               <button
                 type="button"
-                onClick={addAdminUser}
+                onClick={changeAdminPassword}
                 className="h-11 rounded-md bg-ink px-5 text-xs uppercase tracking-[0.14em] text-paper dark:bg-paper dark:text-ink"
               >
-                Add Admin
+                Update
               </button>
             </div>
-            <div className="mt-5 grid gap-3">
-              {adminUsers.map((user) => {
-                const defaultUser = isDefaultAdmin(user);
-
-                return (
-                <div key={user.uid} className="grid gap-3 rounded-lg border border-black/10 p-4 dark:border-white/10 xl:grid-cols-[1fr_1fr_auto] xl:items-end">
-                  <Field label="Email">
-                    <TextInput
-                      type="email"
-                      value={userEmailDrafts[user.uid] ?? user.email}
-                      onChange={(event) => setUserEmailDrafts((current) => ({ ...current, [user.uid]: event.target.value }))}
-                    />
-                  </Field>
-                  <Field label="New password">
-                    <PasswordInput
-                      visible={Boolean(visibleUserPasswords[user.uid])}
-                      onToggle={() => setVisibleUserPasswords((current) => ({ ...current, [user.uid]: !current[user.uid] }))}
-                      value={userPasswordDrafts[user.uid] ?? ""}
-                      onChange={(event) => setUserPasswordDrafts((current) => ({ ...current, [user.uid]: event.target.value }))}
-                      placeholder="Leave blank to keep current"
-                    />
-                  </Field>
-                  <div className="flex flex-wrap gap-2">
-                    {defaultUser ? (
-                      <span className="inline-flex h-11 items-center rounded-md border border-emerald-500/30 px-4 text-xs uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-300">
-                        Default
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => openUserAction("default", user)}
-                        className="h-11 rounded-md border border-black/10 px-4 text-xs uppercase tracking-[0.14em] dark:border-white/10"
-                      >
-                        Make Default
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => updateAdminUser(user)}
-                      className="h-11 rounded-md bg-ink px-4 text-xs uppercase tracking-[0.14em] text-paper dark:bg-paper dark:text-ink"
-                    >
-                      Save User
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => openUserAction("delete", user)}
-                      disabled={defaultUser}
-                      className="h-11 rounded-md border border-red-500/30 px-4 text-xs uppercase tracking-[0.14em] text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                  <p className="text-xs text-muted xl:col-span-3">
-                    UID: {user.uid} {user.lastSignInAt ? ` / Last login: ${user.lastSignInAt}` : ""}
-                    {user.email === adminEmail ? " / Current session" : ""} {defaultUser ? " / Protected from deletion" : ""}
-                  </p>
-                </div>
-                );
-              })}
-              {adminUsers.length === 0 && (
-                <p className="rounded-md bg-neutral-50 p-4 text-sm text-muted dark:bg-neutral-700/40">
-                  {usersLoaded ? "No admin users found." : "Open this tab with Firebase Admin service credentials configured to load users."}
-                </p>
-              )}
-            </div>
-            {userStatus && <p className="mt-3 text-sm text-muted">{userStatus}</p>}
-          </div>
-
-          <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Firebase Admin Setup</p>
-            <p className="mt-2 text-sm leading-6 text-muted">
-              User management requires a Firebase service account on the server. Add either <span className="font-mono">FIREBASE_SERVICE_ACCOUNT_KEY</span> as raw JSON/base64 JSON, or <span className="font-mono">FIREBASE_PROJECT_ID</span>, <span className="font-mono">FIREBASE_CLIENT_EMAIL</span>, and <span className="font-mono">FIREBASE_PRIVATE_KEY</span> in Netlify environment variables.
-            </p>
+            {passwordStatus && <p className="mt-3 text-sm text-muted">{passwordStatus}</p>}
           </div>
 
           <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
@@ -1437,13 +1166,68 @@ export function AdminPanel() {
           </Field>
           <Field label="Subsection">
             <div className="grid grid-cols-[1fr_auto] gap-2">
-              <SelectInput value={project.subsection ? (subsectionOptions.includes(project.subsection) ? project.subsection : "custom") : ""} onChange={(event) => updateItem("projects", project.id, "subsection", event.target.value)}>
-                <option value="">All / Not specified</option>
-                {subsectionOptions.map((item) => (
-                  <option key={item}>{item}</option>
-                ))}
-                <option value="custom">Custom...</option>
-              </SelectInput>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setOpenSubsectionMenuId((current) => (current === project.id ? "" : project.id))}
+                  className="flex h-11 w-full items-center justify-between rounded-md border border-black/10 bg-white px-3 text-left text-sm normal-case tracking-normal text-ink outline-none transition focus:border-ink dark:border-white/10 dark:bg-[#4a4a4a] dark:text-paper"
+                >
+                  <span>{project.subsection || "All / Not specified"}</span>
+                  <ChevronUp
+                    size={16}
+                    className={`transition ${openSubsectionMenuId === project.id ? "rotate-0" : "rotate-180"}`}
+                  />
+                </button>
+                {openSubsectionMenuId === project.id && (
+                  <div className="absolute left-0 right-0 top-full z-30 mt-2 max-h-72 overflow-y-auto rounded-md border border-black/10 bg-white py-1 shadow-soft dark:border-white/10 dark:bg-[#3f3f3f]">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateItem("projects", project.id, "subsection", "");
+                        setOpenSubsectionMenuId("");
+                      }}
+                      className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm normal-case tracking-normal transition hover:bg-neutral-100 dark:hover:bg-neutral-700/60"
+                    >
+                      <span>All / Not specified</span>
+                    </button>
+                    {subsectionOptions.map((item) => (
+                      <div
+                        key={item}
+                        className="group grid grid-cols-[1fr_auto] items-center gap-2 px-3 py-2 transition hover:bg-neutral-100 dark:hover:bg-neutral-700/60"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            updateItem("projects", project.id, "subsection", item);
+                            setOpenSubsectionMenuId("");
+                          }}
+                          className="text-left text-sm normal-case tracking-normal"
+                        >
+                          {item}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            removeProjectSubsection(section, item);
+                          }}
+                          className="flex h-7 w-7 items-center justify-center rounded-full text-muted transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10"
+                          aria-label={`Remove ${item} subsection`}
+                        >
+                          <X size={13} />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setOpenSubsectionMenuId("")}
+                      className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm normal-case tracking-normal transition hover:bg-neutral-100 dark:hover:bg-neutral-700/60"
+                    >
+                      <span>Custom...</span>
+                    </button>
+                  </div>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={() => {
@@ -1456,23 +1240,6 @@ export function AdminPanel() {
               </button>
             </div>
             <TextInput placeholder="Custom subsection" value={customSubsection} onChange={(event) => setCustomSubsection(event.target.value)} />
-            {subsectionOptions.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {subsectionOptions.map((item) => (
-                  <span key={item} className="inline-flex items-center gap-2 rounded-full border border-black/10 px-3 py-1 text-xs normal-case tracking-normal text-ink dark:border-white/10 dark:text-paper">
-                    {item}
-                    <button
-                      type="button"
-                      onClick={() => removeProjectSubsection(section, item)}
-                      className="text-muted transition hover:text-red-600"
-                      aria-label={`Remove ${item} subsection`}
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
           </Field>
         </div>
         <Field label="Description">
@@ -1680,56 +1447,6 @@ export function AdminPanel() {
             <div>
               <p className="font-serif text-2xl">{content.settings.companyName}</p>
               <p className="mt-2 text-xs uppercase tracking-[0.2em] text-muted">Saving changes</p>
-            </div>
-          </div>
-        </div>
-      )}
-      {userAction && (
-        <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/55 px-5 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-xl border border-black/10 bg-white p-6 shadow-soft dark:border-white/10 dark:bg-[#4a4a4a]">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-              {userAction.type === "delete" ? "Confirm Delete Admin" : "Confirm Default Admin"}
-            </p>
-            <h2 className="mt-3 font-serif text-3xl">
-              {userAction.type === "delete" ? "Delete admin user?" : "Protect this admin?"}
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-muted">
-              {userAction.type === "delete"
-                ? `This will permanently remove ${userAction.user.email} from Firebase Authentication.`
-                : `${userAction.user.email} will become a default admin and cannot be deleted from this panel.`}
-              {" "}
-              Enter the password for {userAction.user.email} to continue.
-            </p>
-            <div className="mt-5">
-              <Field label={`Password for ${userAction.user.email}`}>
-                <PasswordInput
-                  visible={showUserActionPassword}
-                  onToggle={() => setShowUserActionPassword((current) => !current)}
-                  value={userActionPassword}
-                  onChange={(event) => setUserActionPassword(event.target.value)}
-                  placeholder="Required for this action"
-                  autoFocus
-                />
-              </Field>
-            </div>
-            {userActionStatus && <p className="mt-3 text-sm text-muted">{userActionStatus}</p>}
-            <div className="mt-6 flex flex-wrap justify-end gap-2">
-              <button
-                type="button"
-                onClick={closeUserAction}
-                className="h-11 rounded-md border border-black/10 px-4 text-xs uppercase tracking-[0.14em] dark:border-white/10"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={confirmUserAction}
-                className={`h-11 rounded-md px-4 text-xs uppercase tracking-[0.14em] text-white ${
-                  userAction.type === "delete" ? "bg-red-600" : "bg-ink dark:bg-paper dark:text-ink"
-                }`}
-              >
-                {userAction.type === "delete" ? "Delete User" : "Make Default"}
-              </button>
             </div>
           </div>
         </div>
