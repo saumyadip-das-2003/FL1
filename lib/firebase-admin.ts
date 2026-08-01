@@ -3,24 +3,58 @@ import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { protectedAdminEmail } from "@/lib/admin-auth";
 
+function normalizePrivateKey(value?: string) {
+  if (!value) {
+    return value;
+  }
+
+  let key = value.trim();
+
+  if (
+    (key.startsWith('"') && key.endsWith('"')) ||
+    (key.startsWith("'") && key.endsWith("'"))
+  ) {
+    key = key.slice(1, -1);
+  }
+
+  key = key.replace(/\\n/g, "\n");
+
+  if (!key.includes("\n") && key.includes("-----BEGIN PRIVATE KEY-----")) {
+    key = key
+      .replace("-----BEGIN PRIVATE KEY-----", "-----BEGIN PRIVATE KEY-----\n")
+      .replace("-----END PRIVATE KEY-----", "\n-----END PRIVATE KEY-----\n");
+  }
+
+  return key;
+}
+
 function getServiceAccount() {
   const rawJson = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
 
   if (rawJson) {
-    const json = rawJson.trim().startsWith("{") ? rawJson : Buffer.from(rawJson, "base64").toString("utf8");
+    let json = rawJson.trim();
+
+    if (
+      (json.startsWith("'") && json.endsWith("'")) ||
+      (json.startsWith('"') && json.endsWith('"') && !json.startsWith("{"))
+    ) {
+      json = json.slice(1, -1);
+    }
+
+    json = json.startsWith("{") ? json : Buffer.from(json, "base64").toString("utf8");
     const parsed = JSON.parse(json) as { project_id?: string; client_email?: string; private_key?: string };
 
     return {
       projectId: parsed.project_id,
       clientEmail: parsed.client_email,
-      privateKey: parsed.private_key?.replace(/\\n/g, "\n")
+      privateKey: normalizePrivateKey(parsed.private_key)
     };
   }
 
   return {
     projectId: process.env.FIREBASE_PROJECT_ID,
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n")
+    privateKey: normalizePrivateKey(process.env.FIREBASE_PRIVATE_KEY)
   };
 }
 
