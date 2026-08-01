@@ -79,7 +79,7 @@ export function ProjectsBrowser({
 
   return (
     <section className="bg-paper px-5 pb-24 pt-32 transition-colors dark:bg-charcoal md:px-8 md:pb-32 md:pt-40">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto w-full max-w-[1560px]">
         <div className="mb-12 max-w-4xl">
           <p className="text-xs uppercase tracking-[0.28em] text-muted">Portfolio</p>
           <h1 className="mt-5 font-serif text-4xl leading-tight text-balance md:text-6xl">

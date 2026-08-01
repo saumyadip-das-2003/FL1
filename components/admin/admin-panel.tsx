@@ -39,7 +39,9 @@ import {
   type AdminProject,
   type AdminService,
   type AdminSocialLink,
-  type AdminBrandLink
+  type AdminBrandLink,
+  type AdminTextItem,
+  type AdminLinkItem
 } from "@/lib/admin-demo-data";
 import { normalizeProjectTaxonomy, serializeProjectTaxonomy, projectTaxonomy, type ProjectSection } from "@/lib/data";
 import { socialPlatforms } from "@/lib/social-platforms";
@@ -750,6 +752,63 @@ export function AdminPanel() {
     }
   }
 
+  function serviceTextItems(key: "serviceWorkflow" | "serviceWhyChoose") {
+    try {
+      const parsed = JSON.parse(content.settings[key] || "[]") as AdminTextItem[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveServiceTextItems(key: "serviceWorkflow" | "serviceWhyChoose", items: AdminTextItem[]) {
+    updateSettings(key, JSON.stringify(items, null, 2));
+  }
+
+  function addServiceTextItem(key: "serviceWorkflow" | "serviceWhyChoose") {
+    saveServiceTextItems(key, [
+      ...serviceTextItems(key),
+      {
+        id: makeId(key),
+        title: "New item",
+        body: "Add description here."
+      }
+    ]);
+  }
+
+  function updateServiceTextItem(key: "serviceWorkflow" | "serviceWhyChoose", id: string, field: keyof AdminTextItem, value: string) {
+    saveServiceTextItems(key, serviceTextItems(key).map((item) => (item.id === id ? { ...item, [field]: value } : item)));
+  }
+
+  function deleteServiceTextItem(key: "serviceWorkflow" | "serviceWhyChoose", id: string) {
+    saveServiceTextItems(key, serviceTextItems(key).filter((item) => item.id !== id));
+  }
+
+  function serviceLinkItems() {
+    try {
+      const parsed = JSON.parse(content.settings.serviceFreelanceLinks || "[]") as AdminLinkItem[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveServiceLinkItems(items: AdminLinkItem[]) {
+    updateSettings("serviceFreelanceLinks", JSON.stringify(items, null, 2));
+  }
+
+  function addServiceLinkItem() {
+    saveServiceLinkItems([...serviceLinkItems(), { id: makeId("platform"), label: "New Platform", href: "https://example.com" }]);
+  }
+
+  function updateServiceLinkItem(id: string, field: keyof AdminLinkItem, value: string) {
+    saveServiceLinkItems(serviceLinkItems().map((item) => (item.id === id ? { ...item, [field]: value } : item)));
+  }
+
+  function deleteServiceLinkItem(id: string) {
+    saveServiceLinkItems(serviceLinkItems().filter((item) => item.id !== id));
+  }
+
   function updateProjectMedia(projectId: string, mediaId: string, field: keyof AdminMedia, value: string) {
     setContent((current) => ({
       ...current,
@@ -1242,7 +1301,20 @@ export function AdminPanel() {
       <div className="grid gap-5 md:grid-cols-2">
         {keys.map((key) => (
           <Field key={key} label={key.replace(/([A-Z])/g, " $1")}>
-            {["homeTagline", "aboutStudioProfile", "aboutMission", "aboutVision", "founderMessage", "offices", "officeMaps"].includes(key) ? (
+            {[
+              "homeTagline",
+              "aboutStudioProfile",
+              "aboutMission",
+              "aboutVision",
+              "founderMessage",
+              "offices",
+              "officeMaps",
+              "servicesIntroBody",
+              "serviceFreelanceBody",
+              "serviceLocalSupportBody",
+              "serviceSocialPresenceBody",
+              "serviceTeamCultureBody"
+            ].includes(key) ? (
               <TextArea value={content.settings[key]} onChange={(event) => updateSettings(key, event.target.value)} />
             ) : (
               <TextInput value={content.settings[key]} onChange={(event) => updateSettings(key, event.target.value)} />
@@ -1475,6 +1547,120 @@ export function AdminPanel() {
     );
   }
 
+  function renderServiceTextItemsEditor({
+    title,
+    settingKey
+  }: {
+    title: string;
+    settingKey: "serviceWorkflow" | "serviceWhyChoose";
+  }) {
+    const items = serviceTextItems(settingKey);
+
+    return (
+      <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">{title}</p>
+          <button
+            type="button"
+            onClick={() => addServiceTextItem(settingKey)}
+            className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-3 text-xs uppercase tracking-[0.14em] text-paper dark:bg-paper dark:text-ink"
+          >
+            <Plus size={15} /> Add
+          </button>
+        </div>
+        <div className="grid gap-3">
+          {items.map((item, index) => (
+            <div key={item.id} className="grid gap-3 rounded-lg border border-black/10 p-4 dark:border-white/10 md:grid-cols-[1fr_1fr_auto] md:items-start">
+              <Field label={`${index + 1}. Title`}>
+                <TextInput value={item.title} onChange={(event) => updateServiceTextItem(settingKey, item.id, "title", event.target.value)} />
+              </Field>
+              <Field label="Description">
+                <TextArea value={item.body} onChange={(event) => updateServiceTextItem(settingKey, item.id, "body", event.target.value)} />
+              </Field>
+              <button
+                type="button"
+                onClick={() => deleteServiceTextItem(settingKey, item.id)}
+                className="h-11 rounded-md border border-red-500/30 px-4 text-xs uppercase tracking-[0.14em] text-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  function renderServicePageSettingsEditor() {
+    const platformLinks = serviceLinkItems();
+
+    return (
+      <div className="grid gap-6">
+        <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
+          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-muted">Services Page Header</p>
+          <div className="grid gap-5 md:grid-cols-2">
+            {renderSettingsFields(["servicesIntroTitle", "servicesIntroBody"])}
+          </div>
+        </div>
+
+        {renderServiceTextItemsEditor({ title: "Workflow Steps", settingKey: "serviceWorkflow" })}
+        {renderServiceTextItemsEditor({ title: "Why Choose Us", settingKey: "serviceWhyChoose" })}
+
+        <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
+          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-muted">Global Freelance Services</p>
+          <div className="grid gap-5 md:grid-cols-2">
+            {renderSettingsFields(["serviceFreelanceTitle", "serviceFreelanceBody"])}
+          </div>
+          <div className="mt-5 grid gap-3">
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={addServiceLinkItem}
+                className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-3 text-xs uppercase tracking-[0.14em] text-paper dark:bg-paper dark:text-ink"
+              >
+                <Plus size={15} /> Add Platform
+              </button>
+            </div>
+            {platformLinks.map((item) => (
+              <div key={item.id} className="grid gap-3 rounded-lg border border-black/10 p-4 dark:border-white/10 md:grid-cols-[1fr_1fr_auto] md:items-end">
+                <Field label="Label">
+                  <TextInput value={item.label} onChange={(event) => updateServiceLinkItem(item.id, "label", event.target.value)} />
+                </Field>
+                <Field label="Link">
+                  <TextInput value={item.href} onChange={(event) => updateServiceLinkItem(item.id, "href", event.target.value)} />
+                </Field>
+                <button
+                  type="button"
+                  onClick={() => deleteServiceLinkItem(item.id)}
+                  className="h-11 rounded-md border border-red-500/30 px-4 text-xs uppercase tracking-[0.14em] text-red-600"
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
+          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-muted">Support, Culture, and CTA</p>
+          {renderSettingsFields([
+            "serviceLocalSupportTitle",
+            "serviceLocalSupportBody",
+            "serviceSocialPresenceTitle",
+            "serviceSocialPresenceBody",
+            "serviceTeamCultureTitle",
+            "serviceTeamCultureBody",
+            "serviceCtaTitle",
+            "serviceCtaPrimaryLabel",
+            "serviceCtaPrimaryHref",
+            "serviceCtaSecondaryLabel",
+            "serviceCtaSecondaryHref"
+          ])}
+        </div>
+      </div>
+    );
+  }
+
   function renderPanel() {
     if (tab === "general") {
       return (
@@ -1493,9 +1679,6 @@ export function AdminPanel() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Admin Password</p>
             <p className="mt-2 text-sm leading-6 text-muted">
               Change the Firebase admin login password for {adminEmail || "the currently logged-in account"}.
-            </p>
-            <p className="mt-2 text-sm leading-6 text-muted">
-              Protected owner account: <span className="font-medium text-ink dark:text-paper">{protectedAdminEmail}</span>. This account must not be deleted.
             </p>
             <div className="mt-5 grid gap-5 md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
               <Field label="Current password">
@@ -1722,7 +1905,15 @@ export function AdminPanel() {
     if (tab === "about") {
       return (
         <div className="grid gap-6">
-          {renderSettingsFields(["aboutStudioProfile", "aboutMission", "aboutVision", "aboutHeroImage"])}
+          {renderSettingsFields([
+            "aboutStudioTitle",
+            "aboutStudioProfile",
+            "aboutMissionTitle",
+            "aboutMission",
+            "aboutVisionTitle",
+            "aboutVision",
+            "aboutHeroImage"
+          ])}
           {renderAboutMessagesEditor()}
         </div>
       );
@@ -1747,6 +1938,15 @@ export function AdminPanel() {
               </Field>
             </div>
           </div>
+        </div>
+      );
+    }
+
+    if (tab === "services") {
+      return (
+        <div className="grid gap-8">
+          {renderServicePageSettingsEditor()}
+          {renderCollection("services")}
         </div>
       );
     }

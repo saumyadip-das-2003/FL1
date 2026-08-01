@@ -321,7 +321,7 @@ export function ProjectListItem({ project }: { project: Project }) {
   return (
     <motion.article
       layout
-      className="py-8 md:py-11"
+        className="w-full py-8 md:py-11"
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
@@ -340,7 +340,7 @@ export function ProjectListItem({ project }: { project: Project }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.985, y: -8 }}
             transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-            className="mx-auto grid max-w-5xl gap-7 md:grid-cols-[210px_minmax(0,720px)] md:items-start"
+            className="mx-auto grid w-full max-w-[1180px] gap-7 md:grid-cols-[220px_minmax(0,860px)] md:items-start"
           >
             <div className="text-center md:pt-1">
               <button type="button" onClick={() => setExpanded(true)} aria-label={`Expand ${project.title}`}>
@@ -370,7 +370,7 @@ export function ProjectListItem({ project }: { project: Project }) {
                 src={project.image}
                 alt={project.title}
                 fill
-                sizes="(min-width: 768px) 720px, 100vw"
+                sizes="(min-width: 768px) 860px, 100vw"
                 className="object-cover transition duration-500 group-hover:scale-[1.025]"
               />
             </button>
@@ -383,10 +383,9 @@ export function ProjectListItem({ project }: { project: Project }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.985, y: -10 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-screen overflow-hidden px-0"
-            style={{ marginLeft: "calc(50% - 50vw)" }}
+            className="relative mx-auto w-full max-w-[1560px] overflow-hidden px-0"
           >
-            <div className="relative min-w-0 overflow-hidden border-y border-black/10 bg-white text-ink dark:border-white/10 dark:bg-[#4a4a4a] dark:text-paper">
+            <div className="relative min-w-0 overflow-hidden border border-black/10 bg-white text-ink dark:border-white/10 dark:bg-[#4a4a4a] dark:text-paper">
               <button
                 type="button"
                 onClick={() => setExpanded(false)}
@@ -420,7 +419,7 @@ export function ProjectListItem({ project }: { project: Project }) {
                 onPointerCancel={stopDragging}
                 onPointerLeave={stopDragging}
                 style={{ touchAction: "pan-x", WebkitOverflowScrolling: "touch" }}
-                className={`no-scrollbar flex h-[500px] cursor-grab select-none gap-4 overflow-x-auto overflow-y-hidden px-[max(20px,calc((100vw-1680px)/2+40px))] py-6 active:cursor-grabbing md:h-[640px] md:gap-6 md:py-8 ${
+                className={`no-scrollbar flex h-[460px] cursor-grab select-none gap-4 overflow-x-auto overflow-y-hidden px-4 py-5 active:cursor-grabbing md:h-[560px] md:gap-6 md:px-6 md:py-6 lg:px-8 ${
                   isDragging ? "snap-none scroll-auto" : "snap-x snap-mandatory scroll-smooth"
                 }`}
               >

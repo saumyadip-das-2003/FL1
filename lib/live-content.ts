@@ -1,4 +1,14 @@
-import { createSeedAdminContent, type AdminAboutMessage, type AdminContent, type AdminNews, type AdminPerson, type AdminProject, type AdminService } from "@/lib/admin-demo-data";
+import {
+  createSeedAdminContent,
+  type AdminAboutMessage,
+  type AdminContent,
+  type AdminLinkItem,
+  type AdminNews,
+  type AdminPerson,
+  type AdminProject,
+  type AdminService,
+  type AdminTextItem
+} from "@/lib/admin-demo-data";
 import { getSanityContent } from "@/lib/sanity-http";
 import type { Project, ProjectCategory, ProjectSection } from "@/lib/data";
 import type { NewsItem } from "@/lib/news";
@@ -114,4 +124,22 @@ export function parseAboutMessages(content: AdminContent): AdminAboutMessage[] {
       message: content.settings.founderMessage
     }
   ];
+}
+
+export function parseTextItems(value?: string): AdminTextItem[] {
+  try {
+    const parsed = JSON.parse(value || "[]") as AdminTextItem[];
+    return Array.isArray(parsed) ? parsed.filter((item) => item.title || item.body) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function parseLinkItems(value?: string): AdminLinkItem[] {
+  try {
+    const parsed = JSON.parse(value || "[]") as AdminLinkItem[];
+    return Array.isArray(parsed) ? parsed.filter((item) => item.label && item.href) : [];
+  } catch {
+    return [];
+  }
 }

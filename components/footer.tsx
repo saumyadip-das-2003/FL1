@@ -13,7 +13,7 @@ export async function Footer() {
   return (
     <footer data-site-chrome className="border-t border-black/20 bg-neutral-200 px-5 py-16 shadow-[0_-14px_40px_rgba(0,0,0,0.04)] transition-colors dark:border-white/15 dark:bg-[#444444] md:px-8 md:py-20">
       {brandLinks.length > 0 && (
-        <div className="mx-auto mb-12 max-w-7xl border-b border-black/10 pb-8 dark:border-white/10">
+        <div className="mb-12 w-full border-b border-black/10 pb-8 dark:border-white/10">
           <p className="mb-5 text-xs uppercase tracking-[0.24em] text-muted">Brands & Collaborations</p>
           <div className="flex flex-wrap items-center gap-4">
             {brandLinks.map((brand) => (
@@ -38,7 +38,7 @@ export async function Footer() {
         </div>
       )}
 
-      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.2fr_1fr_1fr]">
+      <div className="grid w-full gap-12 lg:grid-cols-[1.2fr_1fr_1fr]">
         <div>
           <p className="font-serif text-4xl text-balance md:text-5xl">{content.settings.companyName}</p>
           <p className="mt-5 max-w-md text-sm leading-7 text-muted">

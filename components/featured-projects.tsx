@@ -17,7 +17,7 @@ export async function FeaturedProjects() {
 
   return (
     <section className="bg-paper px-5 py-24 transition-colors dark:bg-charcoal md:px-8 md:py-32">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto w-full max-w-[1560px]">
         <Reveal>
           <div className="mb-14 flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>

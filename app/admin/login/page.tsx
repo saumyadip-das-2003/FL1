@@ -9,7 +9,7 @@ export default function AdminLoginPage() {
         <p className="text-xs uppercase tracking-[0.28em] text-muted">Admin Login</p>
         <h1 className="mt-4 font-serif text-4xl leading-tight">Modern Age Studio</h1>
         <p className="mt-5 text-sm leading-7 text-muted">
-          Login with the Firebase admin account. Without Firebase keys this stays open for local demo mode.
+          Login with your authorized Firebase admin account.
         </p>
         <AdminLoginForm />
         <Link

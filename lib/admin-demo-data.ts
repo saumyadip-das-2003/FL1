@@ -71,6 +71,18 @@ export type AdminBrandLink = {
   href: string;
 };
 
+export type AdminTextItem = {
+  id: string;
+  title: string;
+  body: string;
+};
+
+export type AdminLinkItem = {
+  id: string;
+  label: string;
+  href: string;
+};
+
 export type AdminContent = {
   settings: {
     companyName: string;
@@ -83,11 +95,32 @@ export type AdminContent = {
     featuredProjectIds: string;
     featuredServiceIds: string;
     featuredNewsIds: string;
+    servicesIntroTitle: string;
+    servicesIntroBody: string;
+    serviceWorkflow: string;
+    serviceWhyChoose: string;
+    serviceFreelanceTitle: string;
+    serviceFreelanceBody: string;
+    serviceFreelanceLinks: string;
+    serviceLocalSupportTitle: string;
+    serviceLocalSupportBody: string;
+    serviceSocialPresenceTitle: string;
+    serviceSocialPresenceBody: string;
+    serviceTeamCultureTitle: string;
+    serviceTeamCultureBody: string;
+    serviceCtaTitle: string;
+    serviceCtaPrimaryLabel: string;
+    serviceCtaPrimaryHref: string;
+    serviceCtaSecondaryLabel: string;
+    serviceCtaSecondaryHref: string;
     statYears: string;
     statProjects: string;
     statCountries: string;
+    aboutStudioTitle: string;
     aboutStudioProfile: string;
+    aboutMissionTitle: string;
     aboutMission: string;
+    aboutVisionTitle: string;
     aboutVision: string;
     aboutHeroImage: string;
     founderMessage: string;
@@ -154,12 +187,56 @@ export function createSeedAdminContent(): AdminContent {
       featuredProjectIds: projects.slice(0, 3).map((project) => project.slug).join(", "),
       featuredServiceIds: demoServices.map((service) => service.id).join(", "),
       featuredNewsIds: newsItems.slice(0, 2).map((item) => item.slug).join(", "),
+      servicesIntroTitle: "Our expertise",
+      servicesIntroBody:
+        "From concept drafting to cinematic walkthroughs, we deliver architecture-focused design and visualization services for local and international projects.",
+      serviceWorkflow: JSON.stringify([
+        { id: "workflow-1", title: "Consultation", body: "Understanding goals, scope, and project context." },
+        { id: "workflow-2", title: "Requirement Analysis", body: "Reviewing briefs, references, and deliverables." },
+        { id: "workflow-3", title: "Concept Development", body: "Exploring design direction and visual language." },
+        { id: "workflow-4", title: "Design Production", body: "Creating drawings, models, renders, and assets." },
+        { id: "workflow-5", title: "Review & Revision", body: "Collaborative feedback and refinement cycles." },
+        { id: "workflow-6", title: "Final Delivery", body: "Exporting polished files ready for presentation." }
+      ]),
+      serviceWhyChoose: JSON.stringify([
+        { id: "why-1", title: "Client Satisfaction Focus", body: "Every deliverable is shaped around clear communication and client goals." },
+        { id: "why-2", title: "Detail-Oriented Workflow", body: "Precision in drawings, materials, lighting, and presentation quality." },
+        { id: "why-3", title: "Fast Communication", body: "Responsive updates and collaborative review throughout each project." },
+        { id: "why-4", title: "Global Freelance Experience", body: "Professional delivery for international clients across major platforms." },
+        { id: "why-5", title: "Local Project Support", body: "Bangladesh-based coordination for site analysis and execution support." },
+        { id: "why-6", title: "Dedicated Team", body: "Specialists across drafting, modeling, rendering, and animation." },
+        { id: "why-7", title: "Professional Quality Standards", body: "Studio-grade outputs suitable for client, competition, and marketing use." }
+      ]),
+      serviceFreelanceTitle: "Global freelance services",
+      serviceFreelanceBody:
+        "We deliver architecture and visualization projects professionally to international clients through trusted freelance platforms.",
+      serviceFreelanceLinks: JSON.stringify([
+        { id: "fiverr", label: "Fiverr", href: "https://www.fiverr.com/" },
+        { id: "upwork", label: "Upwork", href: "https://www.upwork.com/" },
+        { id: "freelancer", label: "Freelancer", href: "https://www.freelancer.com/" }
+      ]),
+      serviceLocalSupportTitle: "Local project support",
+      serviceLocalSupportBody:
+        "Bangladesh-based support network with sector-specific specialists for site analysis, project coordination, and local execution support.",
+      serviceSocialPresenceTitle: "Social presence",
+      serviceSocialPresenceBody: "The studio actively shares work, updates, and project showcases across social platforms.",
+      serviceTeamCultureTitle: "Team culture",
+      serviceTeamCultureBody:
+        "Friendly, humble, and collaborative team culture focused on delivering the best experience for every client.",
+      serviceCtaTitle: "Let's Build Something Exceptional Together",
+      serviceCtaPrimaryLabel: "Start a Project",
+      serviceCtaPrimaryHref: "https://www.modernagestudio.com/contact",
+      serviceCtaSecondaryLabel: "Contact Us",
+      serviceCtaSecondaryHref: "https://www.modernagestudio.com/contact",
       statYears: "14",
       statProjects: "86",
       statCountries: "11",
+      aboutStudioTitle: "Quiet buildings with a strong public life.",
       aboutStudioProfile:
         "Atelier Northline is a multidisciplinary office working across civic architecture, private residences, hospitality interiors, exterior envelopes, and climate-responsive landscapes.",
+      aboutMissionTitle: "Architecture that is clear, precise, and generous.",
       aboutMission: "We pursue architecture that is formally clear, materially precise, and generous to daily life.",
+      aboutVisionTitle: "Calm, durable places for adaptive cities.",
       aboutVision: "To shape calm, durable places that help cities adapt with intelligence and grace.",
       aboutHeroImage: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=2200&q=80",
       founderMessage:

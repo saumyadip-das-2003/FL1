@@ -239,12 +239,16 @@ async function buildCataloguePdf() {
   doc.text(line(content.settings.address), margin + 335, 725, { width: 175 });
 
   doc.addPage();
-  section(doc, "Studio Profile", "Company Overview");
+  section(doc, "Studio Profile", line(content.settings.aboutStudioTitle, "Company Overview"));
   bodyText(doc, line(content.settings.aboutStudioProfile));
   doc.moveDown(0.8);
-  bodyText(doc, `Mission: ${line(content.settings.aboutMission)}`);
+  bodyText(doc, `Mission: ${line(content.settings.aboutMissionTitle, content.settings.aboutMission)}`);
+  doc.moveDown(0.3);
+  bodyText(doc, line(content.settings.aboutMission));
   doc.moveDown(0.5);
-  bodyText(doc, `Vision: ${line(content.settings.aboutVision)}`);
+  bodyText(doc, `Vision: ${line(content.settings.aboutVisionTitle, content.settings.aboutVision)}`);
+  doc.moveDown(0.3);
+  bodyText(doc, line(content.settings.aboutVision));
   doc.moveDown(0.5);
   parseAboutMessages(content).forEach((message) => {
     bodyText(doc, `${line(message.name)} / ${line(message.role)}: ${line(message.message)}`);

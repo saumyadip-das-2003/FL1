@@ -10,12 +10,12 @@ export default async function AboutPage() {
   const sections = [
     {
       label: "Mission",
-      title: content.settings.aboutMission,
+      title: content.settings.aboutMissionTitle || content.settings.aboutMission,
       body: content.settings.aboutMission
     },
     {
       label: "Vision",
-      title: content.settings.aboutVision,
+      title: content.settings.aboutVisionTitle || content.settings.aboutVision,
       body: content.settings.aboutVision
     }
   ];
@@ -27,7 +27,7 @@ export default async function AboutPage() {
           <Reveal>
             <p className="text-xs uppercase tracking-[0.28em] text-muted">Studio Profile</p>
             <h1 className="mt-5 font-serif text-4xl leading-tight text-balance md:text-6xl">
-              Quiet buildings with a strong public life.
+              {content.settings.aboutStudioTitle || "Quiet buildings with a strong public life."}
             </h1>
           </Reveal>
           <Reveal delay={0.1}>

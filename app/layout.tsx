@@ -59,15 +59,19 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased transition-colors duration-500`}>
         <Providers>
-          <SiteChromeVisibility />
-          <Navbar
-            companyName={content.settings.companyName}
-            tagline={content.settings.tagline}
-            logoUrl={content.settings.logoUrl}
-          />
-          <PageTransition>{children}</PageTransition>
-          <HomeSocialDock links={socialLinks} />
-          <Footer />
+          <div className="flex min-h-screen flex-col">
+            <SiteChromeVisibility />
+            <Navbar
+              companyName={content.settings.companyName}
+              tagline={content.settings.tagline}
+              logoUrl={content.settings.logoUrl}
+            />
+            <div className="flex-1">
+              <PageTransition>{children}</PageTransition>
+            </div>
+            <HomeSocialDock links={socialLinks} />
+            <Footer />
+          </div>
         </Providers>
       </body>
     </html>

@@ -50,7 +50,7 @@ export function Navbar({
           : "border-black/10 bg-white dark:border-white/10 dark:bg-charcoal"
       )}
     >
-      <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 md:px-8">
+      <nav className="flex h-20 w-full items-center justify-between px-5 md:px-8 2xl:px-12">
         <Link href="/" aria-label="Atelier Northline home">
           <BrandLogo companyName={companyName} tagline={tagline} logoUrl={logoUrl} />
         </Link>
@@ -100,7 +100,7 @@ export function Navbar({
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             className="border-t border-black/10 bg-paper px-5 py-8 dark:border-white/10 dark:bg-charcoal lg:hidden"
           >
-            <div className="mx-auto grid max-w-7xl gap-5">
+            <div className="grid w-full gap-5">
               {navItems.map((item) => (
                 <Link
                   key={item.href}

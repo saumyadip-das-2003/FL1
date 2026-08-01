@@ -48,11 +48,11 @@ export default async function CataloguePage() {
 
       <section className="catalogue-page px-10 py-12">
         <p className="text-xs uppercase tracking-[0.3em] text-neutral-500">Studio Profile</p>
-        <h2 className="mt-4 font-serif text-5xl leading-tight">Company Overview</h2>
+        <h2 className="mt-4 font-serif text-5xl leading-tight">{content.settings.aboutStudioTitle || "Company Overview"}</h2>
         <div className="mt-10 grid gap-8 text-lg leading-8 text-neutral-700">
           <p>{content.settings.aboutStudioProfile}</p>
-          <p><strong>Mission:</strong> {content.settings.aboutMission}</p>
-          <p><strong>Vision:</strong> {content.settings.aboutVision}</p>
+          <p><strong>Mission:</strong> {content.settings.aboutMissionTitle || content.settings.aboutMission}<br />{content.settings.aboutMission}</p>
+          <p><strong>Vision:</strong> {content.settings.aboutVisionTitle || content.settings.aboutVision}<br />{content.settings.aboutVision}</p>
           <p><strong>Message from Founder:</strong> {content.settings.founderMessage}</p>
         </div>
         <div className="mt-12 grid grid-cols-3 gap-5 border-y border-black py-8 text-center">
