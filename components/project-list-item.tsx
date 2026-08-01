@@ -163,12 +163,20 @@ export function ProjectListItem({ project }: { project: Project }) {
     }
 
     const current = Number(nearest.slide.dataset.baseIndex ?? 0);
+    const currentLoop = Number(nearest.slide.dataset.loop ?? 1);
     const next =
       direction === "next"
         ? (current + 1) % baseSlides.length
         : (current - 1 + baseSlides.length) % baseSlides.length;
+    const targetLoop =
+      direction === "next" && current === baseSlides.length - 1
+        ? currentLoop + 1
+        : direction === "previous" && current === 0
+          ? currentLoop - 1
+          : currentLoop;
 
-    scrollToBaseIndex(next, "smooth");
+    scrollToLoopBaseIndex(Math.max(0, Math.min(2, targetLoop)), next, "smooth");
+    window.setTimeout(() => settleInfiniteLoop("auto"), 520);
   }
 
   function nearestSlide() {
@@ -204,11 +212,15 @@ export function ProjectListItem({ project }: { project: Project }) {
   }
 
   function scrollToBaseIndex(baseIndex: number, behavior: ScrollBehavior) {
+    scrollToLoopBaseIndex(1, baseIndex, behavior);
+  }
+
+  function scrollToLoopBaseIndex(loop: number, baseIndex: number, behavior: ScrollBehavior) {
     if (!stripRef.current) {
       return;
     }
 
-    const target = stripRef.current.querySelector<HTMLElement>(`[data-loop="1"][data-base-index="${baseIndex}"]`);
+    const target = stripRef.current.querySelector<HTMLElement>(`[data-loop="${loop}"][data-base-index="${baseIndex}"]`);
     if (target) {
       stripRef.current.scrollTo({ left: centeredOffset(target), behavior });
     }
@@ -449,7 +461,7 @@ export function ProjectListItem({ project }: { project: Project }) {
                 onPointerLeave={stopDragging}
                 onScroll={handleStripScroll}
                 style={{ touchAction: "pan-x", WebkitOverflowScrolling: "touch" }}
-                className={`no-scrollbar flex h-[620px] cursor-grab select-none gap-4 overflow-x-auto overflow-y-hidden px-[max(20px,calc((100vw-1680px)/2+40px))] py-7 active:cursor-grabbing md:h-[780px] md:gap-6 md:py-10 ${
+                className={`no-scrollbar flex h-[500px] cursor-grab select-none gap-4 overflow-x-auto overflow-y-hidden px-[max(20px,calc((100vw-1680px)/2+40px))] py-6 active:cursor-grabbing md:h-[640px] md:gap-6 md:py-8 ${
                   isDragging ? "snap-none scroll-auto" : "snap-x snap-mandatory scroll-smooth"
                 }`}
               >
