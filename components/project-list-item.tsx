@@ -258,7 +258,7 @@ export function ProjectListItem({ project }: { project: Project }) {
           data-slide
           data-loop={slide.loop}
           data-base-index={slide.baseIndex}
-          className="flex h-full w-[78vw] max-w-[360px] shrink-0 snap-center items-center bg-white px-8 text-center text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[360px]"
+          className="flex h-full w-[82vw] max-w-[380px] shrink-0 snap-center items-center bg-white px-8 text-center text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[380px]"
         >
           <div className="w-full">
             <ProjectMark title={project.title} />
@@ -284,7 +284,7 @@ export function ProjectListItem({ project }: { project: Project }) {
           data-slide
           data-loop={slide.loop}
           data-base-index={slide.baseIndex}
-          className="no-scrollbar flex h-full w-[78vw] max-w-[480px] shrink-0 snap-center items-center overflow-y-auto bg-white px-8 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[480px]"
+          className="no-scrollbar flex h-full w-[82vw] max-w-[560px] shrink-0 snap-center items-center overflow-y-auto bg-white px-8 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[560px]"
         >
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-muted">Project Caption</p>
@@ -301,7 +301,7 @@ export function ProjectListItem({ project }: { project: Project }) {
           data-slide
           data-loop={slide.loop}
           data-base-index={slide.baseIndex}
-          className="flex h-full w-[72vw] max-w-[380px] shrink-0 snap-center items-center bg-white px-8 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[380px]"
+          className="flex h-full w-[76vw] max-w-[440px] shrink-0 snap-center items-center bg-white px-8 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[440px]"
         >
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-muted">
@@ -318,14 +318,14 @@ export function ProjectListItem({ project }: { project: Project }) {
         data-slide
         data-loop={slide.loop}
         data-base-index={slide.baseIndex}
-        className="relative h-full w-[86vw] max-w-[960px] shrink-0 snap-center overflow-hidden bg-black md:w-[960px]"
+        className="relative h-full w-[92vw] max-w-[1280px] shrink-0 snap-center overflow-hidden bg-black md:w-[72vw]"
       >
         {slide.media.type === "image" ? (
           <Image
             src={slide.media.source}
             alt={`${project.title} media ${slide.index + 1}`}
             fill
-            sizes="(min-width: 1024px) 960px, 86vw"
+            sizes="(min-width: 1024px) 72vw, 92vw"
             className="object-cover"
             draggable={false}
             priority={slide.index === 0 && slide.loop === 1}
@@ -411,9 +411,9 @@ export function ProjectListItem({ project }: { project: Project }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.985, y: -10 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="relative left-1/2 w-[min(1500px,calc(100vw-48px))] -translate-x-1/2 overflow-hidden px-0"
+            className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden px-0"
           >
-            <div className="relative min-w-0 overflow-hidden border border-black/10 bg-white text-ink dark:border-white/10 dark:bg-[#4a4a4a] dark:text-paper">
+            <div className="relative min-w-0 overflow-hidden border-y border-black/10 bg-white text-ink dark:border-white/10 dark:bg-[#4a4a4a] dark:text-paper">
               <button
                 type="button"
                 onClick={() => setExpanded(false)}
@@ -448,7 +448,7 @@ export function ProjectListItem({ project }: { project: Project }) {
                 onPointerLeave={stopDragging}
                 onScroll={handleStripScroll}
                 style={{ touchAction: "pan-x", WebkitOverflowScrolling: "touch" }}
-                className={`no-scrollbar flex h-[520px] cursor-grab select-none gap-5 overflow-x-auto overflow-y-hidden p-5 active:cursor-grabbing md:h-[720px] md:gap-6 md:p-6 ${
+                className={`no-scrollbar flex h-[620px] cursor-grab select-none gap-4 overflow-x-auto overflow-y-hidden px-[max(20px,calc((100vw-1680px)/2+40px))] py-7 active:cursor-grabbing md:h-[780px] md:gap-6 md:py-10 ${
                   isDragging ? "snap-none scroll-auto" : "snap-x snap-mandatory scroll-smooth"
                 }`}
               >
