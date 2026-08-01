@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { protectedAdminEmail } from "@/lib/admin-auth";
-import { bearerToken, getFirebaseAdminAuth, isFirebaseAdminConfigured, protectedAdminUid, verifyProtectedOwnerRequest } from "@/lib/firebase-admin";
+import { bearerToken, getFirebaseAdminAuth, isFirebaseAdminConfigured, protectedAdminUid, verifyProtectedOwnerRequestDetailed } from "@/lib/firebase-admin";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -10,13 +10,10 @@ async function guard(request: NextRequest) {
     return NextResponse.json({ error: "Firebase Admin service account is not configured." }, { status: 501 });
   }
 
-  const allowed = await verifyProtectedOwnerRequest(bearerToken(request.headers.get("authorization")));
-  return allowed
+  const result = await verifyProtectedOwnerRequestDetailed(bearerToken(request.headers.get("authorization")));
+  return result.allowed
     ? null
-    : NextResponse.json(
-        { error: `Unauthorized. Log out and log back in as ${protectedAdminEmail}, then refresh this panel.` },
-        { status: 401 }
-      );
+    : NextResponse.json({ error: result.error }, { status: 401 });
 }
 
 function errorResponse(error: unknown, fallback: string, status = 500) {

@@ -24,6 +24,34 @@ function getServiceAccount() {
   };
 }
 
+function decodedTokenPayload(token: string) {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) {
+      return null;
+    }
+
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    return JSON.parse(Buffer.from(padded, "base64").toString("utf8")) as {
+      aud?: string;
+      email?: string;
+      exp?: number;
+      iss?: string;
+    };
+  } catch {
+    return null;
+  }
+}
+
+function serviceAccountProjectId() {
+  try {
+    return getServiceAccount().projectId ?? "";
+  } catch {
+    return "";
+  }
+}
+
 export function isFirebaseAdminConfigured() {
   try {
     const account = getServiceAccount();
@@ -70,6 +98,49 @@ export async function verifyProtectedOwnerRequest(token?: string) {
     return decoded.email?.toLowerCase() === protectedAdminEmail;
   } catch {
     return false;
+  }
+}
+
+export async function verifyProtectedOwnerRequestDetailed(token?: string) {
+  if (!token) {
+    return { allowed: false, error: "Unauthorized. No Firebase login token was sent with this request." };
+  }
+
+  const decodedPayload = decodedTokenPayload(token);
+  const expectedProjectId = serviceAccountProjectId();
+  const tokenProjectId = decodedPayload?.aud ?? "";
+  const tokenEmail = decodedPayload?.email?.toLowerCase() ?? "";
+
+  if (decodedPayload?.exp && decodedPayload.exp * 1000 < Date.now()) {
+    return { allowed: false, error: "Unauthorized. The Firebase login token is expired. Log out and log in again." };
+  }
+
+  if (tokenProjectId && expectedProjectId && tokenProjectId !== expectedProjectId) {
+    return {
+      allowed: false,
+      error: `Unauthorized. Firebase client project is "${tokenProjectId}", but Firebase Admin project is "${expectedProjectId}". Use the same Firebase project for NEXT_PUBLIC_FIREBASE_API_KEY and Firebase Admin credentials.`
+    };
+  }
+
+  try {
+    const decoded = await getFirebaseAdminAuth().verifyIdToken(token);
+    const email = decoded.email?.toLowerCase() ?? "";
+
+    if (email !== protectedAdminEmail) {
+      return {
+        allowed: false,
+        error: `Unauthorized. This token belongs to ${email || "an account without an email"}, not ${protectedAdminEmail}.`
+      };
+    }
+
+    return { allowed: true, error: "" };
+  } catch (error) {
+    return {
+      allowed: false,
+      error: `Unauthorized. Firebase Admin could not verify this login token${tokenEmail ? ` for ${tokenEmail}` : ""}. ${
+        error instanceof Error ? error.message : "Check Firebase Admin environment variables."
+      }`
+    };
   }
 }
 
