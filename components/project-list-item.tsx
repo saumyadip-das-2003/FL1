@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, ChevronUp, ExternalLink, Minus, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronUp, ExternalLink, Minus, Plus, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Project, ProjectMedia } from "@/lib/data";
@@ -47,6 +47,7 @@ function ProjectMeta({ project }: { project: Project }) {
 export function ProjectListItem({ project }: { project: Project }) {
   const [expanded, setExpanded] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [activeImage, setActiveImage] = useState<{ src: string; alt: string } | null>(null);
   const images = useMemo(() => [project.image, ...project.gallery], [project.gallery, project.image]);
   const mediaItems = useMemo<ProjectMedia[]>(() => {
     if (project.media?.length) {
@@ -71,20 +72,23 @@ export function ProjectListItem({ project }: { project: Project }) {
       }
     ];
   }, [images, project.media, project.title, project.video]);
-  const baseSlides = useMemo(
-    () => [
+  const baseSlides = useMemo(() => {
+    const visibleMedia = mediaItems.filter(
+      (media) => media.type !== "caption" || media.source.trim() || media.caption.trim()
+    );
+
+    return [
       { id: "meta", kind: "meta" as const },
       { id: "overview", kind: "overview" as const },
-      ...mediaItems.map((media, index) => ({
+      ...visibleMedia.map((media, index) => ({
         id: `${media.type}-${index}`,
         kind: media.type === "caption" ? ("caption" as const) : ("media" as const),
         media,
         index
       })),
       ...(project.mapLocation?.trim() ? [{ id: "map", kind: "map" as const }] : [])
-    ],
-    [mediaItems, project.mapLocation]
-  );
+    ];
+  }, [mediaItems, project.mapLocation]);
   const stripRef = useRef<HTMLDivElement>(null);
   const dragState = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 });
 
@@ -96,8 +100,7 @@ export function ProjectListItem({ project }: { project: Project }) {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (stripRef.current) {
-          const firstMobileContentIndex = window.matchMedia("(max-width: 767px)").matches ? 1 : 0;
-          scrollToBaseIndex(Math.min(firstMobileContentIndex, baseSlides.length - 1), "auto");
+          scrollToBaseIndex(0, "auto");
         }
       });
     });
@@ -267,6 +270,19 @@ export function ProjectListItem({ project }: { project: Project }) {
     return `https://maps.google.com/maps?q=${encodeURIComponent(location)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
   }
 
+  function mapOpenUrl(value: string) {
+    const location = value.trim();
+    if (!location) {
+      return "";
+    }
+
+    if (/^https?:\/\//i.test(location)) {
+      return location;
+    }
+
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
+  }
+
   function youtubeWatchUrl(source: string) {
     const id = youtubeEmbedUrl(source, false).match(/\/embed\/([^?]+)/)?.[1];
     return id ? `https://www.youtube.com/watch?v=${id}` : source;
@@ -334,6 +350,7 @@ export function ProjectListItem({ project }: { project: Project }) {
 
     if (slide.kind === "map") {
       const src = mapEmbedUrl(project.mapLocation ?? "");
+      const openUrl = mapOpenUrl(project.mapLocation ?? "");
 
       return (
         <section
@@ -346,6 +363,16 @@ export function ProjectListItem({ project }: { project: Project }) {
               <p className="text-[11px] uppercase tracking-[0.18em] text-muted md:text-xs md:tracking-[0.22em]">Map Location</p>
               <h3 className="mt-4 font-serif text-3xl leading-tight md:text-4xl">{project.title}</h3>
               <p className="mt-4 text-base leading-7 text-ink/80 dark:text-paper/80">{project.mapLocation}</p>
+              {openUrl ? (
+                <a
+                  href={openUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-5 inline-flex items-center gap-2 border border-black/15 px-4 py-3 text-xs uppercase tracking-[0.14em] transition hover:bg-ink hover:text-paper dark:border-white/15 dark:hover:bg-paper dark:hover:text-ink"
+                >
+                  Open in Maps <ExternalLink size={14} />
+                </a>
+              ) : null}
             </div>
           </div>
           {src ? (
@@ -368,15 +395,29 @@ export function ProjectListItem({ project }: { project: Project }) {
         className="relative h-full w-[calc(100vw-2.5rem)] max-w-none shrink-0 snap-center overflow-hidden bg-black md:w-[72vw] md:max-w-[1280px]"
       >
         {slide.media.type === "image" ? (
-          <Image
-            src={slide.media.source}
-            alt={`${project.title} media ${slide.index + 1}`}
-            fill
-            sizes="(min-width: 1024px) 72vw, 92vw"
-            className="object-contain md:object-cover"
-            draggable={false}
-            priority={slide.index === 0}
-          />
+          <button
+            type="button"
+            onClick={() => {
+              if (!dragState.current.moved) {
+                setActiveImage({
+                  src: slide.media.source,
+                  alt: `${project.title} image ${slide.index + 1}`
+                });
+              }
+            }}
+            className="relative block h-full w-full"
+            aria-label={`Open ${project.title} image ${slide.index + 1}`}
+          >
+            <Image
+              src={slide.media.source}
+              alt={`${project.title} media ${slide.index + 1}`}
+              fill
+              sizes="(min-width: 1024px) 72vw, 92vw"
+              className="object-contain md:object-cover"
+              draggable={false}
+              priority={slide.index === 0}
+            />
+          </button>
         ) : (
           <iframe
             src={youtubeEmbedUrl(slide.media.source)}
@@ -514,6 +555,45 @@ export function ProjectListItem({ project }: { project: Project }) {
                 ))}
               </div>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {activeImage && (
+          <motion.div
+            className="fixed inset-0 z-[140] flex items-center justify-center bg-black/88 p-4 backdrop-blur-sm md:p-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22 }}
+            onClick={() => setActiveImage(null)}
+          >
+            <button
+              type="button"
+              onClick={() => setActiveImage(null)}
+              className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center border border-white/25 bg-black/40 text-paper transition hover:bg-paper hover:text-ink md:right-6 md:top-6"
+              aria-label="Close image preview"
+            >
+              <X size={19} />
+            </button>
+            <motion.div
+              className="relative h-[82vh] w-full max-w-7xl"
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 12 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <Image
+                src={activeImage.src}
+                alt={activeImage.alt}
+                fill
+                sizes="100vw"
+                className="object-contain"
+                priority
+              />
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
