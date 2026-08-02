@@ -57,6 +57,38 @@ function YouTubeLogo() {
   );
 }
 
+function TikTokLogo() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-white">
+      <path d="M16.6 2c.3 2.7 1.8 4.3 4.4 4.5v3.4a8 8 0 0 1-4.4-1.4v6.3c0 4-2.7 6.7-6.6 6.7a6.4 6.4 0 0 1-6.5-6.3c0-3.7 2.9-6.4 6.7-6.4.5 0 .9 0 1.3.1v3.6c-.4-.1-.8-.2-1.3-.2-1.8 0-3.1 1.2-3.1 2.8 0 1.7 1.2 2.8 2.9 2.8 1.8 0 2.9-1.1 2.9-3.2V2h3.7Z" />
+    </svg>
+  );
+}
+
+function TelegramLogo() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-white">
+      <path d="M21.7 4.2 18.4 20c-.2 1.1-.9 1.4-1.8.9l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.3-8.4c.4-.4-.1-.6-.6-.3L5.8 13.4.9 11.9c-1.1-.3-1.1-1.1.2-1.6L20.3 3c.9-.3 1.7.2 1.4 1.2Z" />
+    </svg>
+  );
+}
+
+function PinterestLogo() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-white">
+      <path d="M12.1 2C6.6 2 3 5.6 3 10.2c0 2.1 1.1 4.7 2.8 5.5.3.1.5.1.6-.2.1-.2.4-1.4.5-1.7.1-.3 0-.4-.2-.7-.6-.7-1-1.7-1-2.8 0-3.2 2.4-6.2 6.4-6.2 3.5 0 5.4 2.1 5.4 5 0 3.7-1.6 6.2-3.8 6.2-1.2 0-2.1-1-1.8-2.2.3-1.5 1-3.1 1-4.2 0-1-.5-1.8-1.6-1.8-1.3 0-2.3 1.3-2.3 3.1 0 1.1.4 1.9.4 1.9l-1.5 6.2c-.4 1.7-.2 3.7-.1 3.9.1.1.2.1.3 0 .1-.2 1.8-2.3 2.4-4.1.2-.5.9-3.4.9-3.4.5.8 1.7 1.5 3 1.5 3.9 0 6.6-3.6 6.6-8.3C21 5.1 18.1 2 12.1 2Z" />
+    </svg>
+  );
+}
+
+function EmailLogo() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-white">
+      <path d="M3.5 5h17c.8 0 1.5.7 1.5 1.5v11c0 .8-.7 1.5-1.5 1.5h-17c-.8 0-1.5-.7-1.5-1.5v-11C2 5.7 2.7 5 3.5 5Zm8.5 8 8-5.4V7l-8 5.2L4 7v.6L12 13Zm0 2.2L4 10v7h16v-7l-8 5.2Z" />
+    </svg>
+  );
+}
+
 function GenericLogo() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-white">
@@ -73,10 +105,10 @@ const platformMap = {
   X: { icon: XLogo, color: "bg-black" },
   LinkedIn: { icon: LinkedInLogo, color: "bg-[#0A66C2]" },
   YouTube: { icon: YouTubeLogo, color: "bg-[#FF0000]" },
-  TikTok: { icon: GenericLogo, color: "bg-black" },
-  Telegram: { icon: GenericLogo, color: "bg-[#26A5E4]" },
-  Pinterest: { icon: GenericLogo, color: "bg-[#E60023]" },
-  Email: { icon: GenericLogo, color: "bg-[#555555]" }
+  TikTok: { icon: TikTokLogo, color: "bg-black" },
+  Telegram: { icon: TelegramLogo, color: "bg-[#26A5E4]" },
+  Pinterest: { icon: PinterestLogo, color: "bg-[#E60023]" },
+  Email: { icon: EmailLogo, color: "bg-[#555555]" }
 };
 
 const defaultLinks = [
@@ -116,11 +148,15 @@ export function SocialLinks({
             key={`${link.platform}-${link.href}`}
             href={href}
             aria-label={link.platform}
+            title={link.platform}
             target={href.startsWith("tel:") || href.startsWith("mailto:") ? undefined : "_blank"}
             rel={href.startsWith("tel:") || href.startsWith("mailto:") ? undefined : "noreferrer"}
-            className={`flex h-11 w-11 items-center justify-center border border-white/30 ${platform.color} shadow-sm transition hover:scale-105`}
+            className={`group relative flex h-11 w-11 items-center justify-center border border-white/30 ${platform.color} shadow-sm transition hover:scale-105`}
           >
             <Icon />
+            <span className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 translate-y-1 whitespace-nowrap bg-ink px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-paper opacity-0 shadow-sm transition group-hover:translate-y-0 group-hover:opacity-100 dark:bg-paper dark:text-ink">
+              {link.platform}
+            </span>
           </Link>
         );
       })}
