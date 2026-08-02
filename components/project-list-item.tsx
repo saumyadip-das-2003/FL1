@@ -95,6 +95,7 @@ export function ProjectListItem({ project }: { project: Project }) {
   }, [mediaItems, project.description, project.excerpt, project.mapLocation]);
   const stripRef = useRef<HTMLDivElement>(null);
   const dragState = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 });
+  const pendingImageOpen = useRef<{ src: string; alt: string } | null>(null);
   const imageDragState = useRef({ active: false, startX: 0, startY: 0, x: 0, y: 0 });
 
   useEffect(() => {
@@ -128,6 +129,14 @@ export function ProjectListItem({ project }: { project: Project }) {
     if (!stripRef.current) {
       return;
     }
+
+    const imageTarget = (event.target as HTMLElement).closest<HTMLElement>("[data-project-image-src]");
+    pendingImageOpen.current = imageTarget
+      ? {
+          src: imageTarget.dataset.projectImageSrc ?? "",
+          alt: imageTarget.dataset.projectImageAlt ?? project.title
+        }
+      : null;
 
     dragState.current = {
       active: true,
@@ -169,6 +178,9 @@ export function ProjectListItem({ project }: { project: Project }) {
       return;
     }
 
+    const shouldOpenImage = !dragState.current.moved && pendingImageOpen.current?.src;
+    const imageToOpen = pendingImageOpen.current;
+
     dragState.current.active = false;
     const strip = stripRef.current;
     const nearest = nearestSlide();
@@ -178,6 +190,10 @@ export function ProjectListItem({ project }: { project: Project }) {
     if (nearest?.slide) {
       strip.scrollTo({ left: centeredOffset(nearest.slide), behavior: "smooth" });
     }
+    if (shouldOpenImage && imageToOpen) {
+      setActiveImage(imageToOpen);
+    }
+    pendingImageOpen.current = null;
   }
 
   function slideBy(direction: "previous" | "next") {
@@ -454,6 +470,8 @@ export function ProjectListItem({ project }: { project: Project }) {
           <div
             role="button"
             tabIndex={0}
+            data-project-image-src={slide.media.source}
+            data-project-image-alt={`${project.title} image ${slide.index + 1}`}
             onPointerDown={(event) => {
               imageSlidePointer.current = {
                 startX: event.clientX,
