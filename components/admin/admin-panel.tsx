@@ -562,6 +562,10 @@ export function AdminPanel() {
     setCustomPeopleRole("");
   }
 
+  function removePeopleRole(role: string) {
+    savePeopleRoles(peopleRoles().filter((item) => item !== role));
+  }
+
   function updateItem(key: CollectionKey, id: string, field: string, value: string) {
     setContent((current) => ({
       ...current,
@@ -2571,8 +2575,16 @@ export function AdminPanel() {
             <TextInput placeholder="Custom category" value={customPeopleRole} onChange={(event) => setCustomPeopleRole(event.target.value)} />
             <div className="flex flex-wrap gap-2">
               {roleOptions.map((role) => (
-                <span key={role} className="rounded-full border border-black/10 px-3 py-1 text-xs normal-case tracking-normal dark:border-white/10">
+                <span key={role} className="inline-flex items-center gap-2 rounded-full border border-black/10 px-3 py-1 text-xs normal-case tracking-normal dark:border-white/10">
                   {role}
+                  <button
+                    type="button"
+                    onClick={() => removePeopleRole(role)}
+                    className="text-muted transition hover:text-red-600"
+                    aria-label={`Remove ${role} category`}
+                  >
+                    <X size={12} />
+                  </button>
                 </span>
               ))}
             </div>
