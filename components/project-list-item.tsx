@@ -479,14 +479,6 @@ export function ProjectListItem({ project }: { project: Project }) {
             <div className="relative min-w-0 overflow-hidden border border-black/10 bg-white text-ink dark:border-white/10 dark:bg-[#4a4a4a] dark:text-paper">
               <button
                 type="button"
-                onClick={() => setExpanded(false)}
-                className="absolute right-3 top-3 z-20 hidden h-10 w-10 items-center justify-center border border-black/15 bg-white/90 transition hover:bg-ink hover:text-paper dark:border-white/15 dark:bg-[#4a4a4a]/90 dark:hover:bg-paper dark:hover:text-ink xl:flex xl:h-11 xl:w-11"
-                aria-label={`Minimize ${project.title}`}
-              >
-                <ChevronUp size={19} />
-              </button>
-              <button
-                type="button"
                 onClick={() => slideBy("previous")}
                 className="absolute bottom-0 left-0 top-0 z-10 flex w-10 items-center justify-center bg-gradient-to-r from-black/32 to-transparent text-paper opacity-100 transition md:fixed md:bottom-auto md:left-4 md:top-1/2 md:h-24 md:w-14 md:-translate-y-1/2 md:bg-black/25 md:opacity-100 md:hover:bg-black/40"
                 aria-label={`Previous ${project.title} media`}
