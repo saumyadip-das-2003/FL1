@@ -50,6 +50,7 @@ export function ProjectListItem({ project }: { project: Project }) {
   const [activeImage, setActiveImage] = useState<{ src: string; alt: string } | null>(null);
   const [imageZoom, setImageZoom] = useState(1);
   const [imagePan, setImagePan] = useState({ x: 0, y: 0 });
+  const imageSlidePointer = useRef({ startX: 0, startY: 0, moved: false });
   const images = useMemo(() => [project.image, ...project.gallery], [project.gallery, project.image]);
   const mediaItems = useMemo<ProjectMedia[]>(() => {
     if (project.media?.length) {
@@ -450,17 +451,41 @@ export function ProjectListItem({ project }: { project: Project }) {
         className="relative h-full w-[calc(100vw-2.5rem)] max-w-none shrink-0 snap-center overflow-hidden bg-black md:w-[72vw] md:max-w-[1280px]"
       >
         {slide.media.type === "image" ? (
-          <button
-            type="button"
+          <div
+            role="button"
+            tabIndex={0}
+            onPointerDown={(event) => {
+              imageSlidePointer.current = {
+                startX: event.clientX,
+                startY: event.clientY,
+                moved: false
+              };
+            }}
+            onPointerMove={(event) => {
+              const distanceX = Math.abs(event.clientX - imageSlidePointer.current.startX);
+              const distanceY = Math.abs(event.clientY - imageSlidePointer.current.startY);
+              if (distanceX > 8 || distanceY > 8) {
+                imageSlidePointer.current.moved = true;
+              }
+            }}
             onClick={() => {
-              if (!dragState.current.moved) {
+              if (!imageSlidePointer.current.moved && !dragState.current.moved) {
                 setActiveImage({
                   src: slide.media.source,
                   alt: `${project.title} image ${slide.index + 1}`
                 });
               }
             }}
-            className="relative block h-full w-full"
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                setActiveImage({
+                  src: slide.media.source,
+                  alt: `${project.title} image ${slide.index + 1}`
+                });
+              }
+            }}
+            className="relative block h-full w-full cursor-zoom-in outline-none"
             aria-label={`Open ${project.title} image ${slide.index + 1}`}
           >
             <Image
@@ -472,7 +497,7 @@ export function ProjectListItem({ project }: { project: Project }) {
               draggable={false}
               priority={slide.index === 0}
             />
-          </button>
+          </div>
         ) : (
           <iframe
             src={youtubeEmbedUrl(slide.media.source)}
@@ -565,7 +590,7 @@ export function ProjectListItem({ project }: { project: Project }) {
             <button
               type="button"
               onClick={() => setExpanded(false)}
-              className="absolute right-3 top-3 z-40 flex h-11 w-11 items-center justify-center border border-black/15 bg-white/95 text-ink shadow-soft transition hover:bg-ink hover:text-paper dark:border-white/15 dark:bg-[#4a4a4a]/95 dark:text-paper dark:hover:bg-paper dark:hover:text-ink md:right-5 md:top-5"
+              className="absolute right-5 top-5 z-40 flex h-11 w-11 items-center justify-center border border-black/15 bg-white/95 text-ink shadow-soft transition hover:bg-ink hover:text-paper dark:border-white/15 dark:bg-[#4a4a4a]/95 dark:text-paper dark:hover:bg-paper dark:hover:text-ink md:right-5 md:top-5"
               aria-label={`Minimize ${project.title}`}
             >
               <ChevronUp size={19} />
