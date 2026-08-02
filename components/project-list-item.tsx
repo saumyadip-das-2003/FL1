@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, ChevronUp, ExternalLink, Minus, Plus, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronUp, ExternalLink, Minus, Plus, X, ZoomIn, ZoomOut } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Project, ProjectMedia } from "@/lib/data";
@@ -48,6 +48,8 @@ export function ProjectListItem({ project }: { project: Project }) {
   const [expanded, setExpanded] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [activeImage, setActiveImage] = useState<{ src: string; alt: string } | null>(null);
+  const [imageZoom, setImageZoom] = useState(1);
+  const [imagePan, setImagePan] = useState({ x: 0, y: 0 });
   const images = useMemo(() => [project.image, ...project.gallery], [project.gallery, project.image]);
   const mediaItems = useMemo<ProjectMedia[]>(() => {
     if (project.media?.length) {
@@ -76,10 +78,11 @@ export function ProjectListItem({ project }: { project: Project }) {
     const visibleMedia = mediaItems.filter(
       (media) => media.type !== "caption" || media.source.trim() || media.caption.trim()
     );
+    const hasDescription = project.description.trim() || project.excerpt.trim();
 
     return [
       { id: "meta", kind: "meta" as const },
-      { id: "overview", kind: "overview" as const },
+      ...(hasDescription ? [{ id: "overview", kind: "overview" as const }] : []),
       ...visibleMedia.map((media, index) => ({
         id: `${media.type}-${index}`,
         kind: media.type === "caption" ? ("caption" as const) : ("media" as const),
@@ -88,9 +91,15 @@ export function ProjectListItem({ project }: { project: Project }) {
       })),
       ...(project.mapLocation?.trim() ? [{ id: "map", kind: "map" as const }] : [])
     ];
-  }, [mediaItems, project.mapLocation]);
+  }, [mediaItems, project.description, project.excerpt, project.mapLocation]);
   const stripRef = useRef<HTMLDivElement>(null);
   const dragState = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 });
+  const imageDragState = useRef({ active: false, startX: 0, startY: 0, x: 0, y: 0 });
+
+  useEffect(() => {
+    setImageZoom(1);
+    setImagePan({ x: 0, y: 0 });
+  }, [activeImage]);
 
   useEffect(() => {
     if (!expanded) {
@@ -288,6 +297,52 @@ export function ProjectListItem({ project }: { project: Project }) {
     return id ? `https://www.youtube.com/watch?v=${id}` : source;
   }
 
+  function toggleImageZoom() {
+    setImageZoom((current) => {
+      if (current > 1) {
+        setImagePan({ x: 0, y: 0 });
+        return 1;
+      }
+
+      return 2.2;
+    });
+  }
+
+  function onImagePointerDown(event: React.PointerEvent<HTMLImageElement>) {
+    event.stopPropagation();
+    if (imageZoom <= 1) {
+      return;
+    }
+
+    imageDragState.current = {
+      active: true,
+      startX: event.clientX,
+      startY: event.clientY,
+      x: imagePan.x,
+      y: imagePan.y
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function onImagePointerMove(event: React.PointerEvent<HTMLImageElement>) {
+    if (!imageDragState.current.active || imageZoom <= 1) {
+      return;
+    }
+
+    event.stopPropagation();
+    const distanceX = event.clientX - imageDragState.current.startX;
+    const distanceY = event.clientY - imageDragState.current.startY;
+    setImagePan({
+      x: imageDragState.current.x + distanceX,
+      y: imageDragState.current.y + distanceY
+    });
+  }
+
+  function stopImageDrag(event: React.PointerEvent<HTMLImageElement>) {
+    event.stopPropagation();
+    imageDragState.current.active = false;
+  }
+
   function renderSlide(slide: (typeof baseSlides)[number] & { baseIndex: number }) {
     if (slide.kind === "meta") {
       return (
@@ -426,9 +481,6 @@ export function ProjectListItem({ project }: { project: Project }) {
             className="pointer-events-none h-full w-full"
           />
         )}
-        <div className="absolute bottom-4 left-4 bg-black/70 px-3 py-2 text-xs uppercase tracking-[0.18em] text-paper">
-          {slide.media.type} {slide.index + 1} / {mediaItems.length}
-        </div>
         {slide.media.type === "video" && (
           <a
             href={youtubeWatchUrl(slide.media.source)}
@@ -577,21 +629,48 @@ export function ProjectListItem({ project }: { project: Project }) {
             >
               <X size={19} />
             </button>
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                toggleImageZoom();
+              }}
+              className="absolute right-4 top-20 z-10 flex h-11 w-11 items-center justify-center border border-white/25 bg-black/40 text-paper transition hover:bg-paper hover:text-ink md:right-6 md:top-20"
+              aria-label={imageZoom > 1 ? "Reset image zoom" : "Zoom image"}
+              title={imageZoom > 1 ? "Reset zoom" : "Zoom image"}
+            >
+              {imageZoom > 1 ? <ZoomOut size={19} /> : <ZoomIn size={19} />}
+            </button>
             <motion.div
-              className="relative h-[82vh] w-full max-w-7xl"
+              className="flex max-h-[82vh] max-w-7xl items-center justify-center overflow-hidden"
               initial={{ opacity: 0, scale: 0.96, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 12 }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
               onClick={(event) => event.stopPropagation()}
             >
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={activeImage.src}
                 alt={activeImage.alt}
-                fill
-                sizes="100vw"
-                className="object-contain"
-                priority
+                className={`max-h-[82vh] max-w-full select-none object-contain transition-transform duration-200 ${
+                  imageZoom > 1 ? "cursor-grab active:cursor-grabbing" : "cursor-zoom-in"
+                }`}
+                style={{
+                  transform: `translate3d(${imagePan.x}px, ${imagePan.y}px, 0) scale(${imageZoom})`,
+                  touchAction: imageZoom > 1 ? "none" : "auto"
+                }}
+                onClick={(event) => event.stopPropagation()}
+                onDoubleClick={(event) => {
+                  event.stopPropagation();
+                  toggleImageZoom();
+                }}
+                onPointerDown={onImagePointerDown}
+                onPointerMove={onImagePointerMove}
+                onPointerUp={stopImageDrag}
+                onPointerCancel={stopImageDrag}
+                onPointerLeave={stopImageDrag}
+                draggable={false}
               />
             </motion.div>
           </motion.div>
