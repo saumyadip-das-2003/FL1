@@ -63,8 +63,8 @@ export function HomeIntro({
                 entering
                   ? {
                       opacity: 1,
-                      left: "max(1.25rem, calc((100vw - 80rem) / 2 + 2rem))",
-                      top: 20,
+                      left: compactIntro ? "1rem" : "clamp(2rem, 2.5vw, 3rem)",
+                      top: compactIntro ? 12 : 20,
                       x: 0,
                       y: 0,
                       scale: compactIntro ? 0.92 : 1,

@@ -383,7 +383,7 @@ export function ProjectListItem({ project }: { project: Project }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.985, y: -10 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="relative mx-auto w-full max-w-[1560px] overflow-hidden px-0"
+            className="relative -mx-5 w-[calc(100%+2.5rem)] max-w-none overflow-hidden px-0 md:mx-auto md:w-full md:max-w-[1680px]"
           >
             <div className="relative min-w-0 overflow-hidden border border-black/10 bg-white text-ink dark:border-white/10 dark:bg-[#4a4a4a] dark:text-paper">
               <button
@@ -419,7 +419,7 @@ export function ProjectListItem({ project }: { project: Project }) {
                 onPointerCancel={stopDragging}
                 onPointerLeave={stopDragging}
                 style={{ touchAction: "pan-x", WebkitOverflowScrolling: "touch" }}
-                className={`no-scrollbar flex h-[380px] cursor-grab select-none gap-4 overflow-x-auto overflow-y-hidden px-3 py-4 active:cursor-grabbing sm:h-[440px] md:h-[560px] md:gap-6 md:px-6 md:py-6 lg:px-8 ${
+                className={`no-scrollbar flex h-[380px] cursor-grab select-none gap-4 overflow-x-auto overflow-y-hidden px-3 py-4 active:cursor-grabbing sm:h-[440px] md:h-[640px] md:gap-6 md:px-6 md:py-8 lg:px-8 ${
                   isDragging ? "snap-none scroll-auto" : "snap-x snap-mandatory scroll-smooth"
                 }`}
               >
