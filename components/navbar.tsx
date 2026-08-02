@@ -50,7 +50,7 @@ export function Navbar({
           : "border-black/10 bg-white dark:border-white/10 dark:bg-charcoal"
       )}
     >
-      <nav className="flex h-20 w-full items-center justify-between px-5 md:px-8 2xl:px-12">
+      <nav className="flex h-16 w-full items-center justify-between px-4 md:h-20 md:px-8 2xl:px-12">
         <Link href="/" aria-label="Atelier Northline home">
           <BrandLogo companyName={companyName} tagline={tagline} logoUrl={logoUrl} />
         </Link>
@@ -98,14 +98,14 @@ export function Navbar({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="border-t border-black/10 bg-paper px-5 py-8 dark:border-white/10 dark:bg-charcoal lg:hidden"
+            className="border-t border-black/10 bg-paper px-5 py-5 dark:border-white/10 dark:bg-charcoal lg:hidden"
           >
-            <div className="grid w-full gap-5">
+            <div className="grid w-full gap-3">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="font-serif text-2xl text-ink transition hover:translate-x-2 dark:text-paper"
+                  className="font-serif text-xl leading-tight text-ink transition hover:translate-x-2 dark:text-paper"
                 >
                   {item.label}
                 </Link>

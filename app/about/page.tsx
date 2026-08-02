@@ -22,23 +22,23 @@ export default async function AboutPage() {
 
   return (
     <main className="bg-paper transition-colors dark:bg-charcoal">
-      <section className="px-5 pb-20 pt-32 md:px-8 md:pb-28 md:pt-40">
+      <section className="site-page">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1fr_1.1fr] lg:items-end">
           <Reveal>
-            <p className="text-xs uppercase tracking-[0.28em] text-muted">Studio Profile</p>
-            <h1 className="mt-5 font-serif text-4xl leading-tight text-balance md:text-6xl">
+            <p className="site-eyebrow">Studio Profile</p>
+            <h1 className="site-page-title mt-5">
               {content.settings.aboutStudioTitle || "Quiet buildings with a strong public life."}
             </h1>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="text-lg leading-9 text-muted">
+            <p className="text-base leading-8 text-muted md:text-lg md:leading-9">
               {content.settings.aboutStudioProfile}
             </p>
           </Reveal>
         </div>
       </section>
 
-      <section className="relative h-[60vh] overflow-hidden bg-black">
+      <section className="relative h-[42vh] overflow-hidden bg-black md:h-[60vh]">
         <Image
           src={content.settings.aboutHeroImage}
           alt="Architecture studio workspace"
@@ -48,7 +48,7 @@ export default async function AboutPage() {
         />
       </section>
 
-      <section className="px-5 py-24 md:px-8 md:py-32">
+      <section className="site-section">
         <div className="mx-auto grid max-w-7xl gap-16">
           {sections.map((section) => (
             <div
@@ -56,13 +56,13 @@ export default async function AboutPage() {
               className="grid gap-10 border-t border-black/10 pt-12 dark:border-white/10 lg:grid-cols-[0.7fr_1.3fr]"
             >
               <Reveal>
-                <p className="text-xs uppercase tracking-[0.28em] text-muted">{section.label}</p>
+                <p className="site-eyebrow">{section.label}</p>
               </Reveal>
               <Reveal delay={0.08}>
                 <div>
                   <div>
-                    <p className="font-serif text-3xl leading-tight text-balance md:text-5xl">{section.title}</p>
-                    <p className="mt-8 max-w-3xl text-lg leading-9 text-muted">{section.body}</p>
+                    <p className="font-serif text-2xl leading-tight text-balance md:text-5xl">{section.title}</p>
+                    <p className="mt-6 max-w-3xl text-base leading-8 text-muted md:mt-8 md:text-lg md:leading-9">{section.body}</p>
                   </div>
                 </div>
               </Reveal>
@@ -71,7 +71,7 @@ export default async function AboutPage() {
 
           <div className="grid gap-10 border-t border-black/10 pt-12 dark:border-white/10 lg:grid-cols-[0.7fr_1.3fr]">
             <Reveal>
-              <p className="text-xs uppercase tracking-[0.28em] text-muted">Messages</p>
+              <p className="site-eyebrow">Messages</p>
             </Reveal>
             <div className="grid gap-12">
               {messages.map((message, index) => (
@@ -87,9 +87,9 @@ export default async function AboutPage() {
                       />
                     </div>
                     <div>
-                      <p className="font-serif text-3xl leading-tight text-balance md:text-5xl">{message.name}</p>
-                      <p className="mt-3 text-xs uppercase tracking-[0.24em] text-muted">{message.role}</p>
-                      <p className="mt-8 max-w-3xl text-lg leading-9 text-muted">{message.message}</p>
+                      <p className="font-serif text-2xl leading-tight text-balance md:text-5xl">{message.name}</p>
+                      <p className="mt-3 text-[11px] uppercase tracking-[0.18em] text-muted md:text-xs md:tracking-[0.24em]">{message.role}</p>
+                      <p className="mt-6 max-w-3xl text-base leading-8 text-muted md:mt-8 md:text-lg md:leading-9">{message.message}</p>
                     </div>
                   </article>
                 </Reveal>

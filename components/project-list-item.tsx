@@ -233,11 +233,11 @@ export function ProjectListItem({ project }: { project: Project }) {
         <section
           data-slide
           data-base-index={slide.baseIndex}
-          className="flex h-full w-[82vw] max-w-[380px] shrink-0 snap-center items-center bg-white px-8 text-center text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[380px]"
+          className="flex h-full w-[84vw] max-w-[340px] shrink-0 snap-center items-center bg-white px-5 text-center text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[380px] md:max-w-[380px] md:px-8"
         >
           <div className="w-full">
             <ProjectMark title={project.title} />
-            <h2 className="mt-7 font-sans text-2xl leading-tight tracking-normal">{project.title}</h2>
+            <h2 className="mt-6 font-sans text-xl leading-tight tracking-normal md:mt-7 md:text-2xl">{project.title}</h2>
             <p className="mt-3 text-sm uppercase tracking-normal text-muted">{project.location}</p>
             <ProjectMeta project={project} />
             <button
@@ -258,12 +258,12 @@ export function ProjectListItem({ project }: { project: Project }) {
         <section
           data-slide
           data-base-index={slide.baseIndex}
-          className="no-scrollbar flex h-full w-[82vw] max-w-[560px] shrink-0 snap-center items-center overflow-y-auto bg-white px-8 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[560px]"
+          className="no-scrollbar flex h-full w-[84vw] max-w-[520px] shrink-0 snap-center items-center overflow-y-auto bg-white px-5 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[560px] md:px-8"
         >
           <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-muted">Project Caption</p>
-            <p className="mt-5 text-xl leading-9 text-ink dark:text-paper">{project.excerpt}</p>
-            <p className="mt-5 text-base leading-8 text-ink/85 dark:text-paper/85">{project.description}</p>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-muted md:text-xs md:tracking-[0.22em]">Project Caption</p>
+            <p className="mt-4 text-lg leading-8 text-ink dark:text-paper md:text-xl md:leading-9">{project.excerpt}</p>
+            <p className="mt-4 text-sm leading-7 text-ink/85 dark:text-paper/85 md:text-base md:leading-8">{project.description}</p>
           </div>
         </section>
       );
@@ -274,13 +274,13 @@ export function ProjectListItem({ project }: { project: Project }) {
         <section
           data-slide
           data-base-index={slide.baseIndex}
-          className="flex h-full w-[76vw] max-w-[440px] shrink-0 snap-center items-center bg-white px-8 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[440px]"
+          className="flex h-full w-[76vw] max-w-[380px] shrink-0 snap-center items-center bg-white px-5 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[440px] md:max-w-[440px] md:px-8"
         >
           <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-muted">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-muted md:text-xs md:tracking-[0.22em]">
               {slide.media.type === "image" ? "Image Caption" : "Video Caption"}
             </p>
-            <p className="mt-5 text-xl leading-9">{slide.media.caption}</p>
+            <p className="mt-4 text-lg leading-8 md:mt-5 md:text-xl md:leading-9">{slide.media.caption}</p>
           </div>
         </section>
       );
@@ -290,7 +290,7 @@ export function ProjectListItem({ project }: { project: Project }) {
       <section
         data-slide
         data-base-index={slide.baseIndex}
-        className="relative h-full w-[92vw] max-w-[1280px] shrink-0 snap-center overflow-hidden bg-black md:w-[72vw]"
+        className="relative h-full w-[88vw] max-w-[1280px] shrink-0 snap-center overflow-hidden bg-black md:w-[72vw]"
       >
         {slide.media.type === "image" ? (
           <Image
@@ -321,7 +321,7 @@ export function ProjectListItem({ project }: { project: Project }) {
   return (
     <motion.article
       layout
-        className="w-full py-8 md:py-11"
+        className="w-full py-6 md:py-11"
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
@@ -340,20 +340,20 @@ export function ProjectListItem({ project }: { project: Project }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.985, y: -8 }}
             transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-            className="mx-auto grid w-full max-w-[1180px] gap-7 md:grid-cols-[220px_minmax(0,860px)] md:items-start"
+            className="mx-auto grid w-full max-w-[1180px] gap-5 md:grid-cols-[220px_minmax(0,860px)] md:items-start"
           >
             <div className="text-center md:pt-1">
               <button type="button" onClick={() => setExpanded(true)} aria-label={`Expand ${project.title}`}>
                 <ProjectMark title={project.title} />
               </button>
-              <button type="button" onClick={() => setExpanded(true)} className="mt-6 block w-full">
-                <h2 className="font-sans text-xl leading-tight tracking-normal">{project.title}</h2>
-                <p className="mt-3 text-sm uppercase tracking-normal text-muted">{project.location}</p>
+              <button type="button" onClick={() => setExpanded(true)} className="mt-4 block w-full md:mt-6">
+                <h2 className="font-sans text-lg leading-tight tracking-normal md:text-xl">{project.title}</h2>
+                <p className="mt-2 text-xs uppercase tracking-normal text-muted md:mt-3 md:text-sm">{project.location}</p>
               </button>
               <button
                 type="button"
                 onClick={() => setExpanded(true)}
-                className="mx-auto mt-8 flex h-10 w-10 items-center justify-center border border-black/15 transition hover:bg-ink hover:text-paper dark:border-white/15 dark:hover:bg-paper dark:hover:text-ink"
+                className="mx-auto mt-5 flex h-9 w-9 items-center justify-center border border-black/15 transition hover:bg-ink hover:text-paper dark:border-white/15 dark:hover:bg-paper dark:hover:text-ink md:mt-8 md:h-10 md:w-10"
                 aria-label={`Expand ${project.title}`}
               >
                 <Plus size={18} />
@@ -389,7 +389,7 @@ export function ProjectListItem({ project }: { project: Project }) {
               <button
                 type="button"
                 onClick={() => setExpanded(false)}
-                className="absolute right-4 top-4 z-20 flex h-11 w-11 items-center justify-center border border-black/15 bg-white/90 backdrop-blur transition hover:bg-ink hover:text-paper dark:border-white/15 dark:bg-charcoal/90 dark:hover:bg-paper dark:hover:text-ink"
+                className="absolute right-3 top-3 z-20 flex h-10 w-10 items-center justify-center border border-black/15 bg-white/90 backdrop-blur transition hover:bg-ink hover:text-paper dark:border-white/15 dark:bg-charcoal/90 dark:hover:bg-paper dark:hover:text-ink md:right-4 md:top-4 md:h-11 md:w-11"
                 aria-label={`Minimize ${project.title}`}
               >
                 <ChevronUp size={19} />
@@ -419,7 +419,7 @@ export function ProjectListItem({ project }: { project: Project }) {
                 onPointerCancel={stopDragging}
                 onPointerLeave={stopDragging}
                 style={{ touchAction: "pan-x", WebkitOverflowScrolling: "touch" }}
-                className={`no-scrollbar flex h-[460px] cursor-grab select-none gap-4 overflow-x-auto overflow-y-hidden px-4 py-5 active:cursor-grabbing md:h-[560px] md:gap-6 md:px-6 md:py-6 lg:px-8 ${
+                className={`no-scrollbar flex h-[380px] cursor-grab select-none gap-4 overflow-x-auto overflow-y-hidden px-3 py-4 active:cursor-grabbing sm:h-[440px] md:h-[560px] md:gap-6 md:px-6 md:py-6 lg:px-8 ${
                   isDragging ? "snap-none scroll-auto" : "snap-x snap-mandatory scroll-smooth"
                 }`}
               >

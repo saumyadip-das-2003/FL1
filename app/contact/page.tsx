@@ -14,11 +14,11 @@ export default async function ContactPage() {
   const socialLinks = parseSocialLinks(content);
 
   return (
-    <main className="bg-paper px-5 pb-24 pt-32 transition-colors dark:bg-charcoal md:px-8 md:pb-32 md:pt-40">
+    <main className="site-page bg-paper transition-colors dark:bg-charcoal">
       <section className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.9fr_1.1fr]">
         <Reveal>
-          <p className="text-xs uppercase tracking-[0.28em] text-muted">Contact</p>
-          <h1 className="mt-5 font-serif text-4xl leading-tight text-balance md:text-6xl">
+          <p className="site-eyebrow">Contact</p>
+          <h1 className="site-page-title mt-5">
             Begin a conversation about place, program, and possibility.
           </h1>
           <div className="mt-12 grid gap-5 text-sm">
@@ -41,7 +41,7 @@ export default async function ContactPage() {
           <div>
             <ContactForm />
             <div className="mt-10 border-t border-black/10 pt-8 dark:border-white/10">
-              <p className="text-xs uppercase tracking-[0.28em] text-muted">Social Media</p>
+              <p className="site-eyebrow">Social Media</p>
               <p className="mt-3 max-w-xl text-sm leading-7 text-muted">
                 Follow the studio across active channels for project updates, process notes, and announcements.
               </p>
@@ -61,7 +61,7 @@ export default async function ContactPage() {
             <Reveal key={`${office}-${index}`} delay={index * 0.05}>
               <article className="overflow-hidden border border-black/10 bg-white dark:border-white/10 dark:bg-[#4a4a4a]">
                 <div className="p-6">
-                  <p className="text-xs uppercase tracking-[0.28em] text-muted">Office {index + 1}</p>
+                  <p className="site-eyebrow">Office {index + 1}</p>
                   <p className="mt-3 font-serif text-2xl leading-tight">{office}</p>
                 </div>
                 <div className="aspect-[16/10] bg-paper dark:bg-charcoal">

@@ -16,16 +16,16 @@ export function AboutTeaser({
   stats?: { value: string; label: string }[];
 }) {
   return (
-    <section className="border-y border-black/10 bg-white px-5 py-24 transition-colors dark:border-white/10 dark:bg-[#4a4a4a] md:px-8 md:py-32">
+    <section className="site-section border-y border-black/10 bg-white transition-colors dark:border-white/10 dark:bg-[#4a4a4a]">
       <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[1fr_1.2fr] lg:items-end">
         <Reveal>
-          <p className="text-xs uppercase tracking-[0.28em] text-muted">About the Studio</p>
-          <h2 className="mt-5 font-serif text-5xl leading-tight text-balance md:text-7xl">
+          <p className="site-eyebrow">About the Studio</p>
+          <h2 className="site-section-title mt-5 md:text-7xl">
             Architecture measured by context, restraint, and long use.
           </h2>
         </Reveal>
         <Reveal delay={0.12}>
-          <p className="text-lg leading-9 text-muted">
+          <p className="text-base leading-8 text-muted md:text-lg md:leading-9">
             {profile}
           </p>
           <div className="mt-10 grid grid-cols-3 gap-4 border-y border-black/10 py-8 dark:border-white/10">
@@ -36,17 +36,17 @@ export function AboutTeaser({
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: index * 0.12 }}
-                  className="font-serif text-4xl md:text-6xl"
+                  className="font-serif text-3xl md:text-6xl"
                 >
                   {stat.value}
                 </motion.p>
-                <p className="mt-2 text-xs uppercase tracking-[0.18em] text-muted">{stat.label}</p>
+                <p className="mt-2 text-[10px] uppercase tracking-[0.12em] text-muted md:text-xs md:tracking-[0.18em]">{stat.label}</p>
               </div>
             ))}
           </div>
           <Link
             href="/about"
-            className="mt-10 inline-flex border border-black/20 px-6 py-4 text-xs uppercase tracking-[0.22em] transition hover:bg-ink hover:text-paper dark:border-white/20 dark:hover:bg-paper dark:hover:text-ink"
+            className="mt-10 inline-flex border border-black/20 px-5 py-3 text-[11px] uppercase tracking-[0.18em] transition hover:bg-ink hover:text-paper dark:border-white/20 dark:hover:bg-paper dark:hover:text-ink md:px-6 md:py-4 md:text-xs md:tracking-[0.22em]"
           >
             Read studio profile
           </Link>

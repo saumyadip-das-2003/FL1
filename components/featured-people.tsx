@@ -13,19 +13,19 @@ export async function FeaturedPeople() {
   }
 
   return (
-    <section className="bg-white px-5 py-24 transition-colors dark:bg-[#4a4a4a] md:px-8 md:py-28">
+    <section className="site-section bg-white transition-colors dark:bg-[#4a4a4a]">
       <div className="mx-auto max-w-7xl">
         <Reveal>
           <div className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
-              <p className="text-xs uppercase tracking-[0.28em] text-muted">People</p>
-              <h2 className="mt-4 max-w-3xl font-serif text-4xl leading-tight text-balance md:text-6xl">
+              <p className="site-eyebrow">People</p>
+              <h2 className="site-section-title mt-4 max-w-3xl">
                 The studio team behind the work.
               </h2>
             </div>
             <Link
               href="/people"
-              className="inline-flex w-fit items-center gap-3 border border-black/20 px-6 py-4 text-xs uppercase tracking-[0.22em] transition hover:bg-ink hover:text-paper dark:border-white/20 dark:hover:bg-paper dark:hover:text-ink"
+              className="inline-flex w-fit items-center gap-3 border border-black/20 px-5 py-3 text-[11px] uppercase tracking-[0.18em] transition hover:bg-ink hover:text-paper dark:border-white/20 dark:hover:bg-paper dark:hover:text-ink md:px-6 md:py-4 md:text-xs md:tracking-[0.22em]"
             >
               View people <ArrowUpRight size={16} />
             </Link>

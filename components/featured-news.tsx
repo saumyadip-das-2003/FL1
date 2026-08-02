@@ -18,19 +18,19 @@ export async function FeaturedNews() {
     : newsItems.slice(0, 2);
 
   return (
-    <section className="bg-paper px-5 py-24 transition-colors dark:bg-charcoal md:px-8 md:py-28">
+    <section className="site-section bg-paper transition-colors dark:bg-charcoal">
       <div className="mx-auto max-w-7xl">
         <Reveal>
           <div className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
-              <p className="text-xs uppercase tracking-[0.28em] text-muted">Featured News</p>
-              <h2 className="mt-4 max-w-3xl font-serif text-4xl leading-tight text-balance md:text-6xl">
+              <p className="site-eyebrow">Featured News</p>
+              <h2 className="site-section-title mt-4 max-w-3xl">
                 Recent studio notes and project milestones.
               </h2>
             </div>
             <Link
               href="/news"
-              className="inline-flex w-fit items-center gap-3 border border-black/20 px-6 py-4 text-xs uppercase tracking-[0.22em] transition hover:bg-ink hover:text-paper dark:border-white/20 dark:hover:bg-paper dark:hover:text-ink"
+              className="inline-flex w-fit items-center gap-3 border border-black/20 px-5 py-3 text-[11px] uppercase tracking-[0.18em] transition hover:bg-ink hover:text-paper dark:border-white/20 dark:hover:bg-paper dark:hover:text-ink md:px-6 md:py-4 md:text-xs md:tracking-[0.22em]"
             >
               More news <ArrowUpRight size={16} />
             </Link>
@@ -51,10 +51,10 @@ export async function FeaturedNews() {
                   />
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.22em] text-muted">
+                  <p className="site-eyebrow">
                     {item.category} / {item.date}
                   </p>
-                  <h3 className="mt-4 font-serif text-3xl leading-tight transition group-hover:text-muted md:text-4xl">
+                  <h3 className="mt-4 font-serif text-2xl leading-tight transition group-hover:text-muted md:text-4xl">
                     {item.title}
                   </h3>
                   <p className="mt-4 text-sm leading-7 text-muted">{item.excerpt}</p>

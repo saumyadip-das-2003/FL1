@@ -45,6 +45,10 @@ body {
   color: #080808;
 }
 
+.dark .text-muted {
+  color: #c8c2b8;
+}
+
 .text-balance {
   text-wrap: balance;
 }
@@ -65,4 +69,30 @@ body {
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+@layer components {
+  .site-section {
+    @apply px-5 py-16 md:px-8 md:py-28;
+  }
+
+  .site-page {
+    @apply px-5 pb-16 pt-24 md:px-8 md:pb-32 md:pt-40;
+  }
+
+  .site-eyebrow {
+    @apply text-[11px] uppercase tracking-[0.18em] text-muted md:text-xs md:tracking-[0.28em];
+  }
+
+  .site-page-title {
+    @apply font-serif text-[2.35rem] leading-[1.02] text-balance md:text-6xl;
+  }
+
+  .site-section-title {
+    @apply font-serif text-[2.15rem] leading-[1.04] text-balance md:text-6xl;
+  }
+
+  .site-card-title {
+    @apply font-serif text-2xl leading-tight md:text-3xl;
+  }
 }

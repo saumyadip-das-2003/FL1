@@ -46,7 +46,7 @@ export function PeopleGrid({ team = fallbackTeam }: { team?: Person[] }) {
               key={item}
               type="button"
               onClick={() => setFilter(item)}
-              className="relative whitespace-nowrap pb-4 text-xs uppercase tracking-[0.22em] text-muted transition hover:text-ink dark:hover:text-paper"
+              className="relative whitespace-nowrap pb-4 text-[11px] uppercase tracking-[0.16em] text-muted transition hover:text-ink dark:hover:text-paper md:text-xs md:tracking-[0.22em]"
             >
               {item}
               {filter === item && (
@@ -58,7 +58,7 @@ export function PeopleGrid({ team = fallbackTeam }: { team?: Person[] }) {
             </button>
           ))}
         </div>
-        <label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-muted">
+        <label className="grid gap-2 text-[11px] uppercase tracking-[0.16em] text-muted md:text-xs md:tracking-[0.2em]">
           Search employees
           <input
             value={query}
@@ -89,10 +89,10 @@ export function PeopleGrid({ team = fallbackTeam }: { team?: Person[] }) {
                   onClick={() => setActiveName(expanded ? null : member.name)}
                   className="text-left"
                 >
-                  <h2 className="font-serif text-3xl leading-tight transition hover:text-muted md:text-4xl">
+                  <h2 className="font-serif text-2xl leading-tight transition hover:text-muted md:text-4xl">
                     {member.name}
                   </h2>
-                  <p className="mt-2 text-xs uppercase tracking-[0.22em] text-muted">{member.role}</p>
+                  <p className="mt-2 text-[11px] uppercase tracking-[0.16em] text-muted md:text-xs md:tracking-[0.22em]">{member.role}</p>
                 </button>
                 <button
                   type="button"
@@ -125,7 +125,7 @@ export function PeopleGrid({ team = fallbackTeam }: { team?: Person[] }) {
                         />
                       </div>
                       <div className="max-w-2xl">
-                        <p className="font-serif text-2xl leading-tight">{member.role}</p>
+                        <p className="font-serif text-xl leading-tight md:text-2xl">{member.role}</p>
                         <p className="mt-5 text-base leading-8 text-muted">{member.bio}</p>
                         <div className="mt-8 grid gap-4 border-y border-black/10 py-6 text-sm dark:border-white/10">
                           <p className="flex justify-between gap-5">

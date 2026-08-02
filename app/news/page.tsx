@@ -10,11 +10,11 @@ export default async function NewsPage() {
   const newsItems = content.news.map(adminNewsToNewsItem);
 
   return (
-    <main className="bg-paper px-5 pb-24 pt-32 transition-colors dark:bg-charcoal md:px-8 md:pb-32 md:pt-40">
+    <main className="site-page bg-paper transition-colors dark:bg-charcoal">
       <section className="mx-auto max-w-7xl">
         <Reveal>
-          <p className="text-xs uppercase tracking-[0.28em] text-muted">News</p>
-          <h1 className="mt-5 max-w-5xl font-serif text-4xl leading-tight text-balance md:text-6xl">
+          <p className="site-eyebrow">News</p>
+          <h1 className="site-page-title mt-5 max-w-5xl">
             Studio notes, project milestones, awards, and research updates.
           </h1>
         </Reveal>
@@ -30,11 +30,11 @@ export default async function NewsPage() {
                   <Image src={item.image} alt={item.title} fill sizes="(min-width: 768px) 320px, 100vw" className="object-cover transition duration-500 group-hover:scale-105" />
                 </div>
                 <div className="max-w-3xl">
-                  <p className="text-xs uppercase tracking-[0.22em] text-muted">
+                  <p className="site-eyebrow">
                     {item.category} / {item.date}
                   </p>
-                  <h2 className="mt-4 font-serif text-4xl leading-tight transition group-hover:text-muted md:text-5xl">{item.title}</h2>
-                  <p className="mt-5 text-lg leading-8 text-muted">{item.excerpt}</p>
+                  <h2 className="mt-4 font-serif text-2xl leading-tight transition group-hover:text-muted md:text-5xl">{item.title}</h2>
+                  <p className="mt-5 text-base leading-8 text-muted md:text-lg">{item.excerpt}</p>
                 </div>
               </Link>
             </Reveal>

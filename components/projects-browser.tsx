@@ -78,11 +78,11 @@ export function ProjectsBrowser({
   }, [activeSection, activeSubsection, projects, query]);
 
   return (
-    <section className="bg-paper px-5 pb-24 pt-32 transition-colors dark:bg-charcoal md:px-8 md:pb-32 md:pt-40">
+    <section className="site-page bg-paper transition-colors dark:bg-charcoal">
       <div className="mx-auto w-full max-w-[1560px]">
         <div className="mb-12 max-w-4xl">
-          <p className="text-xs uppercase tracking-[0.28em] text-muted">Portfolio</p>
-          <h1 className="mt-5 font-serif text-4xl leading-tight text-balance md:text-6xl">
+          <p className="site-eyebrow">Portfolio</p>
+          <h1 className="site-page-title mt-5">
             Work organized by type, atmosphere, and public intent.
           </h1>
         </div>
@@ -98,7 +98,7 @@ export function ProjectsBrowser({
                     setActiveSection(section);
                     setActiveSubsection("All");
                   }}
-                  className="flex items-center justify-center gap-2 whitespace-nowrap text-sm uppercase tracking-normal text-muted transition hover:text-ink dark:hover:text-paper md:text-base"
+                  className="flex items-center justify-center gap-2 whitespace-nowrap text-xs uppercase tracking-normal text-muted transition hover:text-ink dark:hover:text-paper md:text-base"
                 >
                   {activeSection === section && (
                     <motion.span
@@ -117,14 +117,14 @@ export function ProjectsBrowser({
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                className="mt-7 flex flex-wrap justify-center gap-x-10 gap-y-4"
+                className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-3 md:gap-x-10 md:gap-y-4"
               >
                 {["All", ...subsections].map((subsection) => (
                   <button
                     key={subsection}
                     type="button"
                     onClick={() => setActiveSubsection(subsection)}
-                    className={`text-sm transition hover:text-ink dark:hover:text-paper md:text-base ${
+                    className={`text-xs transition hover:text-ink dark:hover:text-paper md:text-base ${
                       activeSubsection === subsection ? "text-ink dark:text-paper" : "text-muted"
                     }`}
                   >
@@ -135,7 +135,7 @@ export function ProjectsBrowser({
             )}
           </div>
 
-          <label className="ml-auto grid w-full max-w-md gap-2 text-xs uppercase tracking-[0.2em] text-muted">
+          <label className="ml-auto grid w-full max-w-md gap-2 text-[11px] uppercase tracking-[0.16em] text-muted md:text-xs md:tracking-[0.2em]">
             Search projects
             <input
               value={query}

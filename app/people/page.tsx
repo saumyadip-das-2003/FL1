@@ -9,11 +9,11 @@ export default async function PeoplePage() {
   const team = content.people.map(adminPersonToTeamMember);
 
   return (
-    <main className="bg-paper px-5 pb-24 pt-32 transition-colors dark:bg-charcoal md:px-8 md:pb-32 md:pt-40">
+    <main className="site-page bg-paper transition-colors dark:bg-charcoal">
       <section className="mx-auto max-w-7xl">
         <Reveal>
-          <p className="text-xs uppercase tracking-[0.28em] text-muted">People</p>
-          <h1 className="mt-5 max-w-4xl font-serif text-4xl leading-tight text-balance md:text-6xl">
+          <p className="site-eyebrow">People</p>
+          <h1 className="site-page-title mt-5 max-w-4xl">
             A compact studio shaped by research, delivery, and craft.
           </h1>
         </Reveal>

@@ -16,13 +16,13 @@ export async function FeaturedProjects() {
     : projects.slice(0, 6);
 
   return (
-    <section className="bg-paper px-5 py-24 transition-colors dark:bg-charcoal md:px-8 md:py-32">
+    <section className="site-section bg-paper transition-colors dark:bg-charcoal">
       <div className="mx-auto w-full max-w-[1560px]">
         <Reveal>
           <div className="mb-14 flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
-              <p className="text-xs uppercase tracking-[0.28em] text-muted">Featured Projects</p>
-              <h2 className="mt-4 max-w-3xl font-serif text-5xl leading-tight text-balance md:text-7xl">
+              <p className="site-eyebrow">Featured Projects</p>
+              <h2 className="site-section-title mt-4 max-w-3xl md:text-7xl">
                 Selected work across scales and climates.
               </h2>
             </div>

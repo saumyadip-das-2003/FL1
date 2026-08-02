@@ -19,35 +19,35 @@ export default async function NewsDetailPage({ params }: { params: { slug: strin
 
   return (
     <main className="bg-paper pb-24 pt-20 transition-colors dark:bg-charcoal md:pb-32">
-      <section className="relative min-h-[70vh] overflow-hidden bg-black">
+      <section className="relative min-h-[58svh] overflow-hidden bg-black md:min-h-[70vh]">
         <Image src={item.image} alt={item.title} fill priority sizes="100vw" className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/78 via-black/22 to-black/12" />
         <div className="absolute inset-x-0 bottom-0 px-5 pb-12 md:px-8 md:pb-16">
           <div className="mx-auto max-w-7xl text-paper">
-            <p className="mb-5 text-xs uppercase tracking-[0.28em] text-white/70">
+            <p className="mb-4 text-[11px] uppercase tracking-[0.18em] text-white/75 md:mb-5 md:text-xs md:tracking-[0.28em]">
               {item.category} / {item.date}
             </p>
-            <h1 className="max-w-5xl font-serif text-4xl leading-tight text-balance md:text-6xl">{item.title}</h1>
+            <h1 className="max-w-5xl font-serif text-[2.35rem] leading-[1.02] text-balance md:text-6xl">{item.title}</h1>
           </div>
         </div>
       </section>
 
-      <section className="px-5 py-20 md:px-8 md:py-28">
+      <section className="px-5 py-14 md:px-8 md:py-28">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.7fr_1.3fr]">
           <Reveal>
             <div>
               <Link
                 href="/news"
-                className="mb-10 inline-flex items-center gap-3 border border-black/20 px-5 py-3 text-xs uppercase tracking-[0.2em] transition hover:bg-ink hover:text-paper dark:border-white/20 dark:hover:bg-paper dark:hover:text-ink"
+                className="mb-10 inline-flex items-center gap-3 border border-black/20 px-5 py-3 text-[11px] uppercase tracking-[0.18em] transition hover:bg-ink hover:text-paper dark:border-white/20 dark:hover:bg-paper dark:hover:text-ink md:text-xs md:tracking-[0.2em]"
               >
                 <ArrowLeft size={15} /> All News
               </Link>
-              <p className="text-xs uppercase tracking-[0.28em] text-muted">Full Story</p>
+              <p className="site-eyebrow">Full Story</p>
             </div>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="font-serif text-3xl leading-tight text-balance md:text-5xl">{item.excerpt}</p>
-            <div className="mt-9 grid gap-7 text-lg leading-9 text-muted">
+            <p className="font-serif text-2xl leading-tight text-balance md:text-5xl">{item.excerpt}</p>
+            <div className="mt-7 grid gap-6 text-base leading-8 text-muted md:mt-9 md:gap-7 md:text-lg md:leading-9">
               {item.body.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
               ))}

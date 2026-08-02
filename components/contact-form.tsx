@@ -42,7 +42,7 @@ export function ContactForm() {
     <>
       <form onSubmit={handleSubmit} className="grid gap-5">
         <div className="grid gap-5 md:grid-cols-2">
-          <label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-muted">
+          <label className="grid gap-2 text-[11px] uppercase tracking-[0.16em] text-muted md:text-xs md:tracking-[0.2em]">
             Name
             <input
               name="name"
@@ -50,7 +50,7 @@ export function ContactForm() {
               className="h-14 border border-black/15 bg-transparent px-4 text-base normal-case tracking-normal text-ink outline-none transition focus:border-ink dark:border-white/15 dark:text-paper dark:focus:border-paper"
             />
           </label>
-          <label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-muted">
+          <label className="grid gap-2 text-[11px] uppercase tracking-[0.16em] text-muted md:text-xs md:tracking-[0.2em]">
             Email
             <input
               type="email"
@@ -60,7 +60,7 @@ export function ContactForm() {
             />
           </label>
         </div>
-        <label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-muted">
+        <label className="grid gap-2 text-[11px] uppercase tracking-[0.16em] text-muted md:text-xs md:tracking-[0.2em]">
           Project Type
           <select
             name="project_type"
@@ -72,7 +72,7 @@ export function ContactForm() {
             <option>Landscape</option>
           </select>
         </label>
-        <label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-muted">
+        <label className="grid gap-2 text-[11px] uppercase tracking-[0.16em] text-muted md:text-xs md:tracking-[0.2em]">
           Message
           <textarea
             name="message"
@@ -85,7 +85,7 @@ export function ContactForm() {
         <button
           type="submit"
           disabled={busy}
-          className="h-14 bg-ink px-6 text-xs uppercase tracking-[0.22em] text-paper transition hover:bg-black/75 disabled:opacity-60 dark:bg-paper dark:text-ink dark:hover:bg-white/75"
+          className="h-14 bg-ink px-6 text-[11px] uppercase tracking-[0.18em] text-paper transition hover:bg-black/75 disabled:opacity-60 dark:bg-paper dark:text-ink dark:hover:bg-white/75 md:text-xs md:tracking-[0.22em]"
         >
           {busy ? "Sending..." : "Send inquiry"}
         </button>
