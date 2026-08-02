@@ -373,7 +373,7 @@ export function ProjectListItem({ project }: { project: Project }) {
             alt={`${project.title} media ${slide.index + 1}`}
             fill
             sizes="(min-width: 1024px) 72vw, 92vw"
-            className="object-cover"
+            className="object-contain md:object-cover"
             draggable={false}
             priority={slide.index === 0}
           />
