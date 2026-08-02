@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, ChevronUp, Minus, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronUp, ExternalLink, Minus, Plus } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Project, ProjectMedia } from "@/lib/data";
@@ -81,7 +81,7 @@ export function ProjectListItem({ project }: { project: Project }) {
         media,
         index
       })),
-      ...(project.mapLocation ? [{ id: "map", kind: "map" as const }] : [])
+      ...(project.mapLocation?.trim() ? [{ id: "map", kind: "map" as const }] : [])
     ],
     [mediaItems, project.mapLocation]
   );
@@ -242,10 +242,33 @@ export function ProjectListItem({ project }: { project: Project }) {
     }
 
     if (/^https?:\/\//i.test(location)) {
-      return location;
+      try {
+        const url = new URL(location);
+        const isEmbed = url.pathname.includes("/maps/embed") || url.searchParams.get("output") === "embed";
+        if (isEmbed) {
+          return location;
+        }
+
+        const coordinateMatch = location.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+        if (coordinateMatch) {
+          return `https://maps.google.com/maps?q=${coordinateMatch[1]},${coordinateMatch[2]}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+        }
+
+        const placeMatch = url.pathname.match(/\/maps\/place\/([^/]+)/);
+        if (placeMatch?.[1]) {
+          return `https://maps.google.com/maps?q=${encodeURIComponent(decodeURIComponent(placeMatch[1].replace(/\+/g, " ")))}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+        }
+      } catch {
+        // Fall through and use the raw value as a search query.
+      }
     }
 
     return `https://maps.google.com/maps?q=${encodeURIComponent(location)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+  }
+
+  function youtubeWatchUrl(source: string) {
+    const id = youtubeEmbedUrl(source, false).match(/\/embed\/([^?]+)/)?.[1];
+    return id ? `https://www.youtube.com/watch?v=${id}` : source;
   }
 
   function renderSlide(slide: (typeof baseSlides)[number] & { baseIndex: number }) {
@@ -329,7 +352,7 @@ export function ProjectListItem({ project }: { project: Project }) {
               src={src}
               title={`${project.title} map location`}
               loading="lazy"
-              className="h-full min-h-0 w-full"
+              className="pointer-events-none h-full min-h-0 w-full md:pointer-events-auto"
               referrerPolicy="no-referrer-when-downgrade"
             />
           ) : null}
@@ -358,13 +381,22 @@ export function ProjectListItem({ project }: { project: Project }) {
             src={youtubeEmbedUrl(slide.media.source)}
             title={`${project.title} media video ${slide.index + 1}`}
             allow="autoplay; encrypted-media; picture-in-picture"
-            allowFullScreen
-            className={isDragging ? "pointer-events-none h-full w-full" : "h-full w-full"}
+            className="pointer-events-none h-full w-full"
           />
         )}
         <div className="absolute bottom-4 left-4 bg-black/70 px-3 py-2 text-xs uppercase tracking-[0.18em] text-paper">
           {slide.media.type} {slide.index + 1} / {mediaItems.length}
         </div>
+        {slide.media.type === "video" && (
+          <a
+            href={youtubeWatchUrl(slide.media.source)}
+            target="_blank"
+            rel="noreferrer"
+            className="absolute bottom-4 right-4 inline-flex items-center gap-2 bg-white/90 px-3 py-2 text-[11px] uppercase tracking-[0.14em] text-ink transition hover:bg-white"
+          >
+            YouTube <ExternalLink size={13} />
+          </a>
+        )}
       </section>
     );
   }
@@ -372,7 +404,7 @@ export function ProjectListItem({ project }: { project: Project }) {
   return (
     <motion.article
       layout
-        className="w-full py-6 md:py-11"
+      className="w-full min-w-0 overflow-hidden py-6 md:py-11"
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
@@ -434,12 +466,12 @@ export function ProjectListItem({ project }: { project: Project }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.985, y: -10 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="relative -mx-5 w-[calc(100%+2.5rem)] max-w-none overflow-hidden px-0 md:mx-auto md:w-full md:max-w-[1680px]"
+            className="relative ml-[calc(50%-50vw)] w-screen max-w-none overflow-hidden px-0 md:mx-auto md:ml-auto md:w-full md:max-w-[1680px]"
           >
             <button
               type="button"
               onClick={() => setExpanded(false)}
-              className="fixed right-4 top-24 z-50 flex h-11 w-11 items-center justify-center border border-black/15 bg-white/95 text-ink shadow-soft transition hover:bg-ink hover:text-paper dark:border-white/15 dark:bg-[#4a4a4a]/95 dark:text-paper dark:hover:bg-paper dark:hover:text-ink md:right-6 md:top-28"
+              className="absolute right-3 top-3 z-40 flex h-11 w-11 items-center justify-center border border-black/15 bg-white/95 text-ink shadow-soft transition hover:bg-ink hover:text-paper dark:border-white/15 dark:bg-[#4a4a4a]/95 dark:text-paper dark:hover:bg-paper dark:hover:text-ink md:fixed md:right-6 md:top-28"
               aria-label={`Minimize ${project.title}`}
             >
               <ChevronUp size={19} />
@@ -456,7 +488,7 @@ export function ProjectListItem({ project }: { project: Project }) {
               <button
                 type="button"
                 onClick={() => slideBy("previous")}
-                className="absolute bottom-0 left-0 top-0 z-10 flex w-12 items-center justify-center bg-gradient-to-r from-black/32 to-transparent text-paper opacity-100 transition md:w-20 md:opacity-0 md:hover:opacity-100"
+                className="absolute bottom-0 left-0 top-0 z-10 flex w-10 items-center justify-center bg-gradient-to-r from-black/32 to-transparent text-paper opacity-100 transition md:fixed md:bottom-auto md:left-4 md:top-1/2 md:h-24 md:w-14 md:-translate-y-1/2 md:bg-black/25 md:opacity-100 md:hover:bg-black/40"
                 aria-label={`Previous ${project.title} media`}
               >
                 <ChevronLeft size={24} className="drop-shadow md:h-[30px] md:w-[30px]" />
@@ -464,7 +496,7 @@ export function ProjectListItem({ project }: { project: Project }) {
               <button
                 type="button"
                 onClick={() => slideBy("next")}
-                className="absolute bottom-0 right-0 top-0 z-10 flex w-12 items-center justify-center bg-gradient-to-l from-black/32 to-transparent text-paper opacity-100 transition md:w-20 md:opacity-0 md:hover:opacity-100"
+                className="absolute bottom-0 right-0 top-0 z-10 flex w-10 items-center justify-center bg-gradient-to-l from-black/32 to-transparent text-paper opacity-100 transition md:fixed md:bottom-auto md:right-4 md:top-1/2 md:h-24 md:w-14 md:-translate-y-1/2 md:bg-black/25 md:opacity-100 md:hover:bg-black/40"
                 aria-label={`Next ${project.title} media`}
               >
                 <ChevronRight size={24} className="drop-shadow md:h-[30px] md:w-[30px]" />
@@ -477,8 +509,8 @@ export function ProjectListItem({ project }: { project: Project }) {
                 onPointerUp={stopDragging}
                 onPointerCancel={stopDragging}
                 onPointerLeave={stopDragging}
-                style={{ touchAction: "pan-x", WebkitOverflowScrolling: "touch" }}
-                className={`no-scrollbar flex h-[380px] cursor-grab select-none gap-4 overflow-x-auto overflow-y-hidden px-3 py-4 active:cursor-grabbing sm:h-[440px] md:h-[640px] md:gap-6 md:px-6 md:py-8 lg:px-8 ${
+                style={{ touchAction: "pan-x pan-y", WebkitOverflowScrolling: "touch" }}
+                className={`no-scrollbar flex h-[78vh] max-h-[560px] min-h-[430px] cursor-grab select-none gap-3 overflow-x-auto overflow-y-hidden px-10 py-4 active:cursor-grabbing sm:h-[440px] md:h-[640px] md:max-h-none md:min-h-0 md:gap-6 md:px-6 md:py-8 lg:px-8 ${
                   isDragging ? "snap-none scroll-auto" : "snap-x snap-mandatory scroll-smooth"
                 }`}
               >
