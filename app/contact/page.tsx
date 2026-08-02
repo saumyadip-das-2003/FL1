@@ -3,6 +3,7 @@ import { Reveal } from "@/components/reveal";
 import { getLiveContent } from "@/lib/live-content";
 import { ContactForm } from "@/components/contact-form";
 import { SocialLinks } from "@/components/social-links";
+import { mapEmbedUrl, mapOpenUrl } from "@/lib/map-links";
 import { parseSocialLinks } from "@/lib/social-platforms";
 
 export const dynamic = "force-dynamic";
@@ -56,6 +57,8 @@ export default async function ContactPage() {
       <section className="mx-auto mt-20 grid max-w-7xl gap-6 md:grid-cols-2">
         {offices.map((office, index) => {
           const map = officeMaps[index];
+          const embedMap = mapEmbedUrl(map);
+          const openMap = mapOpenUrl(map);
 
           return (
             <Reveal key={`${office}-${index}`} delay={index * 0.05}>
@@ -65,8 +68,20 @@ export default async function ContactPage() {
                   <p className="mt-3 font-serif text-2xl leading-tight">{office}</p>
                 </div>
                 <div className="aspect-[16/10] bg-paper dark:bg-charcoal">
-                  {map ? (
-                    <iframe src={map} title={`${office} map`} className="h-full w-full" loading="lazy" />
+                  {embedMap ? (
+                    <div className="relative h-full">
+                      <iframe src={embedMap} title={`${office} map`} className="h-full w-full" loading="lazy" />
+                      {openMap ? (
+                        <a
+                          href={openMap}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="absolute left-4 top-4 bg-white/95 px-3 py-2 text-xs uppercase tracking-[0.14em] text-ink shadow-soft transition hover:bg-ink hover:text-paper"
+                        >
+                          Open in Maps
+                        </a>
+                      ) : null}
+                    </div>
                   ) : (
                     <div className="flex h-full items-center justify-center text-center text-muted">
                       <div>

@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, ChevronUp, ExternalLink, Minus, Plus, X, Zoo
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Project, ProjectMedia } from "@/lib/data";
+import { mapEmbedUrl, mapOpenUrl } from "@/lib/map-links";
 import { youtubeEmbedUrl } from "@/lib/youtube";
 
 function ProjectMark({ title }: { title: string }) {
@@ -263,49 +264,6 @@ export function ProjectListItem({ project }: { project: Project }) {
     ];
 
     return captions[index] ?? `${project.title} project image ${index + 1}.`;
-  }
-
-  function mapEmbedUrl(value: string) {
-    const location = value.trim();
-    if (!location || !/^https?:\/\//i.test(location)) {
-      return "";
-    }
-
-    try {
-      const url = new URL(location);
-      const isEmbed = url.pathname.includes("/maps/embed") || url.searchParams.get("output") === "embed";
-      if (isEmbed) {
-        return location;
-      }
-
-      const coordinateMatch = location.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
-      if (coordinateMatch) {
-        return `https://maps.google.com/maps?q=${coordinateMatch[1]},${coordinateMatch[2]}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
-      }
-
-      const placeMatch = url.pathname.match(/\/maps\/place\/([^/]+)/);
-      if (placeMatch?.[1]) {
-        return `https://maps.google.com/maps?q=${encodeURIComponent(decodeURIComponent(placeMatch[1].replace(/\+/g, " ")))}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
-      }
-
-      const query = url.searchParams.get("q") || url.searchParams.get("query");
-      if (query) {
-        return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
-      }
-    } catch {
-      return "";
-    }
-
-    return "";
-  }
-
-  function mapOpenUrl(value: string) {
-    const location = value.trim();
-    if (!location || !/^https?:\/\//i.test(location)) {
-      return "";
-    }
-
-    return location;
   }
 
   function youtubeWatchUrl(source: string) {
