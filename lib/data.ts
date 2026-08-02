@@ -2,7 +2,7 @@ export type ProjectCategory = "Architecture" | "Interior" | "Exterior" | "Landsc
 export type ProjectSection = "Architecture" | "Interiors" | "Landscape" | "Planning" | "Products";
 
 export type ProjectMedia = {
-  type: "image" | "video";
+  type: "image" | "video" | "caption";
   source: string;
   caption: string;
 };
@@ -19,6 +19,7 @@ export type Project = {
   image: string;
   gallery: string[];
   media?: ProjectMedia[];
+  mapLocation?: string;
   excerpt: string;
   description: string;
   video?: string;

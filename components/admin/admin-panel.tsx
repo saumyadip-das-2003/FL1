@@ -105,6 +105,7 @@ const emptyItem: Record<CollectionKey, EditableItem> = {
     subsection: "Culture",
     image: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1600&q=80",
     media: [],
+    mapLocation: "Dhaka, Bangladesh",
     description: "Project description goes here."
   },
   services: {
@@ -162,7 +163,14 @@ function normalizeContent(content: AdminContent): AdminContent {
     },
     projects: (content.projects?.length ? content.projects : seed.projects).map((project, index) => ({
       ...seed.projects[index % seed.projects.length],
-      ...project
+      ...project,
+      mapLocation: project.mapLocation ?? project.location ?? "",
+      media: (project.media ?? []).map((media) => ({
+        ...media,
+        type: media.type ?? "image",
+        source: media.source ?? "",
+        caption: media.caption ?? ""
+      }))
     })),
     services: content.services ?? seed.services,
     news: content.news ?? seed.news,
@@ -282,7 +290,17 @@ function SelectInput(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
   );
 }
 
-function MediaPreview({ type = "image", source, title }: { type?: "image" | "video"; source: string; title: string }) {
+function MediaPreview({ type = "image", source, title, caption }: { type?: AdminMedia["type"]; source: string; title: string; caption?: string }) {
+  if (type === "caption") {
+    return (
+      <span className="flex h-32 w-32 flex-col justify-center rounded-md bg-neutral-100 p-3 text-left dark:bg-neutral-700">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">Caption</span>
+        <span className="mt-2 line-clamp-2 font-serif text-lg leading-tight text-ink dark:text-paper">{source || "Untitled"}</span>
+        <span className="mt-2 line-clamp-2 text-xs leading-5 text-muted">{caption || "No paragraph yet."}</span>
+      </span>
+    );
+  }
+
   if (!source) {
     return <div className="flex h-32 w-32 items-center justify-center rounded-md bg-neutral-100 text-xs text-muted dark:bg-neutral-700">No media</div>;
   }
@@ -859,8 +877,10 @@ export function AdminPanel() {
       source:
         type === "image"
           ? "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1600&q=80"
-          : "https://youtu.be/OP_fVIUTr9Y",
-      caption: type === "image" ? "Image caption goes here." : "Video caption goes here."
+          : type === "video"
+            ? "https://youtu.be/OP_fVIUTr9Y"
+            : "Project note",
+      caption: type === "caption" ? "Write the caption paragraph here." : ""
     };
 
     setContent((current) => ({
@@ -1357,6 +1377,13 @@ export function AdminPanel() {
             className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-2 text-xs shadow-sm dark:border-white/10 dark:bg-[#4a4a4a]"
           >
             <Plus size={13} /> Video
+          </button>
+          <button
+            type="button"
+            onClick={() => insertProjectMedia(projectId, "caption", index)}
+            className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-2 text-xs shadow-sm dark:border-white/10 dark:bg-[#4a4a4a]"
+          >
+            <Plus size={13} /> Caption
           </button>
         </div>
       </div>
@@ -2190,6 +2217,13 @@ export function AdminPanel() {
           <Field label="Project status">
             <TextInput value={project.status} onChange={(event) => updateItem("projects", project.id, "status", event.target.value)} placeholder="Concept, Completed, Under construction..." />
           </Field>
+          <Field label="Map location">
+            <TextInput
+              value={project.mapLocation}
+              onChange={(event) => updateItem("projects", project.id, "mapLocation", event.target.value)}
+              placeholder="Address, place name, or Google Maps embed URL"
+            />
+          </Field>
           <Field label="Section">
             <SelectInput value={project.section} onChange={(event) => updateItem("projects", project.id, "section", event.target.value)}>
               {projectSections.map((item) => (
@@ -2291,6 +2325,7 @@ export function AdminPanel() {
             <div className="flex gap-2">
               <button onClick={() => addProjectMedia(project.id, "image")} className="rounded-md border border-black/10 px-3 py-2 text-xs uppercase tracking-[0.14em] dark:border-white/10">Add image</button>
               <button onClick={() => addProjectMedia(project.id, "video")} className="rounded-md border border-black/10 px-3 py-2 text-xs uppercase tracking-[0.14em] dark:border-white/10">Add video</button>
+              <button onClick={() => addProjectMedia(project.id, "caption")} className="rounded-md border border-black/10 px-3 py-2 text-xs uppercase tracking-[0.14em] dark:border-white/10">Add caption</button>
             </div>
           </div>
           <div className="grid gap-4">
@@ -2308,7 +2343,7 @@ export function AdminPanel() {
                   className="grid gap-4 rounded-lg border border-black/10 p-4 dark:border-white/10 lg:grid-cols-[180px_1fr]"
                 >
                   <div>
-                    <MediaPreview type={media.type} source={media.source} title={`${project.title} media ${index + 1}`} />
+                    <MediaPreview type={media.type} source={media.source} caption={media.caption} title={`${project.title} media ${index + 1}`} />
                     <div className="mt-3 flex items-center justify-between gap-2">
                       <GripVertical className="cursor-grab text-muted" size={17} />
                       <div className="flex gap-1">
@@ -2323,15 +2358,33 @@ export function AdminPanel() {
                       <SelectInput value={media.type} onChange={(event) => updateProjectMedia(project.id, media.id, "type", event.target.value as AdminMedia["type"])}>
                         <option value="image">Image</option>
                         <option value="video">Video</option>
+                        <option value="caption">Caption</option>
                       </SelectInput>
                     </Field>
-                    <Field label={media.type === "image" ? "Image URL / Upload" : "YouTube link"}>
-                      <TextInput value={media.source} onChange={(event) => updateProjectMedia(project.id, media.id, "source", event.target.value)} />
-                      {media.type === "image" && renderDropZone("Upload image", (file) => uploadProjectMedia(project.id, media.id, file), media.source)}
-                    </Field>
-                    <Field label="Caption">
-                      <TextArea value={media.caption} onChange={(event) => updateProjectMedia(project.id, media.id, "caption", event.target.value)} />
-                    </Field>
+                    {media.type === "caption" ? (
+                      <>
+                        <Field label="Caption title">
+                          <TextInput value={media.source} onChange={(event) => updateProjectMedia(project.id, media.id, "source", event.target.value)} />
+                        </Field>
+                        <Field label="Caption paragraph">
+                          <TextArea value={media.caption} onChange={(event) => updateProjectMedia(project.id, media.id, "caption", event.target.value)} />
+                        </Field>
+                      </>
+                    ) : (
+                      <>
+                        <Field label={media.type === "image" ? "Image URL / Upload" : "YouTube link"}>
+                          <TextInput value={media.source} onChange={(event) => updateProjectMedia(project.id, media.id, "source", event.target.value)} />
+                          {media.type === "image" && renderDropZone("Upload image", (file) => uploadProjectMedia(project.id, media.id, file), media.source)}
+                        </Field>
+                        <Field label="Optional internal note">
+                          <TextArea
+                            value={media.caption}
+                            onChange={(event) => updateProjectMedia(project.id, media.id, "caption", event.target.value)}
+                            placeholder="Optional note for admin reference. Add a Caption tile when this should appear in the public slider."
+                          />
+                        </Field>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

@@ -57,12 +57,17 @@ export function ProjectListItem({ project }: { project: Project }) {
       ...images.map((image, index) => ({
         type: "image" as const,
         source: image,
-        caption: captionFor(index)
+        caption: ""
       })),
+      {
+        type: "caption" as const,
+        source: "Project note",
+        caption: captionFor(0)
+      },
       {
         type: "video" as const,
         source: project.video ?? "https://youtu.be/OP_fVIUTr9Y",
-        caption: `${project.title} placeholder project film.`
+        caption: ""
       }
     ];
   }, [images, project.media, project.title, project.video]);
@@ -70,12 +75,15 @@ export function ProjectListItem({ project }: { project: Project }) {
     () => [
       { id: "meta", kind: "meta" as const },
       { id: "overview", kind: "overview" as const },
-      ...mediaItems.flatMap((media, index) => [
-        { id: `media-${index}`, kind: "media" as const, media, index },
-        { id: `caption-${index}`, kind: "caption" as const, media, index }
-      ])
+      ...mediaItems.map((media, index) => ({
+        id: `${media.type}-${index}`,
+        kind: media.type === "caption" ? ("caption" as const) : ("media" as const),
+        media,
+        index
+      })),
+      ...(project.mapLocation ? [{ id: "map", kind: "map" as const }] : [])
     ],
-    [mediaItems]
+    [mediaItems, project.mapLocation]
   );
   const stripRef = useRef<HTMLDivElement>(null);
   const dragState = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 });
@@ -227,6 +235,19 @@ export function ProjectListItem({ project }: { project: Project }) {
     return captions[index] ?? `${project.title} project image ${index + 1}.`;
   }
 
+  function mapEmbedUrl(value: string) {
+    const location = value.trim();
+    if (!location) {
+      return "";
+    }
+
+    if (/^https?:\/\//i.test(location)) {
+      return location;
+    }
+
+    return `https://maps.google.com/maps?q=${encodeURIComponent(location)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+  }
+
   function renderSlide(slide: (typeof baseSlides)[number] & { baseIndex: number }) {
     if (slide.kind === "meta") {
       return (
@@ -274,14 +295,44 @@ export function ProjectListItem({ project }: { project: Project }) {
         <section
           data-slide
           data-base-index={slide.baseIndex}
-          className="flex h-full w-[76vw] max-w-[380px] shrink-0 snap-center items-center bg-white px-5 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[440px] md:max-w-[440px] md:px-8"
+          className="flex h-full w-[76vw] max-w-[460px] shrink-0 snap-center items-center bg-white px-5 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[500px] md:max-w-[500px] md:px-8"
         >
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-muted md:text-xs md:tracking-[0.22em]">
-              {slide.media.type === "image" ? "Image Caption" : "Video Caption"}
+              Caption
             </p>
-            <p className="mt-4 text-lg leading-8 md:mt-5 md:text-xl md:leading-9">{slide.media.caption}</p>
+            <h3 className="mt-4 font-serif text-3xl leading-tight md:text-4xl">{slide.media.source || "Project note"}</h3>
+            <p className="mt-5 text-base leading-8 text-ink/85 dark:text-paper/85 md:text-lg md:leading-9">{slide.media.caption}</p>
           </div>
+        </section>
+      );
+    }
+
+    if (slide.kind === "map") {
+      const src = mapEmbedUrl(project.mapLocation ?? "");
+
+      return (
+        <section
+          data-slide
+          data-base-index={slide.baseIndex}
+          className="grid h-full w-[88vw] max-w-[1280px] shrink-0 snap-center overflow-hidden bg-white text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[72vw] md:grid-cols-[minmax(260px,0.36fr)_minmax(0,1fr)]"
+        >
+          <div className="flex items-center border-b border-black/10 p-5 dark:border-white/10 md:border-b-0 md:border-r md:p-8">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-muted md:text-xs md:tracking-[0.22em]">Map Location</p>
+              <h3 className="mt-4 font-serif text-3xl leading-tight md:text-4xl">{project.title}</h3>
+              <p className="mt-4 text-base leading-7 text-ink/80 dark:text-paper/80">{project.mapLocation}</p>
+            </div>
+          </div>
+          {src ? (
+            <iframe
+              src={src}
+              title={`${project.title} map location`}
+              loading="lazy"
+              className="h-full min-h-0 w-full"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          ) : null}
         </section>
       );
     }
@@ -385,11 +436,19 @@ export function ProjectListItem({ project }: { project: Project }) {
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="relative -mx-5 w-[calc(100%+2.5rem)] max-w-none overflow-hidden px-0 md:mx-auto md:w-full md:max-w-[1680px]"
           >
+            <button
+              type="button"
+              onClick={() => setExpanded(false)}
+              className="fixed right-4 top-24 z-50 flex h-11 w-11 items-center justify-center border border-black/15 bg-white/95 text-ink shadow-soft transition hover:bg-ink hover:text-paper dark:border-white/15 dark:bg-[#4a4a4a]/95 dark:text-paper dark:hover:bg-paper dark:hover:text-ink md:right-6 md:top-28"
+              aria-label={`Minimize ${project.title}`}
+            >
+              <ChevronUp size={19} />
+            </button>
             <div className="relative min-w-0 overflow-hidden border border-black/10 bg-white text-ink dark:border-white/10 dark:bg-[#4a4a4a] dark:text-paper">
               <button
                 type="button"
                 onClick={() => setExpanded(false)}
-                className="absolute right-3 top-3 z-20 flex h-10 w-10 items-center justify-center border border-black/15 bg-white/90 backdrop-blur transition hover:bg-ink hover:text-paper dark:border-white/15 dark:bg-charcoal/90 dark:hover:bg-paper dark:hover:text-ink md:right-4 md:top-4 md:h-11 md:w-11"
+                className="absolute right-3 top-3 z-20 hidden h-10 w-10 items-center justify-center border border-black/15 bg-white/90 transition hover:bg-ink hover:text-paper dark:border-white/15 dark:bg-[#4a4a4a]/90 dark:hover:bg-paper dark:hover:text-ink xl:flex xl:h-11 xl:w-11"
                 aria-label={`Minimize ${project.title}`}
               >
                 <ChevronUp size={19} />

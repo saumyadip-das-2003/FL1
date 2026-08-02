@@ -3,7 +3,7 @@ import { newsItems } from "@/lib/news";
 
 export type AdminMedia = {
   id: string;
-  type: "image" | "video";
+  type: "image" | "video" | "caption";
   source: string;
   caption: string;
 };
@@ -18,6 +18,7 @@ export type AdminProject = {
   subsection: string;
   image: string;
   media: AdminMedia[];
+  mapLocation: string;
   description: string;
 };
 
@@ -305,21 +306,34 @@ export function createSeedAdminContent(): AdminContent {
           id: `${project.slug}-cover`,
           type: "image",
           source: project.image,
+          caption: ""
+        },
+        {
+          id: `${project.slug}-caption-1`,
+          type: "caption",
+          source: "Project note",
           caption: `${project.title} primary view in context.`
         },
         ...project.gallery.map((image, index) => ({
           id: `${project.slug}-image-${index + 1}`,
           type: "image" as const,
           source: image,
-          caption: `${project.title} gallery image ${index + 1}.`
+          caption: ""
         })),
         {
           id: `${project.slug}-video-1`,
           type: "video",
           source: project.video ?? "https://youtu.be/OP_fVIUTr9Y",
-          caption: `${project.title} placeholder project film.`
+          caption: ""
+        },
+        {
+          id: `${project.slug}-caption-2`,
+          type: "caption",
+          source: "Media note",
+          caption: `${project.title} placeholder project film and gallery sequence.`
         }
       ],
+      mapLocation: project.location,
       description: project.description
     })),
     services: demoServices,

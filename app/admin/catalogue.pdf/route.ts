@@ -43,7 +43,8 @@ function normalizeContent(content: AdminContent): AdminContent {
         ...seed.projects[index % seed.projects.length],
         ...project,
         id: project.id || `project-${index + 1}`,
-        media: project.media ?? []
+        media: project.media ?? [],
+        mapLocation: project.mapLocation ?? project.location ?? ""
       })
     ),
     services: (content.services?.length ? content.services : seed.services).map(

@@ -53,6 +53,7 @@ export function adminProjectToProject(project: AdminProject): Project {
       source: media.source,
       caption: media.caption
     })),
+    mapLocation: project.mapLocation,
     excerpt: project.description.split(". ")[0] ?? project.description,
     description: project.description,
     video: firstVideo?.source
