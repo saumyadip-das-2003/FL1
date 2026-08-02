@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export default async function PeoplePage() {
   const content = await getLiveContent();
   const team = content.people.map(adminPersonToTeamMember);
-  const roleOptions = content.settings.peopleRoles
+  const roleOptions = (content.settings.peopleRoles || "Architecture, Engineer, Designer, Technical")
     .split(",")
     .map((role) => role.trim())
     .filter(Boolean);

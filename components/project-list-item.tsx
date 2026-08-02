@@ -96,11 +96,12 @@ export function ProjectListItem({ project }: { project: Project }) {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (stripRef.current) {
-          stripRef.current.scrollTo({ left: 0, behavior: "auto" });
+          const firstMobileContentIndex = window.matchMedia("(max-width: 767px)").matches ? 1 : 0;
+          scrollToBaseIndex(Math.min(firstMobileContentIndex, baseSlides.length - 1), "auto");
         }
       });
     });
-  }, [expanded]);
+  }, [baseSlides.length, expanded]);
 
   function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
     if (event.pointerType !== "mouse") {
@@ -277,7 +278,7 @@ export function ProjectListItem({ project }: { project: Project }) {
         <section
           data-slide
           data-base-index={slide.baseIndex}
-          className="flex h-full w-[84vw] max-w-[340px] shrink-0 snap-center items-center bg-white px-5 text-center text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[380px] md:max-w-[380px] md:px-8"
+          className="flex h-full w-[68vw] max-w-[280px] shrink-0 snap-start items-center bg-white px-5 text-center text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[380px] md:max-w-[380px] md:snap-center md:px-8"
         >
           <div className="w-full">
             <ProjectMark title={project.title} />
@@ -302,11 +303,11 @@ export function ProjectListItem({ project }: { project: Project }) {
         <section
           data-slide
           data-base-index={slide.baseIndex}
-          className="no-scrollbar flex h-full w-[84vw] max-w-[520px] shrink-0 snap-center items-center overflow-y-auto bg-white px-5 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[560px] md:px-8"
+          className="no-scrollbar flex h-full w-[58vw] max-w-none shrink-0 snap-start items-start overflow-y-auto bg-transparent px-0 pr-5 pt-1 text-ink dark:text-paper md:w-[560px] md:max-w-[520px] md:snap-center md:items-center md:bg-white md:px-8 md:pt-0 md:dark:bg-[#4a4a4a]"
         >
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-muted md:text-xs md:tracking-[0.22em]">Project Caption</p>
-            <p className="mt-4 text-lg leading-8 text-ink dark:text-paper md:text-xl md:leading-9">{project.excerpt}</p>
+            <p className="mt-3 text-base leading-7 text-ink dark:text-paper md:mt-4 md:text-xl md:leading-9">{project.excerpt}</p>
             <p className="mt-4 text-sm leading-7 text-ink/85 dark:text-paper/85 md:text-base md:leading-8">{project.description}</p>
           </div>
         </section>
@@ -318,14 +319,14 @@ export function ProjectListItem({ project }: { project: Project }) {
         <section
           data-slide
           data-base-index={slide.baseIndex}
-          className="flex h-full w-[76vw] max-w-[460px] shrink-0 snap-center items-center bg-white px-5 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[500px] md:max-w-[500px] md:px-8"
+          className="flex h-full w-[56vw] max-w-none shrink-0 snap-start items-start bg-transparent px-0 pr-5 pt-1 text-ink dark:text-paper md:w-[500px] md:max-w-[500px] md:snap-center md:items-center md:bg-white md:px-8 md:pt-0 md:dark:bg-[#4a4a4a]"
         >
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-muted md:text-xs md:tracking-[0.22em]">
               Caption
             </p>
-            <h3 className="mt-4 font-serif text-3xl leading-tight md:text-4xl">{slide.media.source || "Project note"}</h3>
-            <p className="mt-5 text-base leading-8 text-ink/85 dark:text-paper/85 md:text-lg md:leading-9">{slide.media.caption}</p>
+            <h3 className="mt-3 font-serif text-2xl leading-tight md:mt-4 md:text-4xl">{slide.media.source || "Project note"}</h3>
+            <p className="mt-4 text-sm leading-7 text-ink/85 dark:text-paper/85 md:mt-5 md:text-lg md:leading-9">{slide.media.caption}</p>
           </div>
         </section>
       );
@@ -338,7 +339,7 @@ export function ProjectListItem({ project }: { project: Project }) {
         <section
           data-slide
           data-base-index={slide.baseIndex}
-          className="grid h-full w-[88vw] max-w-[1280px] shrink-0 snap-center overflow-hidden bg-white text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[72vw] md:grid-cols-[minmax(260px,0.36fr)_minmax(0,1fr)]"
+          className="grid h-full w-[72vw] max-w-none shrink-0 snap-start overflow-hidden bg-white text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[72vw] md:max-w-[1280px] md:snap-center md:grid-cols-[minmax(260px,0.36fr)_minmax(0,1fr)]"
         >
           <div className="flex items-center border-b border-black/10 p-5 dark:border-white/10 md:border-b-0 md:border-r md:p-8">
             <div>
@@ -364,7 +365,7 @@ export function ProjectListItem({ project }: { project: Project }) {
       <section
         data-slide
         data-base-index={slide.baseIndex}
-        className="relative h-full w-[88vw] max-w-[1280px] shrink-0 snap-center overflow-hidden bg-black md:w-[72vw]"
+        className="relative h-full w-[58vw] max-w-none shrink-0 snap-start overflow-hidden bg-black md:w-[72vw] md:max-w-[1280px] md:snap-center"
       >
         {slide.media.type === "image" ? (
           <Image
@@ -423,20 +424,20 @@ export function ProjectListItem({ project }: { project: Project }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.985, y: -8 }}
             transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-            className="mx-auto grid w-full max-w-[1180px] gap-5 md:grid-cols-[220px_minmax(0,860px)] md:items-start"
+            className="mx-auto grid w-full max-w-[1180px] gap-4 md:grid-cols-[220px_minmax(0,860px)] md:items-start md:gap-5"
           >
-            <div className="text-center md:pt-1">
+            <div className="order-2 grid grid-cols-[64px_1fr] items-start gap-4 md:order-1 md:block md:text-center md:pt-1">
               <button type="button" onClick={() => setExpanded(true)} aria-label={`Expand ${project.title}`}>
                 <ProjectMark title={project.title} />
               </button>
-              <button type="button" onClick={() => setExpanded(true)} className="mt-4 block w-full md:mt-6">
-                <h2 className="font-sans text-lg leading-tight tracking-normal md:text-xl">{project.title}</h2>
+              <button type="button" onClick={() => setExpanded(true)} className="block w-full text-left md:mt-6 md:text-center">
+                <h2 className="font-sans text-xl leading-tight tracking-normal md:text-xl">{project.title}</h2>
                 <p className="mt-2 text-xs uppercase tracking-normal text-muted md:mt-3 md:text-sm">{project.location}</p>
               </button>
               <button
                 type="button"
                 onClick={() => setExpanded(true)}
-                className="mx-auto mt-5 flex h-9 w-9 items-center justify-center border border-black/15 transition hover:bg-ink hover:text-paper dark:border-white/15 dark:hover:bg-paper dark:hover:text-ink md:mt-8 md:h-10 md:w-10"
+                className="mx-auto mt-5 hidden h-9 w-9 items-center justify-center border border-black/15 transition hover:bg-ink hover:text-paper dark:border-white/15 dark:hover:bg-paper dark:hover:text-ink md:mt-8 md:flex md:h-10 md:w-10"
                 aria-label={`Expand ${project.title}`}
               >
                 <Plus size={18} />
@@ -446,7 +447,7 @@ export function ProjectListItem({ project }: { project: Project }) {
             <button
               type="button"
               onClick={() => setExpanded(true)}
-              className="group relative aspect-[16/10] overflow-hidden bg-black"
+              className="group relative order-1 aspect-[16/10] overflow-hidden bg-black md:order-2"
               aria-label={`Expand ${project.title}`}
             >
               <Image
@@ -466,7 +467,7 @@ export function ProjectListItem({ project }: { project: Project }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.985, y: -10 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="relative ml-[calc(50%-50vw)] w-screen max-w-none overflow-hidden px-0 md:mx-auto md:ml-auto md:w-full md:max-w-[1680px]"
+            className="relative ml-[calc(50%-50vw)] w-screen max-w-none overflow-hidden px-5 md:mx-auto md:ml-auto md:w-full md:max-w-[1680px] md:px-0"
           >
             <button
               type="button"
@@ -476,11 +477,11 @@ export function ProjectListItem({ project }: { project: Project }) {
             >
               <ChevronUp size={19} />
             </button>
-            <div className="relative min-w-0 overflow-hidden border border-black/10 bg-white text-ink dark:border-white/10 dark:bg-[#4a4a4a] dark:text-paper">
+            <div className="relative min-w-0 overflow-hidden bg-transparent text-ink dark:text-paper md:border md:border-black/10 md:bg-white md:dark:border-white/10 md:dark:bg-[#4a4a4a]">
               <button
                 type="button"
                 onClick={() => slideBy("previous")}
-                className="absolute bottom-0 left-0 top-0 z-10 flex w-10 items-center justify-center bg-gradient-to-r from-black/32 to-transparent text-paper opacity-100 transition md:bottom-auto md:left-4 md:top-1/2 md:h-24 md:w-14 md:-translate-y-1/2 md:bg-black/25 md:hover:bg-black/40"
+                className="absolute bottom-0 left-0 top-0 z-10 hidden w-10 items-center justify-center bg-gradient-to-r from-black/32 to-transparent text-paper opacity-100 transition md:bottom-auto md:left-4 md:top-1/2 md:flex md:h-24 md:w-14 md:-translate-y-1/2 md:bg-black/25 md:hover:bg-black/40"
                 aria-label={`Previous ${project.title} media`}
               >
                 <ChevronLeft size={24} className="drop-shadow md:h-[30px] md:w-[30px]" />
@@ -488,7 +489,7 @@ export function ProjectListItem({ project }: { project: Project }) {
               <button
                 type="button"
                 onClick={() => slideBy("next")}
-                className="absolute bottom-0 right-0 top-0 z-10 flex w-10 items-center justify-center bg-gradient-to-l from-black/32 to-transparent text-paper opacity-100 transition md:bottom-auto md:right-4 md:top-1/2 md:h-24 md:w-14 md:-translate-y-1/2 md:bg-black/25 md:hover:bg-black/40"
+                className="absolute bottom-0 right-0 top-0 z-10 hidden w-10 items-center justify-center bg-gradient-to-l from-black/32 to-transparent text-paper opacity-100 transition md:bottom-auto md:right-4 md:top-1/2 md:flex md:h-24 md:w-14 md:-translate-y-1/2 md:bg-black/25 md:hover:bg-black/40"
                 aria-label={`Next ${project.title} media`}
               >
                 <ChevronRight size={24} className="drop-shadow md:h-[30px] md:w-[30px]" />
@@ -502,7 +503,7 @@ export function ProjectListItem({ project }: { project: Project }) {
                 onPointerCancel={stopDragging}
                 onPointerLeave={stopDragging}
                 style={{ touchAction: "pan-x pan-y", WebkitOverflowScrolling: "touch" }}
-                className={`no-scrollbar flex h-[78vh] max-h-[560px] min-h-[430px] cursor-grab select-none gap-3 overflow-x-auto overflow-y-hidden px-10 py-4 active:cursor-grabbing sm:h-[440px] md:h-[640px] md:max-h-none md:min-h-0 md:gap-6 md:px-6 md:py-8 lg:px-8 ${
+                className={`no-scrollbar flex h-[420px] cursor-grab select-none gap-0 overflow-x-auto overflow-y-hidden px-0 py-0 active:cursor-grabbing md:h-[640px] md:gap-6 md:px-6 md:py-8 lg:px-8 ${
                   isDragging ? "snap-none scroll-auto" : "snap-x snap-mandatory scroll-smooth"
                 }`}
               >
