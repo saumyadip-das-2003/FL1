@@ -95,7 +95,7 @@ const serviceCategories = [
   "D5 Render"
 ];
 const defaultPeopleRoles = ["Architecture", "Engineer", "Designer", "Technical"];
-const newsCategories = ["Studio", "Projects", "Awards", "Research", "Press"];
+const defaultNewsCategories = ["Studio", "Projects", "Awards", "Research", "Press"];
 
 const emptyItem: Record<CollectionKey, EditableItem> = {
   projects: {
@@ -341,6 +341,7 @@ export function AdminPanel() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [customSubsection, setCustomSubsection] = useState("");
   const [customPeopleRole, setCustomPeopleRole] = useState("");
+  const [customNewsCategory, setCustomNewsCategory] = useState("");
   const [openSubsectionMenuId, setOpenSubsectionMenuId] = useState("");
   const [draggedItemId, setDraggedItemId] = useState("");
   const [draggedMediaId, setDraggedMediaId] = useState("");
@@ -564,6 +565,36 @@ export function AdminPanel() {
 
   function removePeopleRole(role: string) {
     savePeopleRoles(peopleRoles().filter((item) => item !== role));
+  }
+
+  function newsCategories() {
+    const categories = (content.settings.newsCategories || "")
+      .split(",")
+      .map((category) => category.trim())
+      .filter(Boolean);
+
+    return Array.from(new Set(categories.length ? categories : defaultNewsCategories));
+  }
+
+  function saveNewsCategories(categories: string[]) {
+    updateSettings("newsCategories", Array.from(new Set(categories.map((category) => category.trim()).filter(Boolean))).join(", "));
+  }
+
+  function addNewsCategory(newsId?: string) {
+    const value = customNewsCategory.trim();
+    if (!value) {
+      return;
+    }
+
+    saveNewsCategories([...newsCategories(), value]);
+    if (newsId) {
+      updateItem("news", newsId, "category", value);
+    }
+    setCustomNewsCategory("");
+  }
+
+  function removeNewsCategory(category: string) {
+    saveNewsCategories(newsCategories().filter((item) => item !== category));
   }
 
   function updateItem(key: CollectionKey, id: string, field: string, value: string) {
@@ -2493,6 +2524,7 @@ export function AdminPanel() {
   }
 
   function renderNewsEditor(item: AdminNews) {
+    const categoryOptions = newsCategories();
     const galleryImages = item.gallery
       .split(/\n+/)
       .map((entry) => entry.trim())
@@ -2503,11 +2535,39 @@ export function AdminPanel() {
         <div className="grid gap-5 md:grid-cols-2">
           <Field label="News title"><TextInput value={item.title} onChange={(event) => updateItem("news", item.id, "title", event.target.value)} /></Field>
           <Field label="Category">
-            <SelectInput value={newsCategories.includes(item.category) ? item.category : "custom"} onChange={(event) => updateItem("news", item.id, "category", event.target.value)}>
-              {newsCategories.map((category) => <option key={category}>{category}</option>)}
-              <option value="custom">Custom...</option>
-            </SelectInput>
-            <TextInput value={item.category} onChange={(event) => updateItem("news", item.id, "category", event.target.value)} />
+            <div className="grid grid-cols-[1fr_auto] gap-2">
+              <SelectInput value={categoryOptions.includes(item.category) ? item.category : "custom"} onChange={(event) => updateItem("news", item.id, "category", event.target.value)}>
+                {categoryOptions.map((category) => <option key={category}>{category}</option>)}
+                <option value="custom">Custom...</option>
+              </SelectInput>
+              <button
+                type="button"
+                onClick={() => addNewsCategory(item.id)}
+                className="rounded-md border border-black/10 px-3 dark:border-white/10"
+                aria-label="Add custom news category"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+            <TextInput placeholder="Custom category" value={customNewsCategory} onChange={(event) => setCustomNewsCategory(event.target.value)} />
+            <div className="flex flex-wrap gap-2">
+              {categoryOptions.map((category) => (
+                <span key={category} className="inline-flex items-center gap-2 rounded-full border border-black/10 px-3 py-1 text-xs normal-case tracking-normal dark:border-white/10">
+                  {category}
+                  <button
+                    type="button"
+                    onClick={() => removeNewsCategory(category)}
+                    className="text-muted transition hover:text-red-600"
+                    aria-label={`Remove ${category} category`}
+                  >
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
+            </div>
+            {!categoryOptions.includes(item.category) && (
+              <TextInput value={item.category} onChange={(event) => updateItem("news", item.id, "category", event.target.value)} />
+            )}
           </Field>
           <Field label="Date"><TextInput value={item.date} onChange={(event) => updateItem("news", item.id, "date", event.target.value)} /></Field>
           <Field label="Slug / ID"><TextInput value={item.id} onChange={(event) => updateItem("news", item.id, "id", event.target.value)} /></Field>

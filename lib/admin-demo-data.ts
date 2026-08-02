@@ -149,6 +149,7 @@ export type AdminContent = {
     brandLinks: string;
     projectSubsections: string;
     peopleRoles: string;
+    newsCategories: string;
   };
   projects: AdminProject[];
   services: AdminService[];
@@ -292,7 +293,8 @@ export function createSeedAdminContent(): AdminContent {
         }
       ]),
       projectSubsections: serializeProjectTaxonomy(projectTaxonomy),
-      peopleRoles: "Architecture, Engineer, Designer, Technical"
+      peopleRoles: "Architecture, Engineer, Designer, Technical",
+      newsCategories: "Studio, Projects, Awards, Research, Press"
     },
     projects: projects.map((project) => ({
       id: project.slug,
