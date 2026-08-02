@@ -13,17 +13,20 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  Moon,
   Newspaper,
   Plus,
   Save,
   Search,
   Settings,
+  Sun,
   Trash2,
   Upload,
   Users,
   Wrench,
   X
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -91,7 +94,7 @@ const serviceCategories = [
   "Enscape",
   "D5 Render"
 ];
-const peopleRoles = ["Founding Partner", "Design Director", "Project Architect", "Interior Lead", "Landscape Architect", "Visualization Artist", "Technical Architect"];
+const defaultPeopleRoles = ["Architecture", "Engineer", "Designer", "Technical"];
 const newsCategories = ["Studio", "Projects", "Awards", "Research", "Press"];
 
 const emptyItem: Record<CollectionKey, EditableItem> = {
@@ -326,6 +329,7 @@ function MediaPreview({ type = "image", source, title, caption }: { type?: Admin
 
 export function AdminPanel() {
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
   const [content, setContent] = useState<AdminContent>(() => createSeedAdminContent());
   const [tab, setTab] = useState<Tab>("general");
   const [selectedId, setSelectedId] = useState<string>("");
@@ -334,7 +338,9 @@ export function AdminPanel() {
   const [token, setToken] = useState("");
   const [busy, setBusy] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [customSubsection, setCustomSubsection] = useState("");
+  const [customPeopleRole, setCustomPeopleRole] = useState("");
   const [openSubsectionMenuId, setOpenSubsectionMenuId] = useState("");
   const [draggedItemId, setDraggedItemId] = useState("");
   const [draggedMediaId, setDraggedMediaId] = useState("");
@@ -441,6 +447,15 @@ export function AdminPanel() {
     return ["projects", "services", "news", "people"].includes(value);
   }
 
+  function toggleSidebar() {
+    if (window.matchMedia("(min-width: 1024px)").matches) {
+      setSidebarCollapsed((current) => !current);
+      return;
+    }
+
+    setSidebarOpen(true);
+  }
+
   async function saveContent(next = content) {
     setBusy(true);
     window.localStorage.setItem(adminStorageKey, JSON.stringify(next));
@@ -519,6 +534,32 @@ export function AdminPanel() {
     };
 
     saveProjectSubsections(next);
+  }
+
+  function peopleRoles() {
+    const roles = content.settings.peopleRoles
+      .split(",")
+      .map((role) => role.trim())
+      .filter(Boolean);
+
+    return Array.from(new Set(roles.length ? roles : defaultPeopleRoles));
+  }
+
+  function savePeopleRoles(roles: string[]) {
+    updateSettings("peopleRoles", Array.from(new Set(roles.map((role) => role.trim()).filter(Boolean))).join(", "));
+  }
+
+  function addPeopleRole(personId?: string) {
+    const value = customPeopleRole.trim();
+    if (!value) {
+      return;
+    }
+
+    savePeopleRoles([...peopleRoles(), value]);
+    if (personId) {
+      updateItem("people", personId, "role", value);
+    }
+    setCustomPeopleRole("");
   }
 
   function updateItem(key: CollectionKey, id: string, field: string, value: string) {
@@ -2506,16 +2547,38 @@ export function AdminPanel() {
   }
 
   function renderPersonEditor(person: AdminPerson) {
+    const roleOptions = peopleRoles();
+
     return (
       <div className="grid gap-5">
         <div className="grid gap-5 md:grid-cols-2">
           <Field label="Name"><TextInput value={person.name} onChange={(event) => updateItem("people", person.id, "name", event.target.value)} /></Field>
-          <Field label="Role / subsection">
-            <SelectInput value={peopleRoles.includes(person.role) ? person.role : "custom"} onChange={(event) => updateItem("people", person.id, "role", event.target.value)}>
-              {peopleRoles.map((role) => <option key={role}>{role}</option>)}
-              <option value="custom">Custom...</option>
-            </SelectInput>
-            <TextInput value={person.role} onChange={(event) => updateItem("people", person.id, "role", event.target.value)} />
+          <Field label="Category / role">
+            <div className="grid grid-cols-[1fr_auto] gap-2">
+              <SelectInput value={roleOptions.includes(person.role) ? person.role : "custom"} onChange={(event) => updateItem("people", person.id, "role", event.target.value)}>
+                {roleOptions.map((role) => <option key={role}>{role}</option>)}
+                <option value="custom">Custom...</option>
+              </SelectInput>
+              <button
+                type="button"
+                onClick={() => addPeopleRole(person.id)}
+                className="rounded-md border border-black/10 px-3 dark:border-white/10"
+                aria-label="Add custom people role"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+            <TextInput placeholder="Custom category" value={customPeopleRole} onChange={(event) => setCustomPeopleRole(event.target.value)} />
+            <div className="flex flex-wrap gap-2">
+              {roleOptions.map((role) => (
+                <span key={role} className="rounded-full border border-black/10 px-3 py-1 text-xs normal-case tracking-normal dark:border-white/10">
+                  {role}
+                </span>
+              ))}
+            </div>
+            {!roleOptions.includes(person.role) && (
+              <TextInput value={person.role} onChange={(event) => updateItem("people", person.id, "role", event.target.value)} />
+            )}
           </Field>
         </div>
         <Field label="Bio"><TextArea value={person.bio} onChange={(event) => updateItem("people", person.id, "bio", event.target.value)} /></Field>
@@ -2567,9 +2630,9 @@ export function AdminPanel() {
         </div>
       )}
       <aside
-        className={`fixed inset-y-0 left-0 z-[70] w-72 border-r border-black/10 bg-white transition-transform dark:border-white/10 dark:bg-[#4a4a4a] lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-[70] w-72 border-r border-black/10 bg-white transition-transform dark:border-white/10 dark:bg-[#4a4a4a] ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        } ${sidebarCollapsed ? "lg:-translate-x-full" : "lg:translate-x-0"}`}
       >
         <div className="flex h-20 items-center justify-between border-b border-black/10 px-5 dark:border-white/10">
           <div>
@@ -2602,10 +2665,10 @@ export function AdminPanel() {
         </nav>
       </aside>
 
-      <div className="lg:pl-72">
+      <div className={`transition-[padding] duration-300 ${sidebarCollapsed ? "lg:pl-0" : "lg:pl-72"}`}>
         <header className="sticky top-0 z-40 flex min-h-20 items-center justify-between gap-4 border-b border-black/10 bg-white px-5 dark:border-white/10 dark:bg-[#4a4a4a]">
           <div className="flex items-center gap-3">
-            <button onClick={() => setSidebarOpen(true)} className="rounded-md border border-black/10 p-2 dark:border-white/10 lg:hidden" aria-label="Open admin menu">
+            <button onClick={toggleSidebar} className="rounded-md border border-black/10 p-2 transition hover:bg-neutral-100 dark:border-white/10 dark:hover:bg-neutral-700/50" aria-label="Toggle admin menu">
               <Menu size={18} />
             </button>
             <div>
@@ -2614,6 +2677,15 @@ export function AdminPanel() {
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-black/10 transition hover:bg-neutral-100 dark:border-white/10 dark:hover:bg-neutral-700/50"
+              aria-label="Toggle admin theme"
+              title="Toggle light / dark"
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
             <button onClick={() => saveContent()} disabled={busy} className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-xs uppercase tracking-[0.14em] text-paper disabled:opacity-60 dark:bg-paper dark:text-ink">
               <Save size={15} /> {busy ? "Saving" : "Save"}
             </button>

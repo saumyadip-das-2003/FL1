@@ -148,6 +148,7 @@ export type AdminContent = {
     quickContactSocialIds: string;
     brandLinks: string;
     projectSubsections: string;
+    peopleRoles: string;
   };
   projects: AdminProject[];
   services: AdminService[];
@@ -290,7 +291,8 @@ export function createSeedAdminContent(): AdminContent {
           href: "https://example.com"
         }
       ]),
-      projectSubsections: serializeProjectTaxonomy(projectTaxonomy)
+      projectSubsections: serializeProjectTaxonomy(projectTaxonomy),
+      peopleRoles: "Architecture, Engineer, Designer, Technical"
     },
     projects: projects.map((project) => ({
       id: project.slug,
@@ -349,7 +351,13 @@ export function createSeedAdminContent(): AdminContent {
     people: team.map((person) => ({
       id: person.name.toLowerCase().replace(/\s+/g, "-"),
       name: person.name,
-      role: person.role,
+      role: person.role.toLowerCase().includes("technical")
+        ? "Technical"
+        : person.role.toLowerCase().includes("sustainability")
+          ? "Engineer"
+          : person.role.toLowerCase().includes("interior") || person.role.toLowerCase().includes("visualization") || person.role.toLowerCase().includes("design")
+            ? "Designer"
+            : "Architecture",
       image: person.image,
       bio: person.bio,
       studio: "Atelier Northline",

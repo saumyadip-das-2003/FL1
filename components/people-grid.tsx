@@ -11,14 +11,20 @@ type Person = (typeof fallbackTeam)[number] & {
   office?: string;
   profile?: string;
 };
-type PeopleFilter = "All" | "Design" | "Interior" | "Landscape" | "Technical";
 
-const peopleFilters: PeopleFilter[] = ["All", "Design", "Interior", "Landscape", "Technical"];
+const defaultPeopleFilters = ["Architecture", "Engineer", "Designer", "Technical"];
 
-export function PeopleGrid({ team = fallbackTeam }: { team?: Person[] }) {
+export function PeopleGrid({
+  team = fallbackTeam,
+  roleOptions = defaultPeopleFilters
+}: {
+  team?: Person[];
+  roleOptions?: string[];
+}) {
+  const peopleFilters = useMemo(() => ["All", ...Array.from(new Set(roleOptions.filter(Boolean)))], [roleOptions]);
   const [activeName, setActiveName] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<PeopleFilter>("All");
+  const [filter, setFilter] = useState("All");
 
   const visibleTeam = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -26,16 +32,11 @@ export function PeopleGrid({ team = fallbackTeam }: { team?: Person[] }) {
     return team.filter((member) => {
       const searchable = [member.name, member.role, member.bio, member.studio, member.office, member.profile].join(" ").toLowerCase();
       const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
-      const matchesFilter =
-        filter === "All" ||
-        (filter === "Design" && /design|founding|project|visualization/i.test(member.role)) ||
-        (filter === "Interior" && /interior/i.test(member.role)) ||
-        (filter === "Landscape" && /landscape|sustainability/i.test(member.role)) ||
-        (filter === "Technical" && /technical|sustainability/i.test(member.role));
+      const matchesFilter = filter === "All" || member.role.toLowerCase() === filter.toLowerCase();
 
       return matchesQuery && matchesFilter;
     });
-  }, [filter, query]);
+  }, [filter, query, team]);
 
   return (
     <div className="mt-16">

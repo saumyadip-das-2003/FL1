@@ -7,6 +7,10 @@ export const dynamic = "force-dynamic";
 export default async function PeoplePage() {
   const content = await getLiveContent();
   const team = content.people.map(adminPersonToTeamMember);
+  const roleOptions = content.settings.peopleRoles
+    .split(",")
+    .map((role) => role.trim())
+    .filter(Boolean);
 
   return (
     <main className="site-page bg-paper transition-colors dark:bg-charcoal">
@@ -18,7 +22,7 @@ export default async function PeoplePage() {
           </h1>
         </Reveal>
 
-        <PeopleGrid team={team} />
+        <PeopleGrid team={team} roleOptions={roleOptions} />
       </section>
     </main>
   );
