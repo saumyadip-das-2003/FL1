@@ -19,6 +19,7 @@ export function HomeIntro({
 }) {
   const [introOpen, setIntroOpen] = useState(true);
   const [entering, setEntering] = useState(false);
+  const [compactIntro, setCompactIntro] = useState(false);
 
   function enterSite() {
     if (entering) {
@@ -34,6 +35,15 @@ export function HomeIntro({
     return () => window.clearTimeout(timer);
   });
 
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 640px)");
+    const sync = () => setCompactIntro(media.matches);
+
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
   return (
     <>
       <AnimatePresence>
@@ -48,7 +58,7 @@ export function HomeIntro({
             onClick={enterSite}
           >
             <motion.div
-              initial={{ opacity: 0, x: "-50%", y: "-50%", scale: 2.25, transformOrigin: "center center" }}
+              initial={{ opacity: 0, x: "-50%", y: "-50%", scale: compactIntro ? 1.35 : 2.25, transformOrigin: "center center" }}
               animate={
                 entering
                   ? {
@@ -57,7 +67,7 @@ export function HomeIntro({
                       top: 20,
                       x: 0,
                       y: 0,
-                      scale: 1,
+                      scale: compactIntro ? 0.92 : 1,
                       transformOrigin: "top left"
                     }
                   : {
@@ -66,12 +76,12 @@ export function HomeIntro({
                       top: "50%",
                       x: "-50%",
                       y: "-50%",
-                      scale: 2.25,
+                      scale: compactIntro ? 1.35 : 2.25,
                       transformOrigin: "center center"
                     }
               }
               transition={{ duration: entering ? 0.72 : 0.8, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute origin-top-left text-center"
+              className="absolute max-w-[88vw] origin-top-left text-center"
             >
               <BrandLogo
                 light

@@ -89,7 +89,7 @@ export function ProjectsBrowser({
 
         <div className="mb-12 grid gap-8">
           <div className="border-y border-black/10 py-5 dark:border-white/10">
-            <div className="grid grid-cols-2 gap-x-8 gap-y-5 md:grid-cols-5">
+            <div className="no-scrollbar flex items-center gap-8 overflow-x-auto pb-1 md:justify-between md:gap-10">
               {(["All", ...sections] as SectionFilter[]).map((section) => (
                 <button
                   key={section}
@@ -98,7 +98,7 @@ export function ProjectsBrowser({
                     setActiveSection(section);
                     setActiveSubsection("All");
                   }}
-                  className="flex items-center justify-center gap-2 whitespace-nowrap text-xs uppercase tracking-normal text-muted transition hover:text-ink dark:hover:text-paper md:text-base"
+                  className="flex shrink-0 items-center justify-center gap-2 whitespace-nowrap text-xs uppercase tracking-normal text-muted transition hover:text-ink dark:hover:text-paper md:text-base"
                 >
                   {activeSection === section && (
                     <motion.span

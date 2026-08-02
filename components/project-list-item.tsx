@@ -397,18 +397,18 @@ export function ProjectListItem({ project }: { project: Project }) {
               <button
                 type="button"
                 onClick={() => slideBy("previous")}
-                className="absolute bottom-0 left-0 top-0 z-10 flex w-20 items-center justify-center bg-gradient-to-r from-black/24 to-transparent text-paper opacity-0 transition hover:opacity-100"
+                className="absolute bottom-0 left-0 top-0 z-10 flex w-12 items-center justify-center bg-gradient-to-r from-black/32 to-transparent text-paper opacity-100 transition md:w-20 md:opacity-0 md:hover:opacity-100"
                 aria-label={`Previous ${project.title} media`}
               >
-                <ChevronLeft size={30} />
+                <ChevronLeft size={24} className="drop-shadow md:h-[30px] md:w-[30px]" />
               </button>
               <button
                 type="button"
                 onClick={() => slideBy("next")}
-                className="absolute bottom-0 right-0 top-0 z-10 flex w-20 items-center justify-center bg-gradient-to-l from-black/24 to-transparent text-paper opacity-0 transition hover:opacity-100"
+                className="absolute bottom-0 right-0 top-0 z-10 flex w-12 items-center justify-center bg-gradient-to-l from-black/32 to-transparent text-paper opacity-100 transition md:w-20 md:opacity-0 md:hover:opacity-100"
                 aria-label={`Next ${project.title} media`}
               >
-                <ChevronRight size={30} />
+                <ChevronRight size={24} className="drop-shadow md:h-[30px] md:w-[30px]" />
               </button>
 
               <div
