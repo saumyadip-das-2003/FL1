@@ -2262,7 +2262,7 @@ export function AdminPanel() {
             <TextInput
               value={project.mapLocation}
               onChange={(event) => updateItem("projects", project.id, "mapLocation", event.target.value)}
-              placeholder="Address, place name, or Google Maps embed URL"
+              placeholder="Paste Google Maps share link or embed URL"
             />
           </Field>
           <Field label="Section">

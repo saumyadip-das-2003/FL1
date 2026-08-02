@@ -267,46 +267,45 @@ export function ProjectListItem({ project }: { project: Project }) {
 
   function mapEmbedUrl(value: string) {
     const location = value.trim();
-    if (!location) {
+    if (!location || !/^https?:\/\//i.test(location)) {
       return "";
     }
 
-    if (/^https?:\/\//i.test(location)) {
-      try {
-        const url = new URL(location);
-        const isEmbed = url.pathname.includes("/maps/embed") || url.searchParams.get("output") === "embed";
-        if (isEmbed) {
-          return location;
-        }
-
-        const coordinateMatch = location.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
-        if (coordinateMatch) {
-          return `https://maps.google.com/maps?q=${coordinateMatch[1]},${coordinateMatch[2]}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
-        }
-
-        const placeMatch = url.pathname.match(/\/maps\/place\/([^/]+)/);
-        if (placeMatch?.[1]) {
-          return `https://maps.google.com/maps?q=${encodeURIComponent(decodeURIComponent(placeMatch[1].replace(/\+/g, " ")))}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
-        }
-      } catch {
-        // Fall through and use the raw value as a search query.
+    try {
+      const url = new URL(location);
+      const isEmbed = url.pathname.includes("/maps/embed") || url.searchParams.get("output") === "embed";
+      if (isEmbed) {
+        return location;
       }
+
+      const coordinateMatch = location.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+      if (coordinateMatch) {
+        return `https://maps.google.com/maps?q=${coordinateMatch[1]},${coordinateMatch[2]}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+      }
+
+      const placeMatch = url.pathname.match(/\/maps\/place\/([^/]+)/);
+      if (placeMatch?.[1]) {
+        return `https://maps.google.com/maps?q=${encodeURIComponent(decodeURIComponent(placeMatch[1].replace(/\+/g, " ")))}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+      }
+
+      const query = url.searchParams.get("q") || url.searchParams.get("query");
+      if (query) {
+        return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+      }
+    } catch {
+      return "";
     }
 
-    return `https://maps.google.com/maps?q=${encodeURIComponent(location)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    return "";
   }
 
   function mapOpenUrl(value: string) {
     const location = value.trim();
-    if (!location) {
+    if (!location || !/^https?:\/\//i.test(location)) {
       return "";
     }
 
-    if (/^https?:\/\//i.test(location)) {
-      return location;
-    }
-
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
+    return location;
   }
 
   function youtubeWatchUrl(source: string) {
@@ -423,6 +422,9 @@ export function ProjectListItem({ project }: { project: Project }) {
     if (slide.kind === "map") {
       const src = mapEmbedUrl(project.mapLocation ?? "");
       const openUrl = mapOpenUrl(project.mapLocation ?? "");
+      if (!src) {
+        return null;
+      }
 
       return (
         <section
