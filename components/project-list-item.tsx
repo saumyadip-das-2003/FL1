@@ -278,7 +278,7 @@ export function ProjectListItem({ project }: { project: Project }) {
         <section
           data-slide
           data-base-index={slide.baseIndex}
-          className="flex h-full w-[68vw] max-w-[280px] shrink-0 snap-start items-center bg-white px-5 text-center text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[380px] md:max-w-[380px] md:snap-center md:px-8"
+          className="flex h-full w-[calc(100vw-2.5rem)] max-w-none shrink-0 snap-center items-center bg-white px-5 text-center text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[380px] md:max-w-[380px] md:px-8"
         >
           <div className="w-full">
             <ProjectMark title={project.title} />
@@ -303,7 +303,7 @@ export function ProjectListItem({ project }: { project: Project }) {
         <section
           data-slide
           data-base-index={slide.baseIndex}
-          className="no-scrollbar flex h-full w-[58vw] max-w-none shrink-0 snap-start items-start overflow-y-auto bg-transparent px-0 pr-5 pt-1 text-ink dark:text-paper md:w-[560px] md:max-w-[520px] md:snap-center md:items-center md:bg-white md:px-8 md:pt-0 md:dark:bg-[#4a4a4a]"
+          className="no-scrollbar flex h-full w-[calc(100vw-2.5rem)] max-w-none shrink-0 snap-center items-center overflow-y-auto bg-white px-5 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[560px] md:max-w-[520px] md:px-8"
         >
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-muted md:text-xs md:tracking-[0.22em]">Project Caption</p>
@@ -319,7 +319,7 @@ export function ProjectListItem({ project }: { project: Project }) {
         <section
           data-slide
           data-base-index={slide.baseIndex}
-          className="flex h-full w-[56vw] max-w-none shrink-0 snap-start items-start bg-transparent px-0 pr-5 pt-1 text-ink dark:text-paper md:w-[500px] md:max-w-[500px] md:snap-center md:items-center md:bg-white md:px-8 md:pt-0 md:dark:bg-[#4a4a4a]"
+          className="flex h-full w-[calc(100vw-2.5rem)] max-w-none shrink-0 snap-center items-center bg-white px-5 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[500px] md:max-w-[500px] md:px-8"
         >
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-muted md:text-xs md:tracking-[0.22em]">
@@ -339,7 +339,7 @@ export function ProjectListItem({ project }: { project: Project }) {
         <section
           data-slide
           data-base-index={slide.baseIndex}
-          className="grid h-full w-[72vw] max-w-none shrink-0 snap-start overflow-hidden bg-white text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[72vw] md:max-w-[1280px] md:snap-center md:grid-cols-[minmax(260px,0.36fr)_minmax(0,1fr)]"
+          className="grid h-full w-[calc(100vw-2.5rem)] max-w-none shrink-0 snap-center overflow-hidden bg-white text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[72vw] md:max-w-[1280px] md:grid-cols-[minmax(260px,0.36fr)_minmax(0,1fr)]"
         >
           <div className="flex items-center border-b border-black/10 p-5 dark:border-white/10 md:border-b-0 md:border-r md:p-8">
             <div>
@@ -365,7 +365,7 @@ export function ProjectListItem({ project }: { project: Project }) {
       <section
         data-slide
         data-base-index={slide.baseIndex}
-        className="relative h-full w-[58vw] max-w-none shrink-0 snap-start overflow-hidden bg-black md:w-[72vw] md:max-w-[1280px] md:snap-center"
+        className="relative h-full w-[calc(100vw-2.5rem)] max-w-none shrink-0 snap-center overflow-hidden bg-black md:w-[72vw] md:max-w-[1280px]"
       >
         {slide.media.type === "image" ? (
           <Image
@@ -503,7 +503,7 @@ export function ProjectListItem({ project }: { project: Project }) {
                 onPointerCancel={stopDragging}
                 onPointerLeave={stopDragging}
                 style={{ touchAction: "pan-x pan-y", WebkitOverflowScrolling: "touch" }}
-                className={`no-scrollbar flex h-[420px] cursor-grab select-none gap-0 overflow-x-auto overflow-y-hidden px-0 py-0 active:cursor-grabbing md:h-[640px] md:gap-6 md:px-6 md:py-8 lg:px-8 ${
+                className={`no-scrollbar flex h-[520px] cursor-grab select-none gap-4 overflow-x-auto overflow-y-hidden px-0 py-0 active:cursor-grabbing md:h-[640px] md:gap-6 md:px-6 md:py-8 lg:px-8 ${
                   isDragging ? "snap-none scroll-auto" : "snap-x snap-mandatory scroll-smooth"
                 }`}
               >
