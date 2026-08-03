@@ -232,48 +232,56 @@ export const projects: Project[] = [
 export const team = [
   {
     name: "Nadia Rahman",
+    category: "Architecture",
     role: "Founding Partner",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80",
     bio: "Leads studio strategy, civic architecture, and research-led design work across South Asia."
   },
   {
     name: "Arman Chowdhury",
+    category: "Designer",
     role: "Design Director",
     image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80",
     bio: "Guides concept development with a focus on proportion, material culture, and public experience."
   },
   {
     name: "Mira Sen",
+    category: "Designer",
     role: "Interior Lead",
     image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=900&q=80",
     bio: "Develops interior environments where spatial performance and atmosphere carry equal weight."
   },
   {
     name: "Farid Islam",
+    category: "Technical",
     role: "Technical Architect",
     image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=900&q=80",
     bio: "Coordinates detailing, delivery standards, facade systems, and consultant integration."
   },
   {
     name: "Leena Park",
+    category: "Architecture",
     role: "Landscape Architect",
     image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=900&q=80",
     bio: "Shapes climate-responsive landscapes, planting strategies, and water-sensitive public realms."
   },
   {
     name: "Jonas Weber",
+    category: "Designer",
     role: "Visualization Artist",
     image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=900&q=80",
     bio: "Builds visual narratives for competitions, client presentations, and early spatial studies."
   },
   {
     name: "Tara Ahmed",
+    category: "Architecture",
     role: "Project Architect",
     image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=900&q=80",
     bio: "Manages residential and cultural projects from schematic design through construction documentation."
   },
   {
     name: "Rafiq Noor",
+    category: "Engineer",
     role: "Sustainability Consultant",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=900&q=80",
     bio: "Advises on passive cooling, resource cycles, carbon-aware specifications, and performance targets."

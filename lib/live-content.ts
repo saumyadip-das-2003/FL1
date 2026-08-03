@@ -91,6 +91,7 @@ export function adminServiceTags(service: AdminService) {
 export function adminPersonToTeamMember(person: AdminPerson) {
   return {
     name: person.name,
+    category: person.category,
     role: person.role,
     image: person.image,
     bio: person.bio,

@@ -43,6 +43,7 @@ export type AdminNews = {
 export type AdminPerson = {
   id: string;
   name: string;
+  category: string;
   role: string;
   image: string;
   bio: string;
@@ -356,13 +357,14 @@ export function createSeedAdminContent(): AdminContent {
     people: team.map((person) => ({
       id: person.name.toLowerCase().replace(/\s+/g, "-"),
       name: person.name,
-      role: person.role.toLowerCase().includes("technical")
+      category: person.role.toLowerCase().includes("technical")
         ? "Technical"
         : person.role.toLowerCase().includes("sustainability")
           ? "Engineer"
           : person.role.toLowerCase().includes("interior") || person.role.toLowerCase().includes("visualization") || person.role.toLowerCase().includes("design")
             ? "Designer"
             : "Architecture",
+      role: person.role,
       image: person.image,
       bio: person.bio,
       studio: "Atelier Northline",

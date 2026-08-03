@@ -130,6 +130,7 @@ const emptyItem: Record<CollectionKey, EditableItem> = {
   people: {
     id: "",
     name: "New Team Member",
+    category: "Architecture",
     role: "Architect",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80",
     bio: "Short biography goes here.",
@@ -177,10 +178,19 @@ function normalizeContent(content: AdminContent): AdminContent {
     })),
     services: content.services ?? seed.services,
     news: content.news ?? seed.news,
-    people: (content.people?.length ? content.people : seed.people).map((person, index) => ({
-      ...seed.people[index % seed.people.length],
-      ...person
-    }))
+    people: (content.people?.length ? content.people : seed.people).map((person, index) => {
+      const seedPerson = seed.people[index % seed.people.length];
+      const legacyPerson = person as AdminPerson & { category?: string };
+      const hasSeparateCategory = Boolean(legacyPerson.category);
+      const category = legacyPerson.category || legacyPerson.role || seedPerson.category || defaultPeopleRoles[0];
+
+      return {
+        ...seedPerson,
+        ...person,
+        category,
+        role: hasSeparateCategory ? (person.role || seedPerson.role) : (seedPerson.role || "")
+      };
+    })
   };
 }
 
@@ -559,7 +569,7 @@ export function AdminPanel() {
 
     savePeopleRoles([...peopleRoles(), value]);
     if (personId) {
-      updateItem("people", personId, "role", value);
+      updateItem("people", personId, "category", value);
     }
     setCustomPeopleRole("");
   }
@@ -2774,16 +2784,16 @@ export function AdminPanel() {
   }
 
   function renderPersonEditor(person: AdminPerson) {
-    const roleOptions = peopleRoles();
+    const categoryOptions = peopleRoles();
 
     return (
       <div className="grid gap-5">
         <div className="grid gap-5 md:grid-cols-2">
           <Field label="Name"><TextInput value={person.name} onChange={(event) => updateItem("people", person.id, "name", event.target.value)} /></Field>
-          <Field label="Category / role">
+          <Field label="Category">
             <div className="grid grid-cols-[1fr_auto] gap-2">
-              <SelectInput value={roleOptions.includes(person.role) ? person.role : "custom"} onChange={(event) => updateItem("people", person.id, "role", event.target.value)}>
-                {roleOptions.map((role) => <option key={role}>{role}</option>)}
+              <SelectInput value={categoryOptions.includes(person.category) ? person.category : "custom"} onChange={(event) => updateItem("people", person.id, "category", event.target.value)}>
+                {categoryOptions.map((role) => <option key={role}>{role}</option>)}
                 <option value="custom">Custom...</option>
               </SelectInput>
               <button
@@ -2797,7 +2807,7 @@ export function AdminPanel() {
             </div>
             <TextInput placeholder="Custom category" value={customPeopleRole} onChange={(event) => setCustomPeopleRole(event.target.value)} />
             <div className="flex flex-wrap gap-2">
-              {roleOptions.map((role) => (
+              {categoryOptions.map((role) => (
                 <span key={role} className="inline-flex items-center gap-2 rounded-full border border-black/10 px-3 py-1 text-xs normal-case tracking-normal dark:border-white/10">
                   {role}
                   <button
@@ -2811,11 +2821,18 @@ export function AdminPanel() {
                 </span>
               ))}
             </div>
-            {!roleOptions.includes(person.role) && (
-              <TextInput value={person.role} onChange={(event) => updateItem("people", person.id, "role", event.target.value)} />
+            {!categoryOptions.includes(person.category) && (
+              <TextInput value={person.category} onChange={(event) => updateItem("people", person.id, "category", event.target.value)} />
             )}
           </Field>
         </div>
+        <Field label="Role">
+          <TextInput
+            value={person.role}
+            placeholder="Founding Partner, Architect, Project Manager..."
+            onChange={(event) => updateItem("people", person.id, "role", event.target.value)}
+          />
+        </Field>
         <Field label="Bio"><TextArea value={person.bio} onChange={(event) => updateItem("people", person.id, "bio", event.target.value)} /></Field>
         <div className="grid gap-5 md:grid-cols-2">
           <Field label="Studio">

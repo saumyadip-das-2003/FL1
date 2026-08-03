@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { team as fallbackTeam } from "@/lib/data";
 
 type Person = (typeof fallbackTeam)[number] & {
+  category?: string;
   studio?: string;
   office?: string;
   profile?: string;
@@ -30,9 +31,10 @@ export function PeopleGrid({
     const normalizedQuery = query.trim().toLowerCase();
 
     return team.filter((member) => {
-      const searchable = [member.name, member.role, member.bio, member.studio, member.office, member.profile].join(" ").toLowerCase();
+      const category = member.category || member.role;
+      const searchable = [member.name, member.category, member.role, member.bio, member.studio, member.office, member.profile].join(" ").toLowerCase();
       const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
-      const matchesFilter = filter === "All" || member.role.toLowerCase() === filter.toLowerCase();
+      const matchesFilter = filter === "All" || category.toLowerCase() === filter.toLowerCase();
 
       return matchesQuery && matchesFilter;
     });
@@ -93,7 +95,7 @@ export function PeopleGrid({
                   <h2 className="font-serif text-2xl leading-tight transition hover:text-muted md:text-4xl">
                     {member.name}
                   </h2>
-                  <p className="mt-2 text-[11px] uppercase tracking-[0.16em] text-muted md:text-xs md:tracking-[0.22em]">{member.role}</p>
+                  <p className="mt-2 text-[11px] uppercase tracking-[0.16em] text-muted md:text-xs md:tracking-[0.22em]">{member.role || member.category}</p>
                 </button>
                 <button
                   type="button"
@@ -126,7 +128,7 @@ export function PeopleGrid({
                         />
                       </div>
                       <div className="max-w-2xl">
-                        <p className="font-serif text-xl leading-tight md:text-2xl">{member.role}</p>
+                        <p className="font-serif text-xl leading-tight md:text-2xl">{member.role || member.category}</p>
                         <p className="mt-5 whitespace-pre-line text-base leading-8 text-muted">{member.bio}</p>
                         <div className="mt-8 grid gap-4 border-y border-black/10 py-6 text-sm dark:border-white/10">
                           <p className="flex justify-between gap-5">
