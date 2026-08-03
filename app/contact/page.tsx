@@ -20,7 +20,7 @@ export default async function ContactPage() {
         <Reveal>
           <p className="site-eyebrow">Contact</p>
           <h1 className="site-page-title mt-5">
-            Begin a conversation about place, program, and possibility.
+            Let&apos;s discuss your next project.
           </h1>
           <div className="mt-12 grid gap-5 text-sm">
             <p className="flex items-center gap-3">
