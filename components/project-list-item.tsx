@@ -424,7 +424,11 @@ export function ProjectListItem({ project }: { project: Project }) {
       <section
         data-slide
         data-base-index={slide.baseIndex}
-        className="relative h-full w-[calc(100vw-2.5rem)] max-w-none shrink-0 snap-center overflow-hidden bg-black md:w-[72vw] md:max-w-[1280px]"
+        className={`relative h-full shrink-0 snap-center overflow-hidden bg-transparent ${
+          slide.media.type === "image"
+            ? "flex w-auto items-center justify-center"
+            : "aspect-video w-[calc(100vw-2.5rem)] max-w-none md:w-auto"
+        }`}
       >
         {slide.media.type === "image" ? (
           <div
@@ -463,17 +467,15 @@ export function ProjectListItem({ project }: { project: Project }) {
                 });
               }
             }}
-            className="relative block h-full w-full cursor-zoom-in outline-none"
+            className="relative block h-full w-auto cursor-zoom-in outline-none"
             aria-label={`Open ${project.title} image ${slide.index + 1}`}
           >
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={slide.media.source}
               alt={`${project.title} media ${slide.index + 1}`}
-              fill
-              sizes="(min-width: 1024px) 72vw, 92vw"
-              className="object-contain md:object-cover"
+              className="h-full w-auto max-w-none select-none object-contain"
               draggable={false}
-              priority={slide.index === 0}
             />
           </div>
         ) : (

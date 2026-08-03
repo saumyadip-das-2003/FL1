@@ -791,13 +791,13 @@ export function AdminPanel() {
     updateSettings("socialLinks", JSON.stringify(links, null, 2));
   }
 
-  function addSocialLink() {
+  function addSocialLink(platform = "Instagram") {
     saveSocialLinks([
       ...socialLinks(),
       {
         id: makeId("social-link"),
-        platform: "Instagram",
-        href: "https://instagram.com"
+        platform,
+        href: platform === "Professional Email" ? content.settings.email : "https://"
       }
     ]);
   }
@@ -1562,58 +1562,115 @@ export function AdminPanel() {
 
   function renderSocialLinksEditor() {
     const links = socialLinks();
+    const groupedLinks = socialPlatformGroups.map((group) => ({
+      ...group,
+      links: links.filter((link) => (group.platforms as readonly string[]).includes(normalizeSocialPlatform(link.platform)))
+    }));
+    const otherLinks = links.filter(
+      (link) => !socialPlatformGroups.some((group) => (group.platforms as readonly string[]).includes(normalizeSocialPlatform(link.platform)))
+    );
 
     return (
       <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-6">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Social Media Links</p>
             <p className="mt-2 text-sm leading-6 text-muted">
-              Choose the platform and paste the public profile link. These links appear in Contact, footer, and quick contact buttons.
+              Manage section-wise platform links for the contact page, footer, service social presence, and quick contact buttons.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={addSocialLink}
-            className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-3 text-xs uppercase tracking-[0.14em] text-paper dark:bg-paper dark:text-ink"
-          >
-            <Plus size={15} /> Add Social
-          </button>
         </div>
 
-        <div className="grid gap-3">
-          {links.map((link) => (
-            <div key={link.id} className="grid gap-3 rounded-lg border border-black/10 p-4 dark:border-white/10 md:grid-cols-[220px_1fr_auto] md:items-end">
-              <Field label="Platform">
-                <SelectInput value={link.platform} onChange={(event) => updateSocialLink(link.id, "platform", event.target.value)}>
-                  {!socialPlatformGroups.some((group) => (group.platforms as readonly string[]).includes(link.platform)) && (
-                    <option>{link.platform}</option>
-                  )}
-                  {socialPlatformGroups.map((group) => (
-                    <optgroup key={group.title} label={group.title}>
-                      {group.platforms.map((platform) => (
-                        <option key={platform}>{platform}</option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </SelectInput>
-              </Field>
-              <Field label="Link / phone / email">
-                <TextInput
-                  value={link.href}
-                  onChange={(event) => updateSocialLink(link.id, "href", event.target.value)}
-                  placeholder="https://..., tel:+880..., or email@example.com"
-                />
-              </Field>
-              <button
-                type="button"
-                onClick={() => deleteSocialLink(link.id)}
-                className="h-11 rounded-md border border-red-500/30 px-4 text-xs uppercase tracking-[0.14em] text-red-600"
-              >
-                Delete
-              </button>
+        <div className="grid gap-5">
+          {groupedLinks.map((group) => (
+            <div key={group.title} className="rounded-lg border border-black/10 p-4 dark:border-white/10">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">{group.title}</p>
+                  <p className="mt-1 text-xs text-muted">{group.links.length} link{group.links.length === 1 ? "" : "s"} added</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => addSocialLink(group.platforms[0])}
+                  className="inline-flex items-center gap-2 rounded-md bg-ink px-3 py-2 text-[11px] uppercase tracking-[0.14em] text-paper dark:bg-paper dark:text-ink"
+                >
+                  <Plus size={14} /> Add Link
+                </button>
+              </div>
+
+              <div className="grid gap-3">
+                {group.links.map((link) => (
+                  <div key={link.id} className="grid gap-3 rounded-lg bg-neutral-50 p-4 dark:bg-neutral-700/30 md:grid-cols-[260px_1fr_auto] md:items-end">
+                    <Field label="Platform">
+                      <SelectInput value={normalizeSocialPlatform(link.platform)} onChange={(event) => updateSocialLink(link.id, "platform", event.target.value)}>
+                        {group.platforms.map((platform) => (
+                          <option key={platform}>{platform}</option>
+                        ))}
+                      </SelectInput>
+                    </Field>
+                    <Field label="Link / phone / email">
+                      <TextInput
+                        value={link.href}
+                        onChange={(event) => updateSocialLink(link.id, "href", event.target.value)}
+                        placeholder="https://..., tel:+880..., or email@example.com"
+                      />
+                    </Field>
+                    <button
+                      type="button"
+                      onClick={() => deleteSocialLink(link.id)}
+                      className="h-11 rounded-md border border-red-500/30 px-4 text-xs uppercase tracking-[0.14em] text-red-600"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))}
+                {group.links.length === 0 && (
+                  <p className="rounded-md border border-dashed border-black/10 p-4 text-sm text-muted dark:border-white/10">
+                    No links added in this section.
+                  </p>
+                )}
+              </div>
             </div>
           ))}
+
+          {otherLinks.length > 0 && (
+            <div className="rounded-lg border border-black/10 p-4 dark:border-white/10">
+              <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Other Links</p>
+              <div className="grid gap-3">
+                {otherLinks.map((link) => (
+                  <div key={link.id} className="grid gap-3 rounded-lg bg-neutral-50 p-4 dark:bg-neutral-700/30 md:grid-cols-[260px_1fr_auto] md:items-end">
+                    <Field label="Platform">
+                      <SelectInput value={link.platform} onChange={(event) => updateSocialLink(link.id, "platform", event.target.value)}>
+                        <option>{link.platform}</option>
+                        {socialPlatformGroups.map((group) => (
+                          <optgroup key={group.title} label={group.title}>
+                            {group.platforms.map((platform) => (
+                              <option key={platform}>{platform}</option>
+                            ))}
+                          </optgroup>
+                        ))}
+                      </SelectInput>
+                    </Field>
+                    <Field label="Link / phone / email">
+                      <TextInput
+                        value={link.href}
+                        onChange={(event) => updateSocialLink(link.id, "href", event.target.value)}
+                        placeholder="https://..., tel:+880..., or email@example.com"
+                      />
+                    </Field>
+                    <button
+                      type="button"
+                      onClick={() => deleteSocialLink(link.id)}
+                      className="h-11 rounded-md border border-red-500/30 px-4 text-xs uppercase tracking-[0.14em] text-red-600"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {links.length === 0 && (
             <p className="rounded-md bg-neutral-50 p-4 text-sm text-muted dark:bg-neutral-700/40">
               No social media links added yet.
