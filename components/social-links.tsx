@@ -192,10 +192,12 @@ export function SocialLinks({
 
 export function SocialLinkButton({
   link,
-  showLabel = false
+  showLabel = false,
+  showHref = true
 }: {
   link: Pick<AdminSocialLink, "platform" | "href">;
   showLabel?: boolean;
+  showHref?: boolean;
 }) {
   const platformLabel = normalizeSocialPlatform(link.platform);
   const platform = platformMap[platformLabel as keyof typeof platformMap] ?? { icon: GenericLogo, color: "bg-ink" };
@@ -221,7 +223,9 @@ export function SocialLinkButton({
       {showLabel ? (
         <span className="min-w-0">
           <span className="block font-medium">{platformLabel}</span>
-          <span className="block truncate text-xs text-muted">{href.replace(/^mailto:|^tel:/, "")}</span>
+          {showHref ? (
+            <span className="block truncate text-xs text-muted">{href.replace(/^mailto:|^tel:/, "")}</span>
+          ) : null}
         </span>
       ) : (
         <span className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 translate-y-1 whitespace-nowrap bg-ink px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-paper opacity-0 shadow-sm transition group-hover:translate-y-0 group-hover:opacity-100 dark:bg-paper dark:text-ink">

@@ -80,12 +80,21 @@ export function ProjectListItem({ project }: { project: Project }) {
     const visibleMedia = mediaItems.filter(
       (media) => media.type !== "caption" || media.source.trim() || media.caption.trim()
     );
+    let skippedCover = false;
+    const mediaAfterCover = visibleMedia.filter((media) => {
+      if (!skippedCover && media.type === "image" && media.source === project.image) {
+        skippedCover = true;
+        return false;
+      }
+
+      return true;
+    });
     const hasDescription = project.description.trim() || project.excerpt.trim();
 
     return [
-      { id: "meta", kind: "meta" as const },
+      { id: "meta-cover", kind: "metaCover" as const },
       ...(hasDescription ? [{ id: "overview", kind: "overview" as const }] : []),
-      ...visibleMedia.map((media, index) => ({
+      ...mediaAfterCover.map((media, index) => ({
         id: `${media.type}-${index}`,
         kind: media.type === "caption" ? ("caption" as const) : ("media" as const),
         media,
@@ -93,7 +102,7 @@ export function ProjectListItem({ project }: { project: Project }) {
       })),
       ...(project.mapLocation?.trim() ? [{ id: "map", kind: "map" as const }] : [])
     ];
-  }, [mediaItems, project.description, project.excerpt, project.mapLocation]);
+  }, [mediaItems, project.description, project.excerpt, project.image, project.mapLocation]);
   const stripRef = useRef<HTMLDivElement>(null);
   const dragState = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0 });
   const pendingImageOpen = useRef<{ src: string; alt: string } | null>(null);
@@ -318,14 +327,15 @@ export function ProjectListItem({ project }: { project: Project }) {
   }
 
   function renderSlide(slide: (typeof baseSlides)[number] & { baseIndex: number }) {
-    if (slide.kind === "meta") {
+    if (slide.kind === "metaCover") {
       return (
         <section
           data-slide
           data-base-index={slide.baseIndex}
-          className="flex h-full w-[calc(100vw-2.5rem)] max-w-none shrink-0 snap-center items-center bg-white px-5 text-center text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[380px] md:max-w-[380px] md:px-8"
+          className="grid h-full w-[calc(100vw-2.5rem)] max-w-none shrink-0 snap-center grid-rows-[auto_minmax(0,1fr)] overflow-hidden bg-white text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[min(1280px,calc(100vw-4rem))] md:grid-cols-[360px_minmax(0,1fr)] md:grid-rows-none md:border md:border-black/10 md:dark:border-white/10"
         >
-          <div className="w-full">
+          <div className="no-scrollbar flex h-full items-center overflow-y-auto border-b border-black/10 px-5 py-8 text-center dark:border-white/10 md:border-b-0 md:border-r md:px-8">
+            <div className="w-full">
             <ProjectMark title={project.title} />
             <h2 className="mt-6 font-sans text-xl leading-tight tracking-normal md:mt-7 md:text-2xl">{project.title}</h2>
             <p className="mt-3 text-sm uppercase tracking-normal text-muted">{project.location}</p>
@@ -338,7 +348,31 @@ export function ProjectListItem({ project }: { project: Project }) {
             >
               <Minus size={18} />
             </button>
+            </div>
           </div>
+          <button
+            type="button"
+            data-project-image-src={project.image}
+            data-project-image-alt={`${project.title} cover image`}
+            onClick={() => {
+              if (!dragState.current.moved) {
+                setActiveImage({
+                  src: project.image,
+                  alt: `${project.title} cover image`
+                });
+              }
+            }}
+            className="flex h-full min-h-0 w-full items-center justify-center overflow-hidden bg-transparent p-0 outline-none"
+            aria-label={`Open ${project.title} cover image`}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={project.image}
+              alt={`${project.title} cover`}
+              className="max-h-full w-full select-none object-contain md:h-full md:w-auto md:max-w-none"
+              draggable={false}
+            />
+          </button>
         </section>
       );
     }
@@ -426,7 +460,7 @@ export function ProjectListItem({ project }: { project: Project }) {
         data-base-index={slide.baseIndex}
         className={`relative h-full shrink-0 snap-center overflow-hidden bg-transparent ${
           slide.media.type === "image"
-            ? "flex w-auto items-center justify-center"
+            ? "flex w-[calc(100vw-2.5rem)] items-center justify-center md:w-auto"
             : "aspect-video w-[calc(100vw-2.5rem)] max-w-none md:w-auto"
         }`}
       >
@@ -467,14 +501,14 @@ export function ProjectListItem({ project }: { project: Project }) {
                 });
               }
             }}
-            className="relative block h-full w-auto cursor-zoom-in outline-none"
+            className="relative flex h-full w-full cursor-zoom-in items-center justify-center outline-none md:block md:w-auto"
             aria-label={`Open ${project.title} image ${slide.index + 1}`}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={slide.media.source}
               alt={`${project.title} media ${slide.index + 1}`}
-              className="h-full w-auto max-w-none select-none object-contain"
+              className="max-h-full w-full select-none object-contain md:h-full md:w-auto md:max-w-none"
               draggable={false}
             />
           </div>

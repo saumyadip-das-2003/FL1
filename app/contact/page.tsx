@@ -39,18 +39,23 @@ export default async function ContactPage() {
         </Reveal>
 
         <Reveal delay={0.1}>
-          <div>
-            <ContactForm />
-            <div className="mt-10 border-t border-black/10 pt-8 dark:border-white/10">
+          <ContactForm />
+        </Reveal>
+      </section>
+
+      <Reveal delay={0.15}>
+        <section className="mx-auto mt-16 max-w-7xl border-t border-black/10 pt-10 dark:border-white/10">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div>
               <p className="site-eyebrow">Social Media</p>
               <p className="mt-3 max-w-xl text-sm leading-7 text-muted">
                 Follow the studio across active channels for project updates, process notes, and announcements.
               </p>
-              <ContactSocialSections links={socialLinks} />
             </div>
           </div>
-        </Reveal>
-      </section>
+          <ContactSocialSections links={socialLinks} />
+        </section>
+      </Reveal>
 
       <section className="mx-auto mt-20 grid max-w-7xl gap-6 md:grid-cols-2">
         {offices.map((office, index) => {

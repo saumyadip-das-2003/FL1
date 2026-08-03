@@ -1,4 +1,4 @@
-import { SocialLinks } from "@/components/social-links";
+import { SocialLinkButton } from "@/components/social-links";
 import { getLiveContent } from "@/lib/live-content";
 import { parseBrandLinks, selectedSocialLinks } from "@/lib/social-platforms";
 import Image from "next/image";
@@ -66,15 +66,24 @@ export async function Footer() {
               </a>
             </p>
             <p>{content.settings.phone}</p>
-            <div className="pt-3">
-              <SocialLinks compact links={socialLinks} />
-            </div>
             <Link href="/admin/login" className="inline-block pt-4 text-xs uppercase tracking-[0.18em] text-muted underline">
               Admin Login
             </Link>
           </div>
         </div>
       </div>
+
+      {socialLinks.length > 0 ? (
+        <div className="mt-7 border-t border-black/10 pt-5 dark:border-white/10">
+          <div className="flex w-full flex-nowrap items-center gap-2 overflow-x-auto overflow-y-visible pb-2">
+            {socialLinks.map((link) => (
+              <div key={`${link.id}-${link.href}`} className="shrink-0">
+                <SocialLinkButton link={link} />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </footer>
   );
 }
