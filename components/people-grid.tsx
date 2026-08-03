@@ -127,7 +127,7 @@ export function PeopleGrid({
                       </div>
                       <div className="max-w-2xl">
                         <p className="font-serif text-xl leading-tight md:text-2xl">{member.role}</p>
-                        <p className="mt-5 text-base leading-8 text-muted">{member.bio}</p>
+                        <p className="mt-5 whitespace-pre-line text-base leading-8 text-muted">{member.bio}</p>
                         <div className="mt-8 grid gap-4 border-y border-black/10 py-6 text-sm dark:border-white/10">
                           <p className="flex justify-between gap-5">
                             <span className="text-muted">Studio</span>

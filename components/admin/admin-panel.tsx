@@ -598,6 +598,37 @@ export function AdminPanel() {
     saveNewsCategories(newsCategories().filter((item) => item !== category));
   }
 
+  function officeEntries() {
+    const addresses = content.settings.offices.split(/\n+/);
+    const maps = (content.settings.officeMaps ?? "").split(/\n+/);
+    const count = Math.max(addresses.length, maps.length, 1);
+
+    return Array.from({ length: count }, (_, index) => ({
+      address: addresses[index]?.trim() ?? "",
+      map: maps[index]?.trim() ?? ""
+    })).filter((entry, index, list) => entry.address || entry.map || list.length === 1 || index < count);
+  }
+
+  function saveOfficeEntries(entries: { address: string; map: string }[]) {
+    updateSettings("offices", entries.map((entry) => entry.address.trim()).filter(Boolean).join("\n"));
+    updateSettings("officeMaps", entries.map((entry) => entry.map.trim()).join("\n"));
+  }
+
+  function updateOfficeEntry(index: number, field: "address" | "map", value: string) {
+    const entries = officeEntries();
+    entries[index] = { ...(entries[index] ?? { address: "", map: "" }), [field]: value };
+    saveOfficeEntries(entries);
+  }
+
+  function addOfficeEntry() {
+    saveOfficeEntries([...officeEntries().filter((entry) => entry.address || entry.map), { address: "", map: "" }]);
+  }
+
+  function removeOfficeEntry(index: number) {
+    const next = officeEntries().filter((_, itemIndex) => itemIndex !== index);
+    saveOfficeEntries(next.length ? next : [{ address: "", map: "" }]);
+  }
+
   function updateItem(key: CollectionKey, id: string, field: string, value: string) {
     setContent((current) => ({
       ...current,
@@ -2228,22 +2259,59 @@ export function AdminPanel() {
     }
 
     if (tab === "contact") {
+      const offices = officeEntries();
+
       return (
         <div className="grid gap-6">
           {renderSettingsFields(["email", "phone", "address"])}
           {renderSocialLinksEditor()}
           <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Offices and Maps</p>
-            <p className="mt-2 text-sm leading-6 text-muted">
-              Add one office per line. Add matching Google Maps embed URLs one per line in the same order.
-            </p>
-            <div className="mt-5 grid gap-5 md:grid-cols-2">
-              <Field label="Office addresses">
-                <TextArea value={content.settings.offices} onChange={(event) => updateSettings("offices", event.target.value)} />
-              </Field>
-              <Field label="Office map embed URLs">
-                <TextArea value={content.settings.officeMaps} onChange={(event) => updateSettings("officeMaps", event.target.value)} />
-              </Field>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Offices and Maps</p>
+                <p className="mt-2 text-sm leading-6 text-muted">
+                  Add each office separately to keep its address and map link matched correctly.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={addOfficeEntry}
+                className="inline-flex items-center gap-2 rounded-md border border-black/10 px-4 py-2 text-xs uppercase tracking-[0.14em] transition hover:bg-ink hover:text-paper dark:border-white/10 dark:hover:bg-paper dark:hover:text-ink"
+              >
+                <Plus size={15} /> Add Address
+              </button>
+            </div>
+            <div className="mt-5 grid gap-4">
+              {offices.map((office, index) => (
+                <div key={index} className="rounded-lg border border-black/10 p-4 dark:border-white/10">
+                  <div className="mb-4 flex items-center justify-between gap-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">Office {index + 1}</p>
+                    <button
+                      type="button"
+                      onClick={() => removeOfficeEntry(index)}
+                      className="inline-flex items-center gap-2 rounded-md border border-red-500/30 px-3 py-2 text-xs uppercase tracking-[0.12em] text-red-600 transition hover:bg-red-50 dark:hover:bg-red-500/10"
+                    >
+                      <Trash2 size={13} /> Remove
+                    </button>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Field label="Address">
+                      <TextArea
+                        value={office.address}
+                        onChange={(event) => updateOfficeEntry(index, "address", event.target.value)}
+                        placeholder="Office address"
+                      />
+                    </Field>
+                    <Field label="Map location link">
+                      <TextArea
+                        value={office.map}
+                        onChange={(event) => updateOfficeEntry(index, "map", event.target.value)}
+                        placeholder="Google Maps share or embed link"
+                      />
+                    </Field>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
