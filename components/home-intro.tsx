@@ -31,6 +31,11 @@ export function HomeIntro({
   }
 
   useEffect(() => {
+    document.body.classList.toggle("home-intro-active", introOpen);
+    return () => document.body.classList.remove("home-intro-active");
+  }, [introOpen]);
+
+  useEffect(() => {
     const timer = window.setTimeout(enterSite, 1000);
     return () => window.clearTimeout(timer);
   });
@@ -51,7 +56,7 @@ export function HomeIntro({
           <motion.button
             type="button"
             aria-label="Enter Atelier Northline website"
-            className="fixed inset-0 z-[100] cursor-pointer overflow-hidden bg-[#101010] text-paper"
+            className="fixed inset-0 z-[200] cursor-pointer overflow-hidden bg-[#101010] text-paper"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}

@@ -23,6 +23,11 @@ html {
   display: none;
 }
 
+.home-intro-active [data-site-chrome] {
+  visibility: hidden;
+  opacity: 0;
+}
+
 body {
   min-height: 100vh;
   background: #f8f7f4;
