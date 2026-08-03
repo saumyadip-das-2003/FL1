@@ -158,6 +158,25 @@ function readFileAsDataUrl(file: File) {
 
 function normalizeContent(content: AdminContent): AdminContent {
   const seed = createSeedAdminContent();
+  const knownPeopleCategories = (content.settings?.peopleRoles || seed.settings.peopleRoles || "")
+    .split(",")
+    .map((role) => role.trim().toLowerCase())
+    .filter(Boolean);
+
+  function normalizePerson(person: AdminPerson, index: number): AdminPerson {
+    const seedPerson = seed.people[index % seed.people.length];
+    const legacyPerson = person as AdminPerson & { category?: string };
+    const legacyRoleLooksLikeCategory = knownPeopleCategories.includes((legacyPerson.role || "").trim().toLowerCase());
+    const category = legacyPerson.category || (legacyRoleLooksLikeCategory ? legacyPerson.role : seedPerson.category) || defaultPeopleRoles[0];
+
+    return {
+      ...seedPerson,
+      ...person,
+      category,
+      role: legacyPerson.category || !legacyRoleLooksLikeCategory ? (person.role || seedPerson.role) : (seedPerson.role || "")
+    };
+  }
+
   return {
     ...seed,
     ...content,
@@ -178,19 +197,7 @@ function normalizeContent(content: AdminContent): AdminContent {
     })),
     services: content.services ?? seed.services,
     news: content.news ?? seed.news,
-    people: (content.people?.length ? content.people : seed.people).map((person, index) => {
-      const seedPerson = seed.people[index % seed.people.length];
-      const legacyPerson = person as AdminPerson & { category?: string };
-      const hasSeparateCategory = Boolean(legacyPerson.category);
-      const category = legacyPerson.category || legacyPerson.role || seedPerson.category || defaultPeopleRoles[0];
-
-      return {
-        ...seedPerson,
-        ...person,
-        category,
-        role: hasSeparateCategory ? (person.role || seedPerson.role) : (seedPerson.role || "")
-      };
-    })
+    people: (content.people?.length ? content.people : seed.people).map(normalizePerson)
   };
 }
 
@@ -469,8 +476,10 @@ export function AdminPanel() {
   }
 
   async function saveContent(next = content) {
+    const normalizedNext = normalizeContent(next);
     setBusy(true);
-    window.localStorage.setItem(adminStorageKey, JSON.stringify(next));
+    setContent(normalizedNext);
+    window.localStorage.setItem(adminStorageKey, JSON.stringify(normalizedNext));
 
     try {
       const response = await fetch("/api/admin/content", {
@@ -479,7 +488,7 @@ export function AdminPanel() {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
-        body: JSON.stringify(next)
+        body: JSON.stringify(normalizedNext)
       });
 
       if (!response.ok) {
