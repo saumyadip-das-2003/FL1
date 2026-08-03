@@ -89,13 +89,53 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
             />
             <motion.div
               key="route-loading-mark"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.24, ease: "easeOut" }}
-              className="pointer-events-none fixed left-1/2 top-24 z-[155] -translate-x-1/2 border border-black/10 bg-white/90 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-ink shadow-sm backdrop-blur dark:border-white/10 dark:bg-[#4b4b4b]/90 dark:text-paper md:top-28"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="pointer-events-none fixed inset-0 z-[155] grid place-items-center bg-paper/45 backdrop-blur-[2px] dark:bg-[#3f3f3f]/45"
             >
-              Loading
+              <div className="flex -translate-y-[2vh] flex-col items-center gap-5">
+                <div className="relative h-20 w-20">
+                  {[
+                    "left-0 top-0 origin-bottom-right",
+                    "right-0 top-0 origin-bottom-left",
+                    "bottom-0 left-0 origin-top-right",
+                    "bottom-0 right-0 origin-top-left"
+                  ].map((position, index) => (
+                    <motion.span
+                      key={position}
+                      className={`absolute h-[38px] w-[38px] border border-ink bg-white shadow-sm dark:border-paper dark:bg-[#565656] ${position}`}
+                      animate={{
+                        x: index % 2 === 0 ? [-1, -14, -1, 0] : [1, 14, 1, 0],
+                        y: index < 2 ? [-1, -14, -1, 0] : [1, 14, 1, 0],
+                        rotate: index % 2 === 0 ? [0, -12, 5, 0] : [0, 12, -5, 0],
+                        opacity: [0.85, 1, 1, 0.9]
+                      }}
+                      transition={{
+                        duration: 1.15,
+                        repeat: Infinity,
+                        ease: [0.65, 0, 0.35, 1],
+                        delay: index * 0.04
+                      }}
+                    />
+                  ))}
+                  <motion.span
+                    className="absolute left-1/2 top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-ink font-serif text-sm text-paper shadow-sm dark:bg-paper dark:text-ink"
+                    animate={{ scale: [0.9, 1.04, 0.94, 1], opacity: [0.82, 1, 0.9, 1] }}
+                    transition={{ duration: 1.15, repeat: Infinity, ease: [0.65, 0, 0.35, 1] }}
+                  >
+                    M
+                  </motion.span>
+                </div>
+                <motion.p
+                  className="text-[10px] font-semibold uppercase tracking-[0.28em] text-ink dark:text-paper"
+                  animate={{ opacity: [0.55, 1, 0.55] }}
+                  transition={{ duration: 1.15, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  Loading
+                </motion.p>
+              </div>
             </motion.div>
           </>
         )}

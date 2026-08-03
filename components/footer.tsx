@@ -11,7 +11,7 @@ export async function Footer() {
   const brandLinks = parseBrandLinks(content);
 
   return (
-    <footer data-site-chrome className="border-t border-black/20 bg-neutral-200 px-5 py-8 shadow-[0_-14px_40px_rgba(0,0,0,0.04)] transition-colors dark:border-white/15 dark:bg-[#444444] md:px-8 md:py-10">
+    <footer data-site-chrome data-site-footer className="border-t border-black/20 bg-neutral-200 px-5 py-8 shadow-[0_-14px_40px_rgba(0,0,0,0.04)] transition-colors dark:border-white/15 dark:bg-[#444444] md:px-8 md:py-10">
       {brandLinks.length > 0 && (
         <div className="mb-7 w-full border-b border-black/10 pb-6 dark:border-white/10">
           <p className="mb-4 text-xs uppercase tracking-[0.24em] text-muted">Partners & Collaborations</p>

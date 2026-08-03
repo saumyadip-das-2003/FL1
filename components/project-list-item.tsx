@@ -92,7 +92,8 @@ export function ProjectListItem({ project }: { project: Project }) {
     const hasDescription = project.description.trim() || project.excerpt.trim();
 
     return [
-      { id: "meta-cover", kind: "metaCover" as const },
+      { id: "meta", kind: "meta" as const },
+      { id: "cover", kind: "cover" as const },
       ...(hasDescription ? [{ id: "overview", kind: "overview" as const }] : []),
       ...mediaAfterCover.map((media, index) => ({
         id: `${media.type}-${index}`,
@@ -327,18 +328,17 @@ export function ProjectListItem({ project }: { project: Project }) {
   }
 
   function renderSlide(slide: (typeof baseSlides)[number] & { baseIndex: number }) {
-    if (slide.kind === "metaCover") {
+    if (slide.kind === "meta") {
       return (
         <section
           data-slide
           data-base-index={slide.baseIndex}
-          className="grid h-full w-[calc(100vw-2.5rem)] max-w-none shrink-0 snap-center grid-rows-[auto_minmax(0,1fr)] overflow-hidden bg-white text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[min(1280px,calc(100vw-4rem))] md:grid-cols-[360px_minmax(0,1fr)] md:grid-rows-none md:border md:border-black/10 md:dark:border-white/10"
+          className="flex h-full w-[calc(100vw-2.5rem)] max-w-none shrink-0 snap-center items-center bg-white px-5 text-center text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[380px] md:max-w-[380px] md:px-8"
         >
-          <div className="no-scrollbar flex max-h-[56%] items-center overflow-y-auto border-b border-black/10 px-5 py-6 text-center dark:border-white/10 md:h-full md:max-h-none md:border-b-0 md:border-r md:px-8 md:py-8">
-            <div className="w-full">
+          <div className="w-full">
             <ProjectMark title={project.title} />
-            <h2 className="mt-4 font-sans text-xl leading-tight tracking-normal md:mt-7 md:text-2xl">{project.title}</h2>
-            <p className="mt-2 text-sm uppercase tracking-normal text-muted md:mt-3">{project.location}</p>
+            <h2 className="mt-6 font-sans text-xl leading-tight tracking-normal md:mt-7 md:text-2xl">{project.title}</h2>
+            <p className="mt-3 text-sm uppercase tracking-normal text-muted">{project.location}</p>
             <ProjectMeta project={project} />
             <button
               type="button"
@@ -348,8 +348,18 @@ export function ProjectListItem({ project }: { project: Project }) {
             >
               <Minus size={18} />
             </button>
-            </div>
           </div>
+        </section>
+      );
+    }
+
+    if (slide.kind === "cover") {
+      return (
+        <section
+          data-slide
+          data-base-index={slide.baseIndex}
+          className="relative flex h-full w-[calc(100vw-2.5rem)] max-w-none shrink-0 snap-center items-center justify-center overflow-hidden bg-transparent md:w-auto"
+        >
           <div
             role="button"
             tabIndex={0}
@@ -372,7 +382,7 @@ export function ProjectListItem({ project }: { project: Project }) {
                 });
               }
             }}
-            className="flex h-full min-h-0 w-full items-center justify-center overflow-hidden bg-transparent p-0 outline-none"
+            className="flex h-full min-h-0 w-full cursor-zoom-in items-center justify-center overflow-hidden bg-transparent p-0 outline-none md:w-auto"
             aria-label={`Open ${project.title} cover image`}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}

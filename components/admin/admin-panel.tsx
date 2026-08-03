@@ -366,6 +366,7 @@ export function AdminPanel() {
   const [userEmailDrafts, setUserEmailDrafts] = useState<Record<string, string>>({});
   const [userPasswordDrafts, setUserPasswordDrafts] = useState<Record<string, string>>({});
   const [visibleUserPasswords, setVisibleUserPasswords] = useState<Record<string, boolean>>({});
+  const [socialPlacementStatus, setSocialPlacementStatus] = useState("");
   const isProtectedOwnerSession = adminEmail.trim().toLowerCase() === protectedAdminEmail;
 
   useEffect(() => {
@@ -819,7 +820,15 @@ export function AdminPanel() {
 
   function toggleSelectedSocialId(key: "footerSocialIds" | "quickContactSocialIds" | "serviceSocialPresenceSocialIds", id: string) {
     const current = selectedSocialIds(key);
+    const adding = !current.includes(id);
+
+    if (key === "quickContactSocialIds" && adding && current.length >= 5) {
+      setSocialPlacementStatus("Quick Contacts can show a maximum of 5 links. Remove one before adding another.");
+      return;
+    }
+
     const next = current.includes(id) ? current.filter((item) => item !== id) : [...current, id];
+    setSocialPlacementStatus("");
     updateSettings(key, next.join(", "));
   }
 
@@ -1705,20 +1714,40 @@ export function AdminPanel() {
           <div key={group.key} className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">{group.title}</p>
             <p className="mt-2 text-sm leading-6 text-muted">{group.description}</p>
+            {group.key === "quickContactSocialIds" ? (
+              <p className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted">
+                {Math.min(group.selected.length, 5)} / 5 selected
+              </p>
+            ) : null}
             <div className="mt-5 grid gap-2">
-              {links.map((link) => (
-                <label key={`${group.key}-${link.id}`} className="flex items-center justify-between gap-4 rounded-md border border-black/10 px-3 py-3 text-sm dark:border-white/10">
-                  <span>{link.platform}</span>
-                  <input
-                    type="checkbox"
-                    checked={group.selected.includes(link.id)}
-                    onChange={() => toggleSelectedSocialId(group.key, link.id)}
-                    className="h-4 w-4"
-                  />
-                </label>
-              ))}
+              {links.map((link) => {
+                const checked = group.selected.includes(link.id);
+                const quickLimitReached = group.key === "quickContactSocialIds" && !checked && group.selected.length >= 5;
+
+                return (
+                  <label
+                    key={`${group.key}-${link.id}`}
+                    className={`flex items-center justify-between gap-4 rounded-md border border-black/10 px-3 py-3 text-sm dark:border-white/10 ${
+                      quickLimitReached ? "opacity-50" : ""
+                    }`}
+                  >
+                    <span>{link.platform}</span>
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleSelectedSocialId(group.key, link.id)}
+                      className="h-4 w-4"
+                    />
+                  </label>
+                );
+              })}
               {links.length === 0 && <p className="text-sm text-muted">Add social links in Contact first.</p>}
             </div>
+            {group.key === "quickContactSocialIds" && socialPlacementStatus ? (
+              <p className="mt-3 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-200">
+                {socialPlacementStatus}
+              </p>
+            ) : null}
           </div>
         ))}
       </div>
