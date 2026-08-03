@@ -71,6 +71,72 @@ body {
   display: none;
 }
 
+.route-square-loader {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  transform: rotate(45deg);
+}
+
+.route-square-loader span {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background: #111111;
+  animation: route-square-dance 1.15s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.dark .route-square-loader span {
+  background: #f4f1eb;
+}
+
+.route-square-loader span:nth-child(1) {
+  left: 0;
+  top: 0;
+  animation-delay: 0s;
+}
+
+.route-square-loader span:nth-child(2) {
+  right: 0;
+  top: 0;
+  animation-delay: 0.12s;
+}
+
+.route-square-loader span:nth-child(3) {
+  right: 0;
+  bottom: 0;
+  animation-delay: 0.24s;
+}
+
+.route-square-loader span:nth-child(4) {
+  left: 0;
+  bottom: 0;
+  animation-delay: 0.36s;
+}
+
+@keyframes route-square-dance {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+
+  25% {
+    transform: scale(0.55) rotate(90deg);
+    opacity: 0.72;
+  }
+
+  50% {
+    transform: scale(1) rotate(180deg);
+    opacity: 1;
+  }
+
+  75% {
+    transform: scale(0.55) rotate(270deg);
+    opacity: 0.72;
+  }
+}
+
 @layer components {
   .site-section {
     @apply px-5 py-16 md:px-8 md:py-28;

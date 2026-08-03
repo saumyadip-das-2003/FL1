@@ -96,30 +96,11 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
               className="pointer-events-none fixed inset-0 z-[155] grid place-items-center bg-paper/45 backdrop-blur-[2px] dark:bg-[#3f3f3f]/45"
             >
               <div className="flex -translate-y-[2vh] flex-col items-center gap-5">
-                <div className="relative h-20 w-20">
-                  {[
-                    "left-0 top-0 origin-bottom-right",
-                    "right-0 top-0 origin-bottom-left",
-                    "bottom-0 left-0 origin-top-right",
-                    "bottom-0 right-0 origin-top-left"
-                  ].map((position, index) => (
-                    <motion.span
-                      key={position}
-                      className={`absolute h-[38px] w-[38px] bg-ink shadow-sm dark:bg-paper ${position}`}
-                      animate={{
-                        x: index % 2 === 0 ? [-1, -14, -1, 0] : [1, 14, 1, 0],
-                        y: index < 2 ? [-1, -14, -1, 0] : [1, 14, 1, 0],
-                        rotate: index % 2 === 0 ? [0, -12, 5, 0] : [0, 12, -5, 0],
-                        opacity: [0.85, 1, 1, 0.9]
-                      }}
-                      transition={{
-                        duration: 1.15,
-                        repeat: Infinity,
-                        ease: [0.65, 0, 0.35, 1],
-                        delay: index * 0.04
-                      }}
-                    />
-                  ))}
+                <div className="route-square-loader" aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                  <span />
                 </div>
                 <motion.p
                   className="text-[10px] font-semibold uppercase tracking-[0.28em] text-ink dark:text-paper"
