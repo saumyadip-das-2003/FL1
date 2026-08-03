@@ -58,6 +58,12 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased transition-colors duration-500`}>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(location.pathname==='/'||location.pathname===''){document.body.classList.add('home-intro-active')}}catch(e){}"
+          }}
+        />
         <Providers>
           <div className="flex min-h-screen flex-col">
             <SiteChromeVisibility />
