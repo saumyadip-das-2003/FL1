@@ -82,12 +82,22 @@ body {
   position: absolute;
   width: 28px;
   height: 28px;
-  background: #111111;
+  border: 1px solid rgba(17, 17, 17, 0.18);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
   animation: route-square-dance 1.15s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
+.route-square-loader span:nth-child(odd) {
+  background: #111111;
+}
+
+.route-square-loader span:nth-child(even) {
+  background: #ffffff;
+}
+
 .dark .route-square-loader span {
-  background: #f4f1eb;
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
 }
 
 .route-square-loader span:nth-child(1) {

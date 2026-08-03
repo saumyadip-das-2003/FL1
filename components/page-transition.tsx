@@ -2,33 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { createElement, useEffect, useRef, useState } from "react";
-
-const lottieScriptId = "lottiefiles-player-script";
-const loaderLottieUrl = "https://assets2.lottiefiles.com/packages/lf20_Z4BhGL.json";
-
-function LottieLoader() {
-  useEffect(() => {
-    if (document.getElementById(lottieScriptId)) {
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.id = lottieScriptId;
-    script.src = "https://unpkg.com/@lottiefiles/lottie-player@2.0.12/dist/lottie-player.js";
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
-
-  return createElement("lottie-player", {
-    src: loaderLottieUrl,
-    background: "transparent",
-    speed: "1",
-    loop: true,
-    autoplay: true,
-    class: "h-28 w-28 md:h-36 md:w-36"
-  });
-}
+import { useEffect, useRef, useState } from "react";
 
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -122,7 +96,12 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
               className="pointer-events-none fixed inset-0 z-[155] grid place-items-center bg-paper/45 backdrop-blur-[2px] dark:bg-[#3f3f3f]/45"
             >
               <div className="flex -translate-y-[2vh] flex-col items-center gap-5">
-                <LottieLoader />
+                <div className="route-square-loader" aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                </div>
                 <motion.p
                   className="text-[10px] font-semibold uppercase tracking-[0.28em] text-ink dark:text-paper"
                   animate={{ opacity: [0.55, 1, 0.55] }}
