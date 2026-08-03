@@ -105,7 +105,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
                   ].map((position, index) => (
                     <motion.span
                       key={position}
-                      className={`absolute h-[38px] w-[38px] border border-ink bg-white shadow-sm dark:border-paper dark:bg-[#565656] ${position}`}
+                      className={`absolute h-[38px] w-[38px] bg-ink shadow-sm dark:bg-paper ${position}`}
                       animate={{
                         x: index % 2 === 0 ? [-1, -14, -1, 0] : [1, 14, 1, 0],
                         y: index < 2 ? [-1, -14, -1, 0] : [1, 14, 1, 0],
@@ -120,13 +120,6 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
                       }}
                     />
                   ))}
-                  <motion.span
-                    className="absolute left-1/2 top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-ink font-serif text-sm text-paper shadow-sm dark:bg-paper dark:text-ink"
-                    animate={{ scale: [0.9, 1.04, 0.94, 1], opacity: [0.82, 1, 0.9, 1] }}
-                    transition={{ duration: 1.15, repeat: Infinity, ease: [0.65, 0, 0.35, 1] }}
-                  >
-                    M
-                  </motion.span>
                 </div>
                 <motion.p
                   className="text-[10px] font-semibold uppercase tracking-[0.28em] text-ink dark:text-paper"
