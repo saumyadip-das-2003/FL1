@@ -31,7 +31,7 @@ export function HomeIntro({
   }
 
   useEffect(() => {
-    const timer = window.setTimeout(enterSite, 1800);
+    const timer = window.setTimeout(enterSite, 1000);
     return () => window.clearTimeout(timer);
   });
 
