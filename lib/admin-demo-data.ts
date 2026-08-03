@@ -278,9 +278,12 @@ export function createSeedAdminContent(): AdminContent {
       x: "https://x.com",
       linkedin: "https://linkedin.com",
       socialLinks: JSON.stringify([
-        { id: "whatsapp", platform: "WhatsApp", href: "https://wa.me/8801700000000" },
+        { id: "email", platform: "Professional Email", href: "studio@ateliernorthline.test" },
+        { id: "whatsapp", platform: "WhatsApp Business", href: "https://wa.me/8801700000000" },
         { id: "call", platform: "Call", href: "tel:+8801700000000" },
-        { id: "facebook", platform: "Facebook", href: "https://facebook.com" }
+        { id: "facebook", platform: "Facebook Page", href: "https://facebook.com" },
+        { id: "instagram", platform: "Instagram", href: "https://instagram.com" },
+        { id: "linkedin", platform: "LinkedIn", href: "https://linkedin.com" }
       ]),
       footerSocialIds: "whatsapp, call, facebook",
       quickContactSocialIds: "whatsapp, call, facebook",

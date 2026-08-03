@@ -47,7 +47,7 @@ import {
   type AdminLinkItem
 } from "@/lib/admin-demo-data";
 import { normalizeProjectTaxonomy, serializeProjectTaxonomy, projectTaxonomy, type ProjectSection } from "@/lib/data";
-import { socialPlatforms } from "@/lib/social-platforms";
+import { normalizeSocialPlatform, socialPlatformGroups } from "@/lib/social-platforms";
 import { youtubeEmbedUrl } from "@/lib/youtube";
 
 type Tab = "general" | "home" | "projects" | "services" | "news" | "people" | "about" | "contact" | "settings";
@@ -772,16 +772,18 @@ export function AdminPanel() {
     try {
       const parsed = JSON.parse(content.settings.socialLinks || "[]") as AdminSocialLink[];
       if (Array.isArray(parsed)) {
-        return parsed;
+        return parsed.map((link) => ({ ...link, platform: normalizeSocialPlatform(link.platform) }));
       }
     } catch {
       // Use legacy social fields below.
     }
 
     return [
-      { id: "whatsapp", platform: "WhatsApp", href: content.settings.whatsapp },
-      { id: "call", platform: "Call", href: `tel:${content.settings.phone.replace(/\s+/g, "")}` },
-      { id: "facebook", platform: "Facebook", href: content.settings.facebook }
+      { id: "email", platform: "Professional Email", href: content.settings.email },
+      { id: "whatsapp", platform: "WhatsApp Business", href: content.settings.whatsapp },
+      { id: "facebook", platform: "Facebook Page", href: content.settings.facebook },
+      { id: "instagram", platform: "Instagram", href: content.settings.instagram },
+      { id: "linkedin", platform: "LinkedIn", href: content.settings.linkedin }
     ];
   }
 
@@ -1584,8 +1586,15 @@ export function AdminPanel() {
             <div key={link.id} className="grid gap-3 rounded-lg border border-black/10 p-4 dark:border-white/10 md:grid-cols-[220px_1fr_auto] md:items-end">
               <Field label="Platform">
                 <SelectInput value={link.platform} onChange={(event) => updateSocialLink(link.id, "platform", event.target.value)}>
-                  {socialPlatforms.map((platform) => (
-                    <option key={platform}>{platform}</option>
+                  {!socialPlatformGroups.some((group) => (group.platforms as readonly string[]).includes(link.platform)) && (
+                    <option>{link.platform}</option>
+                  )}
+                  {socialPlatformGroups.map((group) => (
+                    <optgroup key={group.title} label={group.title}>
+                      {group.platforms.map((platform) => (
+                        <option key={platform}>{platform}</option>
+                      ))}
+                    </optgroup>
                   ))}
                 </SelectInput>
               </Field>

@@ -15,24 +15,25 @@ export async function Footer() {
       {brandLinks.length > 0 && (
         <div className="mb-7 w-full border-b border-black/10 pb-6 dark:border-white/10">
           <p className="mb-4 text-xs uppercase tracking-[0.24em] text-muted">Partners & Collaborations</p>
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex w-full flex-nowrap items-center gap-4 overflow-x-auto overflow-y-hidden pb-2">
             {brandLinks.map((brand) => (
               <Link
                 key={brand.id}
                 href={brand.href || "#"}
                 target={brand.href ? "_blank" : undefined}
                 rel={brand.href ? "noreferrer" : undefined}
-                className="group relative flex h-16 w-32 items-center justify-center overflow-hidden border border-black/10 bg-white p-3 transition dark:border-white/10 dark:bg-[#555555]"
+                className="group relative flex h-16 max-w-36 shrink-0 items-center justify-center overflow-hidden transition"
                 aria-label={brand.name}
+                title={brand.name}
               >
                 <Image
                   src={brand.logo}
                   alt={brand.name}
                   width={160}
                   height={80}
-                  className="max-h-full w-auto object-contain transition duration-300 group-hover:scale-95 group-hover:opacity-25"
+                  className="h-auto max-h-16 w-auto max-w-36 object-contain transition duration-300 group-hover:scale-95 group-hover:opacity-25"
                 />
-                <span className="absolute inset-0 flex translate-y-2 items-center justify-center bg-ink/85 px-3 text-center text-[10px] font-semibold uppercase leading-4 tracking-[0.14em] text-paper opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 dark:bg-paper/90 dark:text-ink">
+                <span className="absolute inset-0 flex translate-y-2 items-center justify-center bg-ink/85 px-2 text-center text-[10px] font-semibold uppercase leading-4 tracking-[0.14em] text-paper opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 dark:bg-paper/90 dark:text-ink">
                   {brand.name}
                 </span>
               </Link>

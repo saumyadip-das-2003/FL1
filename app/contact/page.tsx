@@ -2,7 +2,7 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import { Reveal } from "@/components/reveal";
 import { getLiveContent } from "@/lib/live-content";
 import { ContactForm } from "@/components/contact-form";
-import { SocialLinks } from "@/components/social-links";
+import { ContactSocialSections } from "@/components/contact-social-sections";
 import { mapEmbedUrl, mapOpenUrl } from "@/lib/map-links";
 import { parseSocialLinks } from "@/lib/social-platforms";
 
@@ -46,9 +46,7 @@ export default async function ContactPage() {
               <p className="mt-3 max-w-xl text-sm leading-7 text-muted">
                 Follow the studio across active channels for project updates, process notes, and announcements.
               </p>
-              <div className="mt-5">
-                <SocialLinks compact links={socialLinks} />
-              </div>
+              <ContactSocialSections links={socialLinks} />
             </div>
           </div>
         </Reveal>

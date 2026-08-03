@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { AdminSocialLink } from "@/lib/admin-demo-data";
+import { normalizeSocialPlatform } from "@/lib/social-platforms";
 
 function WhatsAppLogo() {
   return (
@@ -97,18 +98,61 @@ function GenericLogo() {
   );
 }
 
+function SimpleIconLogo({ slug }: { slug: string }) {
+  return (
+    <img
+      src={`https://cdn.simpleicons.org/${slug}/white`}
+      alt=""
+      aria-hidden="true"
+      className="h-5 w-5 object-contain"
+      loading="lazy"
+    />
+  );
+}
+
 const platformMap = {
+  "WhatsApp Business": { icon: WhatsAppLogo, color: "bg-[#25D366]" },
   WhatsApp: { icon: WhatsAppLogo, color: "bg-[#25D366]" },
   Call: { icon: PhoneLogo, color: "bg-[#0A84FF]" },
+  "Facebook Page": { icon: FacebookLogo, color: "bg-[#1877F2]" },
+  "Facebook Group": { icon: FacebookLogo, color: "bg-[#1877F2]" },
+  "Facebook Messenger": { icon: () => <SimpleIconLogo slug="messenger" />, color: "bg-[#0084FF]" },
   Facebook: { icon: FacebookLogo, color: "bg-[#1877F2]" },
   Instagram: { icon: InstagramLogo, color: "bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#FCAF45]" },
+  "X (Twitter)": { icon: XLogo, color: "bg-black" },
   X: { icon: XLogo, color: "bg-black" },
   LinkedIn: { icon: LinkedInLogo, color: "bg-[#0A66C2]" },
   YouTube: { icon: YouTubeLogo, color: "bg-[#FF0000]" },
   TikTok: { icon: TikTokLogo, color: "bg-black" },
+  Threads: { icon: () => <SimpleIconLogo slug="threads" />, color: "bg-black" },
+  Reddit: { icon: () => <SimpleIconLogo slug="reddit" />, color: "bg-[#FF4500]" },
+  "Telegram Channel": { icon: TelegramLogo, color: "bg-[#26A5E4]" },
   Telegram: { icon: TelegramLogo, color: "bg-[#26A5E4]" },
+  Discord: { icon: () => <SimpleIconLogo slug="discord" />, color: "bg-[#5865F2]" },
+  Bluesky: { icon: () => <SimpleIconLogo slug="bluesky" />, color: "bg-[#1185FE]" },
+  Mastodon: { icon: () => <SimpleIconLogo slug="mastodon" />, color: "bg-[#6364FF]" },
+  Quora: { icon: () => <SimpleIconLogo slug="quora" />, color: "bg-[#B92B27]" },
   Pinterest: { icon: PinterestLogo, color: "bg-[#E60023]" },
-  Email: { icon: EmailLogo, color: "bg-[#555555]" }
+  "Professional Email": { icon: EmailLogo, color: "bg-[#555555]" },
+  Email: { icon: EmailLogo, color: "bg-[#555555]" },
+  Behance: { icon: () => <SimpleIconLogo slug="behance" />, color: "bg-[#1769FF]" },
+  Houzz: { icon: () => <SimpleIconLogo slug="houzz" />, color: "bg-[#4DBC15]" },
+  ArchDaily: { icon: () => <SimpleIconLogo slug="archdaily" />, color: "bg-[#111111]" },
+  Designboom: { icon: () => <SimpleIconLogo slug="designboom" />, color: "bg-[#111111]" },
+  Dezeen: { icon: () => <SimpleIconLogo slug="dezeen" />, color: "bg-[#111111]" },
+  Archinect: { icon: () => <SimpleIconLogo slug="archinect" />, color: "bg-[#333333]" },
+  Dribbble: { icon: () => <SimpleIconLogo slug="dribbble" />, color: "bg-[#EA4C89]" },
+  Vimeo: { icon: () => <SimpleIconLogo slug="vimeo" />, color: "bg-[#1AB7EA]" },
+  Flickr: { icon: () => <SimpleIconLogo slug="flickr" />, color: "bg-[#0063DC]" },
+  Medium: { icon: () => <SimpleIconLogo slug="medium" />, color: "bg-black" },
+  Fiverr: { icon: () => <SimpleIconLogo slug="fiverr" />, color: "bg-[#1DBF73]" },
+  Upwork: { icon: () => <SimpleIconLogo slug="upwork" />, color: "bg-[#14A800]" },
+  "Freelancer.com": { icon: () => <SimpleIconLogo slug="freelancer" />, color: "bg-[#29B2FE]" },
+  PeoplePerHour: { icon: () => <SimpleIconLogo slug="peopleperhour" />, color: "bg-[#FF7300]" },
+  Guru: { icon: () => <SimpleIconLogo slug="guru" />, color: "bg-[#00B981]" },
+  Contra: { icon: () => <SimpleIconLogo slug="contra" />, color: "bg-black" },
+  Toptal: { icon: () => <SimpleIconLogo slug="toptal" />, color: "bg-[#3863A0]" },
+  Wellfound: { icon: () => <SimpleIconLogo slug="wellfound" />, color: "bg-[#111111]" }
 };
 
 const defaultLinks = [
@@ -118,11 +162,12 @@ const defaultLinks = [
 ];
 
 function normalizeHref(link: Pick<AdminSocialLink, "platform" | "href">) {
+  const platform = normalizeSocialPlatform(link.platform);
   if (link.platform === "Call" && !link.href.startsWith("tel:")) {
     return `tel:${link.href.replace(/\s+/g, "")}`;
   }
 
-  if (link.platform === "Email" && !link.href.startsWith("mailto:")) {
+  if (platform === "Professional Email" && !link.href.startsWith("mailto:")) {
     return `mailto:${link.href}`;
   }
 
@@ -138,28 +183,51 @@ export function SocialLinks({
 }) {
   return (
     <div className={compact ? "flex flex-wrap gap-2" : "flex flex-col gap-2"}>
-      {links.map((link) => {
-        const platform = platformMap[link.platform as keyof typeof platformMap] ?? { icon: GenericLogo, color: "bg-ink" };
-        const href = normalizeHref(link);
-        const Icon = platform.icon;
-
-        return (
-          <Link
-            key={`${link.platform}-${link.href}`}
-            href={href}
-            aria-label={link.platform}
-            title={link.platform}
-            target={href.startsWith("tel:") || href.startsWith("mailto:") ? undefined : "_blank"}
-            rel={href.startsWith("tel:") || href.startsWith("mailto:") ? undefined : "noreferrer"}
-            className={`group relative flex h-11 w-11 items-center justify-center border border-white/30 ${platform.color} shadow-sm transition hover:scale-105`}
-          >
-            <Icon />
-            <span className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 translate-y-1 whitespace-nowrap bg-ink px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-paper opacity-0 shadow-sm transition group-hover:translate-y-0 group-hover:opacity-100 dark:bg-paper dark:text-ink">
-              {link.platform}
-            </span>
-          </Link>
-        );
-      })}
+      {links.map((link) => (
+        <SocialLinkButton key={`${normalizeSocialPlatform(link.platform)}-${link.href}`} link={link} />
+      ))}
     </div>
+  );
+}
+
+export function SocialLinkButton({
+  link,
+  showLabel = false
+}: {
+  link: Pick<AdminSocialLink, "platform" | "href">;
+  showLabel?: boolean;
+}) {
+  const platformLabel = normalizeSocialPlatform(link.platform);
+  const platform = platformMap[platformLabel as keyof typeof platformMap] ?? { icon: GenericLogo, color: "bg-ink" };
+  const href = normalizeHref(link);
+  const Icon = platform.icon;
+
+  return (
+    <Link
+      href={href}
+      aria-label={platformLabel}
+      title={platformLabel}
+      target={href.startsWith("tel:") || href.startsWith("mailto:") ? undefined : "_blank"}
+      rel={href.startsWith("tel:") || href.startsWith("mailto:") ? undefined : "noreferrer"}
+      className={
+        showLabel
+          ? "group flex items-center gap-3 border border-black/10 bg-white p-3 text-sm transition hover:border-black/30 hover:bg-neutral-50 dark:border-white/10 dark:bg-[#4a4a4a] dark:hover:border-white/30 dark:hover:bg-[#555555]"
+          : `group relative flex h-11 w-11 items-center justify-center border border-white/30 ${platform.color} shadow-sm transition hover:scale-105`
+      }
+    >
+      <span className={`flex h-11 w-11 shrink-0 items-center justify-center ${platform.color}`}>
+        <Icon />
+      </span>
+      {showLabel ? (
+        <span className="min-w-0">
+          <span className="block font-medium">{platformLabel}</span>
+          <span className="block truncate text-xs text-muted">{href.replace(/^mailto:|^tel:/, "")}</span>
+        </span>
+      ) : (
+        <span className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 translate-y-1 whitespace-nowrap bg-ink px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-paper opacity-0 shadow-sm transition group-hover:translate-y-0 group-hover:opacity-100 dark:bg-paper dark:text-ink">
+          {platformLabel}
+        </span>
+      )}
+    </Link>
   );
 }
