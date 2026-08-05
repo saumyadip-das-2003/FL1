@@ -8,7 +8,7 @@ export async function Footer() {
   const content = await getLiveContent();
   const offices = content.settings.offices.split(/\n+/).map((office) => office.trim()).filter(Boolean);
   const socialLinks = selectedSocialLinks(content, "footerSocialIds");
-  const brandLinks = parseBrandLinks(content);
+  const brandLinks = parseBrandLinks(content).filter((brand) => brand.logo);
 
   return (
     <footer data-site-chrome data-site-footer className="border-t border-black/20 bg-neutral-200 px-5 py-8 shadow-[0_-14px_40px_rgba(0,0,0,0.04)] transition-colors dark:border-white/15 dark:bg-[#444444] md:px-8 md:py-10">

@@ -20,7 +20,7 @@ export default async function NewsDetailPage({ params }: { params: { slug: strin
   return (
     <main className="bg-paper pb-24 pt-20 transition-colors dark:bg-charcoal md:pb-32">
       <section className="relative min-h-[58svh] overflow-hidden bg-black md:min-h-[70vh]">
-        <Image src={item.image} alt={item.title} fill priority sizes="100vw" className="object-cover" />
+        {item.image ? <Image src={item.image} alt={item.title} fill priority sizes="100vw" className="object-cover" /> : null}
         <div className="absolute inset-0 bg-gradient-to-t from-black/78 via-black/22 to-black/12" />
         <div className="absolute inset-x-0 bottom-0 px-5 pb-12 md:px-8 md:pb-16">
           <div className="mx-auto max-w-7xl text-paper">
@@ -58,7 +58,7 @@ export default async function NewsDetailPage({ params }: { params: { slug: strin
 
       <section className="px-5 md:px-8">
         <div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-3">
-          {item.gallery.map((image, index) => (
+          {item.gallery.filter(Boolean).map((image, index) => (
             <Reveal key={image} delay={index * 0.06}>
               <div className="relative aspect-[4/3] overflow-hidden bg-black">
                 <Image

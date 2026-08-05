@@ -36,15 +36,17 @@ export async function FeaturedPeople() {
           {people.map((person, index) => (
             <Reveal key={person.name} delay={index * 0.05}>
               <Link href="/people" className="group block border-t border-black/10 pt-5 dark:border-white/10">
-                <div className="relative aspect-[4/5] overflow-hidden bg-black">
-                  <Image
-                    src={person.image}
-                    alt={person.name}
-                    fill
-                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover grayscale transition duration-700 group-hover:scale-105 group-hover:grayscale-0"
-                  />
-                </div>
+                {person.image ? (
+                  <div className="relative aspect-[4/5] overflow-hidden bg-black">
+                    <Image
+                      src={person.image}
+                      alt={person.name}
+                      fill
+                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                      className="object-cover grayscale transition duration-700 group-hover:scale-105 group-hover:grayscale-0"
+                    />
+                  </div>
+                ) : null}
                 <h3 className="mt-5 font-serif text-2xl leading-tight transition group-hover:text-muted">
                   {person.name}
                 </h3>

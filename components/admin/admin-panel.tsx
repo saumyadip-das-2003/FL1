@@ -103,10 +103,11 @@ const emptyItem: Record<CollectionKey, EditableItem> = {
     title: "New Project",
     location: "Dhaka, Bangladesh",
     year: "2026",
+    client: "",
     status: "Concept",
     section: "Architecture",
     subsection: "Culture",
-    image: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1600&q=80",
+    image: "",
     media: [],
     mapLocation: "Dhaka, Bangladesh",
     description: "Project description goes here."
@@ -114,7 +115,7 @@ const emptyItem: Record<CollectionKey, EditableItem> = {
   services: {
     id: "",
     title: "New Service",
-    image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1400&q=80",
+    image: "",
     description: "Service description goes here.",
     tags: "Planning, Design"
   },
@@ -123,7 +124,7 @@ const emptyItem: Record<CollectionKey, EditableItem> = {
     title: "New News Item",
     date: "July 2026",
     category: "Studio",
-    image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1400&q=80",
+    image: "",
     gallery: "",
     description: "Full news story goes here."
   },
@@ -132,7 +133,7 @@ const emptyItem: Record<CollectionKey, EditableItem> = {
     name: "New Team Member",
     category: "Architecture",
     role: "Architect",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80",
+    image: "",
     bio: "Short biography goes here.",
     studio: "Modern Age Studio",
     office: "Dhaka",
@@ -187,6 +188,7 @@ function normalizeContent(content: AdminContent): AdminContent {
     projects: (content.projects?.length ? content.projects : seed.projects).map((project, index) => ({
       ...seed.projects[index % seed.projects.length],
       ...project,
+      client: project.client ?? "",
       mapLocation: project.mapLocation ?? project.location ?? "",
       media: (project.media ?? []).map((media) => ({
         ...media,
@@ -354,6 +356,7 @@ export function AdminPanel() {
   const [status, setStatus] = useState("Checking admin session...");
   const [token, setToken] = useState("");
   const [busy, setBusy] = useState(false);
+  const [loadingContent, setLoadingContent] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [customSubsection, setCustomSubsection] = useState("");
@@ -420,6 +423,8 @@ export function AdminPanel() {
         setStatus("Connected to Sanity content.");
       } catch {
         setStatus("Using local demo content until Sanity/Firebase keys are available.");
+      } finally {
+        setLoadingContent(false);
       }
     }
 
@@ -792,7 +797,7 @@ export function AdminPanel() {
         id: makeId("about-message"),
         name: "New Message",
         role: "Studio Leadership",
-        image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80",
+        image: "",
         message: "Add this person's message here."
       }
     ]);
@@ -905,7 +910,7 @@ export function AdminPanel() {
       {
         id: makeId("brand-link"),
         name: "New Brand",
-        logo: "https://picsum.photos/seed/brand-logo/240/120",
+        logo: "",
         href: "https://example.com"
       }
     ]);
@@ -1013,11 +1018,11 @@ export function AdminPanel() {
       type,
       source:
         type === "image"
-          ? "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1600&q=80"
+          ? ""
           : type === "video"
-            ? "https://youtu.be/OP_fVIUTr9Y"
-            : "Project note",
-      caption: type === "caption" ? "Write the caption paragraph here." : ""
+            ? ""
+            : "",
+      caption: ""
     };
 
     setContent((current) => ({
@@ -1550,7 +1555,7 @@ export function AdminPanel() {
             ) : (
               <TextInput value={content.settings[key]} onChange={(event) => updateSettings(key, event.target.value)} />
             )}
-            {["logoUrl", "founderImage", "aboutHeroImage"].includes(key) && renderDropZone("Upload image", (file) => uploadToSettings(key, file), content.settings[key])}
+            {["logoUrl", "founderImage", "aboutHeroImage", "homeImageUrl"].includes(key) && renderDropZone("Upload image", (file) => uploadToSettings(key, file), content.settings[key])}
           </Field>
         ))}
       </div>
@@ -2226,7 +2231,26 @@ export function AdminPanel() {
     if (tab === "home") {
       return (
         <div className="grid gap-6">
-          {renderSettingsFields(["homeHeadline", "homeTagline", "homeVideoUrl", "statYears", "statProjects", "statCountries"])}
+          {renderSettingsFields(["homeHeadline", "homeTagline", "statYears", "statProjects", "statCountries"])}
+          <div className="rounded-lg border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-[#4a4a4a]">
+            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-muted">Home hero media</p>
+            <div className="grid gap-5 md:grid-cols-3">
+              <Field label="Media type">
+                <SelectInput value={content.settings.homeMediaType || "none"} onChange={(event) => updateSettings("homeMediaType", event.target.value)}>
+                  <option value="none">Plain background</option>
+                  <option value="video">YouTube video</option>
+                  <option value="image">Image</option>
+                </SelectInput>
+              </Field>
+              <Field label="YouTube video URL">
+                <TextInput value={content.settings.homeVideoUrl} onChange={(event) => updateSettings("homeVideoUrl", event.target.value)} placeholder="Optional YouTube link" />
+              </Field>
+              <Field label="Hero image URL / upload">
+                <TextInput value={content.settings.homeImageUrl} onChange={(event) => updateSettings("homeImageUrl", event.target.value)} placeholder="Optional image URL" />
+                {renderDropZone("Upload hero image", (file) => uploadToSettings("homeImageUrl", file), content.settings.homeImageUrl)}
+              </Field>
+            </div>
+          </div>
           <div className="grid gap-5 xl:grid-cols-3">
             {renderFeaturedSelector(
               "Featured Projects",
@@ -2471,6 +2495,9 @@ export function AdminPanel() {
           </Field>
           <Field label="Year">
             <TextInput value={project.year} onChange={(event) => updateItem("projects", project.id, "year", event.target.value)} />
+          </Field>
+          <Field label="Client">
+            <TextInput value={project.client} onChange={(event) => updateItem("projects", project.id, "client", event.target.value)} placeholder="Client or organization name" />
           </Field>
           <Field label="Project status">
             <TextInput value={project.status} onChange={(event) => updateItem("projects", project.id, "status", event.target.value)} placeholder="Concept, Completed, Under construction..." />
@@ -2864,28 +2891,13 @@ export function AdminPanel() {
 
   return (
     <main className="min-h-screen bg-neutral-100 text-ink transition-colors dark:bg-[#3a3a3a] dark:text-paper">
-      {busy && (
+      {(busy || loadingContent) && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-white/55 backdrop-blur-sm dark:bg-black/35">
           <div className="flex flex-col items-center gap-5 rounded-xl border border-black/10 bg-white/75 px-10 py-8 text-center shadow-soft dark:border-white/10 dark:bg-[#4a4a4a]/80">
-            {content.settings.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={content.settings.logoUrl}
-                alt=""
-                className="h-16 w-16 animate-pulse object-contain opacity-80"
-              />
-            ) : (
-              <div className="flex h-16 w-16 animate-pulse items-center justify-center rounded-full border border-black/15 font-serif text-xl dark:border-white/15">
-                {content.settings.companyName
-                  .split(" ")
-                  .slice(0, 2)
-                  .map((part) => part[0])
-                  .join("")}
-              </div>
-            )}
+            <div className="route-square-loader" aria-hidden="true" />
             <div>
               <p className="font-serif text-2xl">{content.settings.companyName}</p>
-              <p className="mt-2 text-xs uppercase tracking-[0.2em] text-muted">Saving changes</p>
+              <p className="mt-2 text-xs uppercase tracking-[0.2em] text-muted">{busy ? "Saving changes" : "Loading admin"}</p>
             </div>
           </div>
         </div>

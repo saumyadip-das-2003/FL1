@@ -41,15 +41,17 @@ export async function FeaturedNews() {
           {featuredNews.slice(0, 2).map((item, index) => (
             <Reveal key={item.slug} delay={index * 0.06}>
               <Link href={`/news/${item.slug}`} className="group grid gap-5 border-t border-black/10 pt-6 dark:border-white/10">
-                <div className="relative aspect-[16/9] overflow-hidden bg-black">
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    fill
-                    sizes="(min-width: 768px) 50vw, 100vw"
-                    className="object-cover transition duration-700 group-hover:scale-105"
-                  />
-                </div>
+                {item.image ? (
+                  <div className="relative aspect-[16/9] overflow-hidden bg-black">
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      sizes="(min-width: 768px) 50vw, 100vw"
+                      className="object-cover transition duration-700 group-hover:scale-105"
+                    />
+                  </div>
+                ) : null}
                 <div>
                   <p className="site-eyebrow">
                     {item.category} / {item.date}

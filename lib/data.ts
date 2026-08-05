@@ -12,6 +12,7 @@ export type Project = {
   title: string;
   location: string;
   year: string;
+  client?: string;
   status?: string;
   category: ProjectCategory;
   section?: ProjectSection;

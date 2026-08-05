@@ -13,6 +13,7 @@ export type AdminProject = {
   title: string;
   location: string;
   year: string;
+  client: string;
   status: string;
   section: string;
   subsection: string;
@@ -91,7 +92,9 @@ export type AdminContent = {
     tagline: string;
     logoUrl: string;
     homeLogoText: string;
+    homeMediaType: string;
     homeVideoUrl: string;
+    homeImageUrl: string;
     homeHeadline: string;
     homeTagline: string;
     featuredProjectIds: string;
@@ -191,7 +194,9 @@ export function createSeedAdminContent(): AdminContent {
       tagline: "Architecture Studio",
       logoUrl: "",
       homeLogoText: "Modern Age Studio",
-      homeVideoUrl: "https://youtu.be/OP_fVIUTr9Y",
+      homeMediaType: "none",
+      homeVideoUrl: "",
+      homeImageUrl: "",
       homeHeadline: "Formal spaces for a changing climate.",
       homeTagline: "A client-facing studio prototype for architecture, interiors, exteriors, and landscape portfolios.",
       featuredProjectIds: projects.slice(0, 3).map((project) => project.slug).join(", "),
@@ -254,16 +259,16 @@ export function createSeedAdminContent(): AdminContent {
       aboutMission: "We pursue architecture that is formally clear, materially precise, and generous to daily life.",
       aboutVisionTitle: "Calm, durable places for adaptive cities.",
       aboutVision: "To shape calm, durable places that help cities adapt with intelligence and grace.",
-      aboutHeroImage: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=2200&q=80",
+      aboutHeroImage: "",
       founderMessage:
         "Architecture should make complexity feel quietly resolved. This founder message can introduce the real practice, its origins, collaborators, and values.",
-      founderImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80",
+      founderImage: "",
       aboutMessages: JSON.stringify([
         {
           id: "founder-message",
           name: "Nadia Rahman",
           role: "Founder & Principal Architect",
-          image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80",
+          image: "",
           message:
             "Architecture should make complexity feel quietly resolved. This message can introduce the real practice, its origins, collaborators, and values."
         }
@@ -292,7 +297,7 @@ export function createSeedAdminContent(): AdminContent {
         {
           id: "collab-atelier",
           name: "Collaborating Studio",
-          logo: "https://picsum.photos/seed/brand-logo-1/240/120",
+          logo: "",
           href: "https://example.com"
         }
       ]),
@@ -305,6 +310,7 @@ export function createSeedAdminContent(): AdminContent {
       title: project.title,
       location: project.location,
       year: project.year,
+      client: project.client ?? "Placeholder Studio",
       status: "Concept",
       section: project.section ?? project.category,
       subsection: project.subsection ?? "",
@@ -328,18 +334,16 @@ export function createSeedAdminContent(): AdminContent {
           source: image,
           caption: ""
         })),
-        {
-          id: `${project.slug}-video-1`,
-          type: "video",
-          source: project.video ?? "https://youtu.be/OP_fVIUTr9Y",
-          caption: ""
-        },
-        {
-          id: `${project.slug}-caption-2`,
-          type: "caption",
-          source: "Media note",
-          caption: `${project.title} placeholder project film and gallery sequence.`
-        }
+        ...(project.video
+          ? [
+              {
+                id: `${project.slug}-video-1`,
+                type: "video" as const,
+                source: project.video,
+                caption: ""
+              }
+            ]
+          : [])
       ],
       mapLocation: project.location,
       description: project.description

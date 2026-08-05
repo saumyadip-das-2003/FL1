@@ -31,7 +31,7 @@ function ProjectMeta({ project }: { project: Project }) {
       </div>
       <div>
         <dt className="text-xs uppercase tracking-[0.16em] text-muted">Client</dt>
-        <dd className="mt-1 uppercase">Placeholder Studio</dd>
+        <dd className="mt-1 uppercase">{project.client || "Placeholder Studio"}</dd>
       </div>
       <div>
         <dt className="text-xs uppercase tracking-[0.16em] text-muted">Typology</dt>
@@ -52,10 +52,10 @@ export function ProjectListItem({ project }: { project: Project }) {
   const [imageZoom, setImageZoom] = useState(1);
   const [imagePan, setImagePan] = useState({ x: 0, y: 0 });
   const imageSlidePointer = useRef({ startX: 0, startY: 0, moved: false });
-  const images = useMemo(() => [project.image, ...project.gallery], [project.gallery, project.image]);
+  const images = useMemo(() => [project.image, ...project.gallery].filter(Boolean), [project.gallery, project.image]);
   const mediaItems = useMemo<ProjectMedia[]>(() => {
     if (project.media?.length) {
-      return project.media;
+      return project.media.filter((media) => media.type === "caption" || media.source.trim());
     }
 
     return [
@@ -69,11 +69,13 @@ export function ProjectListItem({ project }: { project: Project }) {
         source: "Project note",
         caption: captionFor(0)
       },
-      {
-        type: "video" as const,
-        source: project.video ?? "https://youtu.be/OP_fVIUTr9Y",
-        caption: ""
-      }
+      ...(project.video
+        ? [{
+            type: "video" as const,
+            source: project.video,
+            caption: ""
+          }]
+        : [])
     ];
   }, [images, project.media, project.title, project.video]);
   const baseSlides = useMemo(() => {
@@ -93,7 +95,7 @@ export function ProjectListItem({ project }: { project: Project }) {
 
     return [
       { id: "meta", kind: "meta" as const },
-      { id: "cover", kind: "cover" as const },
+      ...(project.image ? [{ id: "cover", kind: "cover" as const }] : []),
       ...(hasDescription ? [{ id: "overview", kind: "overview" as const }] : []),
       ...mediaAfterCover.map((media, index) => ({
         id: `${media.type}-${index}`,
@@ -402,7 +404,7 @@ export function ProjectListItem({ project }: { project: Project }) {
         <section
           data-slide
           data-base-index={slide.baseIndex}
-          className="no-scrollbar flex h-full w-[calc(100vw-2.5rem)] max-w-none shrink-0 snap-center items-center overflow-y-auto bg-white px-5 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[560px] md:max-w-[520px] md:px-8"
+          className="flex h-full w-[calc(100vw-2.5rem)] max-w-none shrink-0 snap-center items-start overflow-y-auto bg-white px-5 py-8 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[560px] md:max-w-[520px] md:px-8"
         >
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-muted md:text-xs md:tracking-[0.22em]">Project Caption</p>
@@ -418,7 +420,7 @@ export function ProjectListItem({ project }: { project: Project }) {
         <section
           data-slide
           data-base-index={slide.baseIndex}
-          className="flex h-full w-[calc(100vw-2.5rem)] max-w-none shrink-0 snap-center items-center bg-white px-5 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[500px] md:max-w-[500px] md:px-8"
+          className="flex h-full w-[calc(100vw-2.5rem)] max-w-none shrink-0 snap-center items-start overflow-y-auto bg-white px-5 py-8 text-ink dark:bg-[#4a4a4a] dark:text-paper md:w-[500px] md:max-w-[500px] md:px-8"
         >
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-muted md:text-xs md:tracking-[0.22em]">
@@ -448,7 +450,7 @@ export function ProjectListItem({ project }: { project: Project }) {
             <div>
               <p className="text-[11px] uppercase tracking-[0.18em] text-muted md:text-xs md:tracking-[0.22em]">Map Location</p>
               <h3 className="mt-4 font-serif text-3xl leading-tight md:text-4xl">{project.title}</h3>
-              <p className="mt-4 text-base leading-7 text-ink/80 dark:text-paper/80">{project.mapLocation}</p>
+              <p className="mt-4 text-base leading-7 text-ink/80 dark:text-paper/80">{project.location}</p>
               {openUrl ? (
                 <a
                   href={openUrl}
@@ -602,13 +604,19 @@ export function ProjectListItem({ project }: { project: Project }) {
               className="group relative order-1 aspect-[16/10] overflow-hidden bg-black md:order-2"
               aria-label={`Expand ${project.title}`}
             >
-              <Image
-                src={project.image}
-                alt={project.title}
-                fill
-                sizes="(min-width: 768px) 860px, 100vw"
-                className="object-cover transition duration-500 group-hover:scale-[1.025]"
-              />
+              {project.image ? (
+                <Image
+                  src={project.image}
+                  alt={project.title}
+                  fill
+                  sizes="(min-width: 768px) 860px, 100vw"
+                  className="object-cover transition duration-500 group-hover:scale-[1.025]"
+                />
+              ) : (
+                <span className="flex h-full w-full items-center justify-center bg-neutral-100 text-xs uppercase tracking-[0.18em] text-muted dark:bg-[#4a4a4a]">
+                  No image
+                </span>
+              )}
             </button>
           </motion.div>
         ) : (

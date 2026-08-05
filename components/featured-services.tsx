@@ -40,15 +40,17 @@ export async function FeaturedServices() {
           {services.map((service, index) => (
             <Reveal key={service.title} delay={index * 0.06}>
               <article className="group overflow-hidden border border-black/10 bg-paper dark:border-white/10 dark:bg-charcoal">
-                <div className="relative aspect-[16/10] overflow-hidden bg-black">
-                  <Image
-                    src={service.image}
-                    alt={service.title}
-                    fill
-                    sizes="(min-width: 768px) 33vw, 100vw"
-                    className="object-cover transition duration-700 group-hover:scale-105"
-                  />
-                </div>
+                {service.image ? (
+                  <div className="relative aspect-[16/10] overflow-hidden bg-black">
+                    <Image
+                      src={service.image}
+                      alt={service.title}
+                      fill
+                      sizes="(min-width: 768px) 33vw, 100vw"
+                      className="object-cover transition duration-700 group-hover:scale-105"
+                    />
+                  </div>
+                ) : null}
                 <div className="p-6">
                   <h3 className="site-card-title">{service.title}</h3>
                   <p className="mt-4 text-sm leading-7 text-muted">{service.description}</p>

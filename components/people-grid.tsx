@@ -118,15 +118,17 @@ export function PeopleGrid({
                     className="overflow-hidden"
                   >
                     <div className="mt-8 grid gap-8 md:grid-cols-[320px_1fr] md:items-start">
-                      <div className="relative aspect-[4/5] overflow-hidden bg-black">
-                        <Image
-                          src={member.image}
-                          alt={member.name}
-                          fill
-                          sizes="(min-width: 768px) 320px, 100vw"
-                          className="object-cover grayscale"
-                        />
-                      </div>
+                      {member.image ? (
+                        <div className="relative aspect-[4/5] overflow-hidden bg-black">
+                          <Image
+                            src={member.image}
+                            alt={member.name}
+                            fill
+                            sizes="(min-width: 768px) 320px, 100vw"
+                            className="object-cover grayscale"
+                          />
+                        </div>
+                      ) : null}
                       <div className="max-w-2xl">
                         <p className="font-serif text-xl leading-tight md:text-2xl">{member.role || member.category}</p>
                         <p className="mt-5 whitespace-pre-line text-base leading-8 text-muted">{member.bio}</p>
@@ -141,7 +143,7 @@ export function PeopleGrid({
                           </p>
                           <p className="flex justify-between gap-5">
                             <span className="text-muted">Profile</span>
-                            <span>{member.profile || "Placeholder employee details"}</span>
+                            <span>{member.profile}</span>
                           </p>
                         </div>
                       </div>

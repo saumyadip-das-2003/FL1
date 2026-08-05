@@ -23,16 +23,18 @@ export function ProjectCard({ project, tall = false }: { project: Project; tall?
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className={`relative block w-full overflow-hidden bg-black text-left ${tall ? "aspect-[4/5]" : "aspect-[4/3]"}`}
+          className={`relative block w-full overflow-hidden bg-neutral-100 text-left dark:bg-[#4a4a4a] ${tall ? "aspect-[4/5]" : "aspect-[4/3]"}`}
           aria-label={`Open ${project.title} media`}
         >
-          <Image
-            src={project.image}
-            alt={project.title}
-            fill
-            sizes="(min-width: 1024px) 33vw, 100vw"
-            className="object-cover transition duration-700 ease-smooth group-hover:scale-110"
-          />
+          {project.image ? (
+            <Image
+              src={project.image}
+              alt={project.title}
+              fill
+              sizes="(min-width: 1024px) 33vw, 100vw"
+              className="object-cover transition duration-700 ease-smooth group-hover:scale-110"
+            />
+          ) : null}
           <div className="absolute inset-0 bg-black/0 transition duration-500 group-hover:bg-black/38" />
           <div className="absolute inset-x-0 bottom-0 translate-y-5 p-5 text-paper opacity-0 transition duration-500 group-hover:translate-y-0 group-hover:opacity-100">
             <p className="max-w-sm text-sm leading-6">{project.excerpt}</p>

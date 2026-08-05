@@ -38,15 +38,17 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <section className="relative h-[42vh] overflow-hidden bg-black md:h-[60vh]">
-        <Image
-          src={content.settings.aboutHeroImage}
-          alt="Architecture studio workspace"
-          fill
-          sizes="100vw"
-          className="object-cover"
-        />
-      </section>
+      {content.settings.aboutHeroImage ? (
+        <section className="relative h-[42vh] overflow-hidden bg-black md:h-[60vh]">
+          <Image
+            src={content.settings.aboutHeroImage}
+            alt="Architecture studio workspace"
+            fill
+            sizes="100vw"
+            className="object-cover"
+          />
+        </section>
+      ) : null}
 
       <section className="site-section">
         <div className="mx-auto grid max-w-7xl gap-16">
@@ -76,16 +78,18 @@ export default async function AboutPage() {
             <div className="grid gap-12">
               {messages.map((message, index) => (
                 <Reveal key={message.id} delay={index * 0.06}>
-                  <article className="grid gap-8 md:grid-cols-[260px_1fr] md:items-start">
-                    <div className="relative aspect-[4/5] overflow-hidden bg-black">
-                      <Image
-                        src={message.image}
-                        alt={message.name}
-                        fill
-                        sizes="(min-width: 768px) 260px, 100vw"
-                        className="object-cover grayscale"
-                      />
-                    </div>
+                  <article className={`grid gap-8 md:items-start ${message.image ? "md:grid-cols-[260px_1fr]" : ""}`}>
+                    {message.image ? (
+                      <div className="relative aspect-[4/5] overflow-hidden bg-black">
+                        <Image
+                          src={message.image}
+                          alt={message.name}
+                          fill
+                          sizes="(min-width: 768px) 260px, 100vw"
+                          className="object-cover grayscale"
+                        />
+                      </div>
+                    ) : null}
                     <div>
                       <p className="font-serif text-2xl leading-tight text-balance md:text-5xl">{message.name}</p>
                       <p className="mt-3 text-[11px] uppercase tracking-[0.18em] text-muted md:text-xs md:tracking-[0.24em]">{message.role}</p>

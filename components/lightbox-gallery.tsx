@@ -7,8 +7,12 @@ import type { Project } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
 export function LightboxGallery({ project }: { project: Project }) {
-  const images = [project.image, ...project.gallery];
-  const [active, setActive] = useState(images[0]);
+  const images = [project.image, ...project.gallery].filter(Boolean);
+  const [active, setActive] = useState(images[0] ?? "");
+
+  if (!images.length || !active) {
+    return null;
+  }
 
   return (
     <>

@@ -1,18 +1,16 @@
-const fallbackVideoId = "OP_fVIUTr9Y";
-
 export function getYouTubeId(source?: string) {
   if (!source) {
-    return fallbackVideoId;
+    return "";
   }
 
   try {
     const url = new URL(source);
     if (url.hostname.includes("youtu.be")) {
-      return url.pathname.replace("/", "") || fallbackVideoId;
+      return url.pathname.replace("/", "");
     }
 
     if (url.searchParams.get("v")) {
-      return url.searchParams.get("v") ?? fallbackVideoId;
+      return url.searchParams.get("v") ?? "";
     }
 
     const parts = url.pathname.split("/").filter(Boolean);
@@ -27,11 +25,14 @@ export function getYouTubeId(source?: string) {
     }
   }
 
-  return fallbackVideoId;
+  return "";
 }
 
 export function youtubeEmbedUrl(source?: string, autoplay = true) {
   const id = getYouTubeId(source);
+  if (!id) {
+    return "";
+  }
   const params = new URLSearchParams({
     autoplay: autoplay ? "1" : "0",
     mute: "1",

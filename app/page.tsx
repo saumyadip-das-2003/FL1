@@ -28,7 +28,9 @@ export default async function Home() {
         <Hero
           headline={content.settings.homeHeadline}
           tagline={content.settings.homeTagline}
+          mediaType={content.settings.homeMediaType}
           videoUrl={content.settings.homeVideoUrl}
+          imageUrl={content.settings.homeImageUrl}
         />
         <FeaturedProjects />
         <FeaturedServices />

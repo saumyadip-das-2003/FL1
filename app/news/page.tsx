@@ -26,9 +26,11 @@ export default async function NewsPage() {
                 href={`/news/${item.slug}`}
                 className="group grid gap-6 border-t border-black/10 pt-8 dark:border-white/10 md:grid-cols-[320px_1fr] md:items-start"
               >
-                <div className="relative aspect-[16/10] overflow-hidden bg-black">
-                  <Image src={item.image} alt={item.title} fill sizes="(min-width: 768px) 320px, 100vw" className="object-cover transition duration-500 group-hover:scale-105" />
-                </div>
+                {item.image ? (
+                  <div className="relative aspect-[16/10] overflow-hidden bg-black">
+                    <Image src={item.image} alt={item.title} fill sizes="(min-width: 768px) 320px, 100vw" className="object-cover transition duration-500 group-hover:scale-105" />
+                  </div>
+                ) : null}
                 <div className="max-w-3xl">
                   <p className="site-eyebrow">
                     {item.category} / {item.date}

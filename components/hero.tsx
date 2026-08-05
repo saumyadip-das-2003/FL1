@@ -2,35 +2,40 @@
 
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { getYouTubeId } from "@/lib/youtube";
 
 export function Hero({
   headline = "Formal spaces for a changing climate.",
   tagline = "A client-facing studio prototype for architecture, interiors, exteriors, and landscape portfolios.",
-  videoUrl = "https://youtu.be/OP_fVIUTr9Y"
+  mediaType = "none",
+  videoUrl = "",
+  imageUrl = ""
 }: {
   headline?: string;
   tagline?: string;
+  mediaType?: string;
   videoUrl?: string;
+  imageUrl?: string;
 }) {
   const videoId = getYouTubeId(videoUrl);
+  const showVideo = mediaType === "video" && Boolean(videoId);
+  const showImage = mediaType === "image" && Boolean(imageUrl);
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden bg-charcoal text-paper">
-      <div
-        className="absolute inset-0 bg-cover bg-center md:hidden"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=2200&q=80')"
-        }}
-      />
-      <iframe
-        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&playsinline=1&rel=0`}
-        title="Architecture studio background video"
-        className="pointer-events-none absolute left-1/2 top-1/2 block aspect-video h-[120vh] min-h-full w-[213.34vh] min-w-full -translate-x-1/2 -translate-y-1/2 object-cover"
-        allow="autoplay; encrypted-media; picture-in-picture"
-      />
+      {showImage && (
+        <Image src={imageUrl} alt="" fill priority sizes="100vw" className="object-cover" />
+      )}
+      {showVideo && (
+        <iframe
+          src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&playsinline=1&rel=0`}
+          title="Architecture studio background video"
+          className="pointer-events-none absolute left-1/2 top-1/2 block aspect-video h-[120vh] min-h-full w-[213.34vh] min-w-full -translate-x-1/2 -translate-y-1/2 object-cover"
+          allow="autoplay; encrypted-media; picture-in-picture"
+        />
+      )}
       <div className="absolute inset-0 bg-gradient-to-b from-black/28 via-black/18 to-black/72" />
       <div className="relative z-10 flex min-h-[100svh] items-end px-5 pb-12 pt-24 md:px-8 md:pb-24 md:pt-32">
         <div className="mx-auto w-full max-w-7xl">

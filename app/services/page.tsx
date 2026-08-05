@@ -68,15 +68,17 @@ export default async function ServicesPage() {
           {services.map((service, index) => (
             <Reveal key={service.title} delay={index * 0.04}>
               <article className="group overflow-hidden border border-black/10 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-soft dark:border-white/10 dark:bg-[#4a4a4a]">
-                <div className="relative aspect-[16/10] overflow-hidden bg-black">
-                  <Image
-                    src={service.image}
-                    alt={service.title}
-                    fill
-                    sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
-                    className="object-cover transition duration-700 group-hover:scale-105"
-                  />
-                </div>
+                {service.image ? (
+                  <div className="relative aspect-[16/10] overflow-hidden bg-black">
+                    <Image
+                      src={service.image}
+                      alt={service.title}
+                      fill
+                      sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+                      className="object-cover transition duration-700 group-hover:scale-105"
+                    />
+                  </div>
+                ) : null}
                 <div className="p-6 md:p-8">
                   <h2 className="site-card-title">{service.title}</h2>
                   <p className="mt-4 text-base leading-8 text-muted">{service.description}</p>

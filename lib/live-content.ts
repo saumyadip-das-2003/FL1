@@ -34,21 +34,22 @@ function categoryFromSection(section: string): ProjectCategory {
 }
 
 export function adminProjectToProject(project: AdminProject): Project {
-  const imageMedia = project.media.filter((media) => media.type === "image");
-  const firstVideo = project.media.find((media) => media.type === "video");
+  const imageMedia = project.media.filter((media) => media.type === "image" && media.source.trim());
+  const firstVideo = project.media.find((media) => media.type === "video" && media.source.trim());
 
   return {
     slug: project.id,
     title: project.title,
     location: project.location,
     year: project.year,
+    client: project.client,
     status: project.status,
     category: categoryFromSection(project.section),
     section: project.section as ProjectSection,
     subsection: project.subsection,
     image: project.image,
-    gallery: imageMedia.map((media) => media.source).filter((source) => source !== project.image),
-    media: project.media.map((media) => ({
+    gallery: imageMedia.map((media) => media.source).filter((source) => source && source !== project.image),
+    media: project.media.filter((media) => media.type === "caption" || media.source.trim()).map((media) => ({
       type: media.type,
       source: media.source,
       caption: media.caption

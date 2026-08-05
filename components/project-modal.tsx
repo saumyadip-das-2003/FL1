@@ -7,8 +7,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Project } from "@/lib/data";
 import { cn } from "@/lib/utils";
-
-const placeholderVideoId = "OP_fVIUTr9Y";
+import { getYouTubeId } from "@/lib/youtube";
 
 export function ProjectModal({
   project,
@@ -21,12 +20,13 @@ export function ProjectModal({
   onClose: () => void;
   initialImage?: string;
 }) {
-  const images = useMemo(() => [project.image, ...project.gallery], [project.gallery, project.image]);
-  const [activeImage, setActiveImage] = useState(images[0]);
+  const images = useMemo(() => [project.image, ...project.gallery].filter(Boolean), [project.gallery, project.image]);
+  const [activeImage, setActiveImage] = useState(images[0] ?? "");
+  const videoId = getYouTubeId(project.video);
 
   useEffect(() => {
     if (open) {
-      setActiveImage(initialImage ?? images[0]);
+      setActiveImage(initialImage ?? images[0] ?? "");
       document.body.style.overflow = "hidden";
     }
 
@@ -55,14 +55,16 @@ export function ProjectModal({
           >
             <div className="flex min-h-0 flex-col bg-black">
               <div className="relative min-h-0 flex-1">
-                <Image
-                  src={activeImage}
-                  alt={project.title}
-                  fill
-                  sizes="(min-width: 1024px) 68vw, 100vw"
-                  className="object-contain"
-                  priority
-                />
+                {activeImage ? (
+                  <Image
+                    src={activeImage}
+                    alt={project.title}
+                    fill
+                    sizes="(min-width: 1024px) 68vw, 100vw"
+                    className="object-contain"
+                    priority
+                  />
+                ) : null}
               </div>
               <div className="flex gap-2 overflow-x-auto border-t border-white/10 bg-black p-3">
                 {images.map((image, index) => (
@@ -108,24 +110,24 @@ export function ProjectModal({
                 </div>
                 <div className="flex justify-between gap-6">
                   <dt className="text-muted">Media</dt>
-                  <dd>{images.length} images / 1 video</dd>
+                  <dd>{images.length} images{videoId ? " / 1 video" : ""}</dd>
                 </div>
               </dl>
 
               <p className="mt-7 text-base leading-8 text-muted">{project.description}</p>
 
-              <div className="mt-8">
+              {videoId ? <div className="mt-8">
                 <p className="mb-3 text-xs uppercase tracking-[0.22em] text-muted">Project Video</p>
                 <div className="aspect-video overflow-hidden bg-black">
                   <iframe
-                    src={`https://www.youtube.com/embed/${placeholderVideoId}?autoplay=0&mute=1&controls=1&modestbranding=1&rel=0`}
+                    src={`https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1&controls=1&modestbranding=1&rel=0`}
                     title={`${project.title} video`}
                     className="h-full w-full"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   />
                 </div>
-              </div>
+              </div> : null}
 
               <Link
                 href={`/projects/${project.slug}`}
