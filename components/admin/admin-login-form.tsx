@@ -26,10 +26,12 @@ export function AdminLoginForm() {
     event.preventDefault();
     setBusy(true);
     setError("");
+    let navigating = false;
 
     try {
       if (!firebaseApiKey) {
         window.localStorage.setItem(adminTokenStorageKey, "demo-admin-token");
+        navigating = true;
         router.push("/admin");
         return;
       }
@@ -54,11 +56,14 @@ export function AdminLoginForm() {
         window.localStorage.setItem(adminRefreshTokenStorageKey, payload.refreshToken);
       }
       window.localStorage.setItem(adminEmailStorageKey, email.trim().toLowerCase());
+      navigating = true;
       router.push("/admin");
     } catch (loginError) {
       setError(loginError instanceof Error ? loginError.message : "Login failed.");
     } finally {
-      setBusy(false);
+      if (!navigating) {
+        setBusy(false);
+      }
     }
   }
 
@@ -103,6 +108,21 @@ export function AdminLoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="mt-8 grid gap-4 text-left">
+      {busy && (
+        <div className="fixed inset-0 z-[160] grid place-items-center bg-paper/70 backdrop-blur-[2px] dark:bg-[#3f3f3f]/70">
+          <div className="flex flex-col items-center gap-5">
+            <div className="route-square-loader" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-ink dark:text-paper">
+              Loading
+            </p>
+          </div>
+        </div>
+      )}
       <label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-muted">
         Email
         <input

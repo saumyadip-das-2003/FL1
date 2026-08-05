@@ -357,6 +357,7 @@ export function AdminPanel() {
   const [token, setToken] = useState("");
   const [busy, setBusy] = useState(false);
   const [loadingContent, setLoadingContent] = useState(true);
+  const [logoutBusy, setLogoutBusy] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [customSubsection, setCustomSubsection] = useState("");
@@ -1133,6 +1134,7 @@ export function AdminPanel() {
   }
 
   function logout() {
+    setLogoutBusy(true);
     window.localStorage.removeItem(adminTokenStorageKey);
     window.localStorage.removeItem(adminRefreshTokenStorageKey);
     window.localStorage.removeItem(adminEmailStorageKey);
@@ -2891,14 +2893,18 @@ export function AdminPanel() {
 
   return (
     <main className="min-h-screen bg-neutral-100 text-ink transition-colors dark:bg-[#3a3a3a] dark:text-paper">
-      {(busy || loadingContent) && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-white/55 backdrop-blur-sm dark:bg-black/35">
-          <div className="flex flex-col items-center gap-5 rounded-xl border border-black/10 bg-white/75 px-10 py-8 text-center shadow-soft dark:border-white/10 dark:bg-[#4a4a4a]/80">
-            <div className="route-square-loader" aria-hidden="true" />
-            <div>
-              <p className="font-serif text-2xl">{content.settings.companyName}</p>
-              <p className="mt-2 text-xs uppercase tracking-[0.2em] text-muted">{busy ? "Saving changes" : "Loading admin"}</p>
+      {(busy || loadingContent || logoutBusy) && (
+        <div className="fixed inset-0 z-[160] grid place-items-center bg-white/65 backdrop-blur-[2px] dark:bg-[#3f3f3f]/65">
+          <div className="flex flex-col items-center gap-5">
+            <div className="route-square-loader" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+              <span />
             </div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-ink dark:text-paper">
+              {logoutBusy ? "Logging out" : busy ? "Saving" : "Loading"}
+            </p>
           </div>
         </div>
       )}
