@@ -2,39 +2,18 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(false);
-  const loadingStartedAt = useRef(0);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    const minVisibleTime = 520;
-    const elapsed = Date.now() - loadingStartedAt.current;
-    const remaining = Math.max(180, minVisibleTime - elapsed);
-
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      setIsLoading(false);
-    }, remaining);
+    setIsLoading(false);
   }, [pathname]);
 
   useEffect(() => {
     function startLoading() {
-      loadingStartedAt.current = Date.now();
       setIsLoading(true);
     }
 
