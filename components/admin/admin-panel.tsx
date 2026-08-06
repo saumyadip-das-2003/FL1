@@ -29,7 +29,7 @@ import {
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { type SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { adminEmailStorageKey, adminRefreshTokenStorageKey, adminTokenStorageKey, protectedAdminEmail } from "@/lib/admin-auth";
 import {
   adminStorageKey,
@@ -349,7 +349,17 @@ function MediaPreview({ type = "image", source, title, caption }: { type?: Admin
 export function AdminPanel() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-  const [content, setContent] = useState<AdminContent>(() => createSeedAdminContent());
+  const [content, setContentState] = useState<AdminContent>(() => createSeedAdminContent());
+  const contentRef = useRef(content);
+  const setContent = useCallback((next: SetStateAction<AdminContent>) => {
+    setContentState((current) => {
+      const base = contentRef.current ?? current;
+      const resolved =
+        typeof next === "function" ? (next as (current: AdminContent) => AdminContent)(base) : next;
+      contentRef.current = resolved;
+      return resolved;
+    });
+  }, []);
   const [tab, setTab] = useState<Tab>("general");
   const [selectedId, setSelectedId] = useState<string>("");
   const [savedAt, setSavedAt] = useState("");
@@ -389,6 +399,10 @@ export function AdminPanel() {
   const [visibleUserPasswords, setVisibleUserPasswords] = useState<Record<string, boolean>>({});
   const [socialPlacementStatus, setSocialPlacementStatus] = useState("");
   const isProtectedOwnerSession = adminEmail.trim().toLowerCase() === protectedAdminEmail;
+
+  useEffect(() => {
+    contentRef.current = content;
+  }, [content]);
 
   useEffect(() => {
     const storedToken = window.localStorage.getItem(adminTokenStorageKey);
@@ -481,8 +495,14 @@ export function AdminPanel() {
     setSidebarOpen(true);
   }
 
-  async function saveContent(next = content) {
-    const normalizedNext = normalizeContent(next);
+  async function saveContent(next?: AdminContent) {
+    const sourceContent = next ?? contentRef.current;
+    if (loadingContent) {
+      setStatus("Content is still loading. Please try again in a moment.");
+      return;
+    }
+
+    const normalizedNext = normalizeContent(sourceContent);
     setBusy(true);
     setContent(normalizedNext);
     window.localStorage.setItem(adminStorageKey, JSON.stringify(normalizedNext));
