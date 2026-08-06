@@ -185,7 +185,7 @@ function normalizeContent(content: AdminContent): AdminContent {
       ...seed.settings,
       ...content.settings
     },
-    projects: (content.projects?.length ? content.projects : seed.projects).map((project, index) => ({
+    projects: (content.projects ?? seed.projects).map((project, index) => ({
       ...seed.projects[index % seed.projects.length],
       ...project,
       client: project.client ?? "",
@@ -199,7 +199,7 @@ function normalizeContent(content: AdminContent): AdminContent {
     })),
     services: content.services ?? seed.services,
     news: content.news ?? seed.news,
-    people: (content.people?.length ? content.people : seed.people).map(normalizePerson)
+    people: (content.people ?? seed.people).map(normalizePerson)
   };
 }
 
