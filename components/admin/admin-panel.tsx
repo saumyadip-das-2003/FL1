@@ -539,12 +539,13 @@ export function AdminPanel() {
     window.localStorage.setItem(adminStorageKey, JSON.stringify(normalizedNext));
 
     try {
+      const authToken = await getFreshAdminToken();
       const response = await fetch("/api/admin/content", {
         method: "PUT",
         cache: "no-store",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
         },
         body: JSON.stringify(normalizedNext)
       });
@@ -1196,12 +1197,13 @@ export function AdminPanel() {
 
     setBusy(true);
     try {
+      const authToken = await getFreshAdminToken();
       const response = await fetch(
         `/api/admin/content?collection=${encodeURIComponent(deletePrompt.key)}&id=${encodeURIComponent(deletePrompt.id)}`,
         {
           method: "DELETE",
           cache: "no-store",
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined
+          headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined
         }
       );
       const result = await readAdminApiResponse<{ mode?: string; content?: AdminContent }>(response);
