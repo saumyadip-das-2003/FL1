@@ -46,7 +46,8 @@ export async function getSanityContent(mode: SanityReadMode = "fresh"): Promise<
   });
 
   if (!response.ok) {
-    throw new Error("Unable to read Sanity content.");
+    const details = await response.text();
+    throw new Error(`Unable to read Sanity content. Sanity returned ${response.status}: ${details.slice(0, 220)}`);
   }
 
   const payload = (await response.json()) as { result?: AdminContent };
@@ -77,7 +78,8 @@ export async function saveSanityContent(content: AdminContent) {
   });
 
   if (!response.ok) {
-    throw new Error("Unable to save Sanity content.");
+    const details = await response.text();
+    throw new Error(`Unable to save Sanity content. Sanity returned ${response.status}: ${details.slice(0, 220)}`);
   }
 
   revalidateTag(siteContentCacheTag);

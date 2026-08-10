@@ -48,7 +48,6 @@ import {
 } from "@/lib/admin-demo-data";
 import { normalizeProjectTaxonomy, serializeProjectTaxonomy, projectTaxonomy, type ProjectSection } from "@/lib/data";
 import { normalizeSocialPlatform, socialPlatformGroups } from "@/lib/social-platforms";
-import { youtubeEmbedUrl } from "@/lib/youtube";
 
 type Tab = "general" | "home" | "projects" | "services" | "news" | "people" | "about" | "contact" | "settings";
 type CollectionKey = "projects" | "services" | "news" | "people";
@@ -226,6 +225,28 @@ function itemImage(item: EditableItem) {
   return "image" in item ? item.image : "";
 }
 
+function itemSearchText(item: EditableItem) {
+  if ("title" in item) {
+    const base = [item.title, item.description].filter(Boolean);
+
+    if ("location" in item) {
+      base.push(item.location, item.year, item.client, item.status, item.section, item.subsection);
+    }
+
+    if ("date" in item) {
+      base.push(item.date, item.category);
+    }
+
+    if ("tags" in item) {
+      base.push(item.tags);
+    }
+
+    return base.join(" ").toLowerCase();
+  }
+
+  return [item.name, item.category, item.role, item.bio, item.studio, item.office, item.profile].join(" ").toLowerCase();
+}
+
 function Field({
   label,
   children
@@ -329,12 +350,10 @@ function MediaPreview({ type = "image", source, title, caption }: { type?: Admin
 
   if (type === "video") {
     return (
-      <iframe
-        src={youtubeEmbedUrl(source, false)}
-        title={title}
-        className="h-32 w-48 rounded-md bg-black"
-        allow="autoplay; encrypted-media; picture-in-picture"
-      />
+      <span className="flex h-32 w-32 flex-col items-center justify-center rounded-md bg-black p-3 text-center text-paper">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-paper/60">Video</span>
+        <span className="mt-2 line-clamp-3 break-all text-xs leading-5 text-paper/85">{source}</span>
+      </span>
     );
   }
 
@@ -356,6 +375,7 @@ export function AdminPanel() {
     const resolved = typeof next === "function" ? (next as (current: AdminContent) => AdminContent)(base) : next;
     contentRef.current = resolved;
     setContentState(resolved);
+    return resolved;
   }, []);
   const [tab, setTab] = useState<Tab>("general");
   const [selectedId, setSelectedId] = useState<string>("");
@@ -514,14 +534,14 @@ export function AdminPanel() {
         body: JSON.stringify(normalizedNext)
       });
 
+      const result = await readAdminApiResponse<{ mode?: string }>(response);
       if (!response.ok) {
-        throw new Error("Remote save failed.");
+        throw new Error(result.error || `Remote save failed with status ${response.status}.`);
       }
 
-      const result = (await response.json()) as { mode?: string };
       setStatus(result.mode === "sanity" ? "Saved to Sanity." : "Saved locally. Add Sanity keys for production storage.");
-    } catch {
-      setStatus("Saved locally only. Check Firebase/Sanity environment keys.");
+    } catch (error) {
+      setStatus(`Saved locally only. ${error instanceof Error ? error.message : "Check Firebase/Sanity environment keys."}`);
     } finally {
       setSavedAt(new Date().toLocaleTimeString());
       setBusy(false);
@@ -1146,8 +1166,12 @@ export function AdminPanel() {
   }
 
   function deleteItem(key: CollectionKey, id: string) {
-    setContent((current) => ({ ...current, [key]: current[key].filter((item) => item.id !== id) as never }));
+    const nextContent = setContent((current) => ({
+      ...current,
+      [key]: current[key].filter((item) => item.id !== id) as never
+    }));
     setSelectedId("");
+    void saveContent(nextContent);
   }
 
   function logout() {
@@ -2400,9 +2424,9 @@ export function AdminPanel() {
 
   function renderCollection(key: CollectionKey) {
     const normalizedQuery = collectionQuery.trim().toLowerCase();
-    const visibleItems = content[key].filter((item) =>
-      JSON.stringify(item).toLowerCase().includes(normalizedQuery)
-    );
+    const visibleItems = normalizedQuery
+      ? content[key].filter((item) => itemSearchText(item).includes(normalizedQuery))
+      : content[key];
 
     return (
       <section className="grid gap-6 xl:grid-cols-[340px_1fr]">

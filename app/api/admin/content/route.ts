@@ -32,8 +32,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const content = await getSanityContent();
-  return NextResponse.json({ content });
+  try {
+    const content = await getSanityContent();
+    return NextResponse.json({ content });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to read admin content." },
+      { status: 500 }
+    );
+  }
 }
 
 export async function PUT(request: NextRequest) {
@@ -41,8 +48,15 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const content = (await request.json()) as AdminContent;
-  const result = await saveSanityContent(content);
+  try {
+    const content = (await request.json()) as AdminContent;
+    const result = await saveSanityContent(content);
 
-  return NextResponse.json(result);
+    return NextResponse.json(result);
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to save admin content." },
+      { status: 500 }
+    );
+  }
 }
