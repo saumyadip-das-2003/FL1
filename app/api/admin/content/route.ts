@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFirebaseApiKey } from "@/lib/admin-auth";
-import { getSanityContent, saveSanityContent } from "@/lib/sanity-http";
+import { deleteSanityContentItem, getSanityContent, saveSanityContent } from "@/lib/sanity-http";
 import type { AdminContent } from "@/lib/admin-demo-data";
 
 export const dynamic = "force-dynamic";
@@ -81,20 +81,9 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    const content = await getSanityContent();
-    const before = content[collection].length;
-    const nextContent: AdminContent = {
-      ...content,
-      [collection]: content[collection].filter((item) => item.id !== id)
-    };
+    const content = await deleteSanityContentItem(collection, id);
 
-    if (nextContent[collection].length === before) {
-      return NextResponse.json({ error: "The selected item was not found in Sanity." }, { status: 404 });
-    }
-
-    const result = await saveSanityContent(nextContent);
-
-    return NextResponse.json({ ...result, content: nextContent });
+    return NextResponse.json({ mode: "sanity", content });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to delete admin content." },
