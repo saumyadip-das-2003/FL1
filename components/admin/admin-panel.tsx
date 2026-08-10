@@ -60,6 +60,11 @@ type AdminUser = {
   createdAt?: string;
   lastSignInAt?: string;
 };
+type DeletePrompt = {
+  key: CollectionKey;
+  id: string;
+  title: string;
+} | null;
 
 const sidebarItems: { id: Tab; label: string; icon: typeof Settings }[] = [
   { id: "general", label: "General", icon: Settings },
@@ -420,6 +425,7 @@ export function AdminPanel() {
   const [userPasswordDrafts, setUserPasswordDrafts] = useState<Record<string, string>>({});
   const [visibleUserPasswords, setVisibleUserPasswords] = useState<Record<string, boolean>>({});
   const [socialPlacementStatus, setSocialPlacementStatus] = useState("");
+  const [deletePrompt, setDeletePrompt] = useState<DeletePrompt>(null);
   const isProtectedOwnerSession = adminEmail.trim().toLowerCase() === protectedAdminEmail;
 
   useEffect(() => {
@@ -1175,12 +1181,48 @@ export function AdminPanel() {
   }
 
   function deleteItem(key: CollectionKey, id: string) {
-    const nextContent = updateDraft((current) => ({
-      ...current,
-      [key]: current[key].filter((item) => item.id !== id) as never
-    }));
-    setSelectedId("");
-    void saveContent(nextContent);
+    const item = contentRef.current[key].find((entry) => entry.id === id);
+    setDeletePrompt({
+      key,
+      id,
+      title: item ? itemTitle(item as EditableItem) : id
+    });
+  }
+
+  async function confirmDeleteItem() {
+    if (!deletePrompt) {
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const response = await fetch(
+        `/api/admin/content?collection=${encodeURIComponent(deletePrompt.key)}&id=${encodeURIComponent(deletePrompt.id)}`,
+        {
+          method: "DELETE",
+          cache: "no-store",
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined
+        }
+      );
+      const result = await readAdminApiResponse<{ mode?: string; content?: AdminContent }>(response);
+
+      if (!response.ok || !result.content) {
+        throw new Error(result.error || `Delete failed with status ${response.status}.`);
+      }
+
+      const normalized = normalizeContent(result.content);
+      userEditedRef.current = false;
+      setContent(normalized);
+      window.localStorage.setItem(adminStorageKey, JSON.stringify(normalized));
+      setSelectedId("");
+      setDeletePrompt(null);
+      setStatus(result.mode === "sanity" ? "Deleted from Sanity." : "Deleted locally. Add Sanity keys for production storage.");
+    } catch (error) {
+      setStatus(`Delete failed. ${error instanceof Error ? error.message : "Please check Firebase/Sanity settings."}`);
+    } finally {
+      setSavedAt(new Date().toLocaleTimeString());
+      setBusy(false);
+    }
   }
 
   function logout() {
@@ -2955,6 +2997,35 @@ export function AdminPanel() {
             <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-ink dark:text-paper">
               {logoutBusy ? "Logging out" : busy ? "Saving" : "Loading"}
             </p>
+          </div>
+        </div>
+      )}
+      {deletePrompt && (
+        <div className="fixed inset-0 z-[170] grid place-items-center bg-black/45 px-4 backdrop-blur-[2px]">
+          <div className="w-full max-w-md rounded-lg border border-black/10 bg-white p-6 shadow-soft dark:border-white/10 dark:bg-[#4a4a4a]">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-red-600">Confirm delete</p>
+            <h2 className="mt-3 font-serif text-3xl leading-tight">Are you sure?</h2>
+            <p className="mt-4 text-sm leading-7 text-muted">
+              Do you want to delete <span className="font-semibold text-ink dark:text-paper">{deletePrompt.title}</span> from {deletePrompt.key}? This will remove it from Sanity after confirmation.
+            </p>
+            <div className="mt-7 flex flex-wrap justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setDeletePrompt(null)}
+                disabled={busy}
+                className="rounded-md border border-black/10 px-4 py-3 text-xs uppercase tracking-[0.14em] transition hover:bg-neutral-100 disabled:opacity-50 dark:border-white/10 dark:hover:bg-neutral-700/50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteItem}
+                disabled={busy}
+                className="rounded-md bg-red-600 px-4 py-3 text-xs uppercase tracking-[0.14em] text-white transition hover:bg-red-700 disabled:opacity-50"
+              >
+                {busy ? "Deleting" : "Delete"}
+              </button>
+            </div>
           </div>
         </div>
       )}
