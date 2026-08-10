@@ -1,7 +1,10 @@
 import { createSeedAdminContent, type AdminContent } from "@/lib/admin-demo-data";
+import { revalidateTag } from "next/cache";
 
 const sanityApiVersion = "2025-02-19";
 const contentDocumentId = "modernAgeStudioContent";
+export const siteContentCacheTag = "modern-age-studio-content";
+type SanityReadMode = "fresh" | "cached";
 
 function getSanityConfig() {
   return {
@@ -21,16 +24,25 @@ export function isSanityConfigured() {
   return Boolean(projectId && dataset && token);
 }
 
-export async function getSanityContent(): Promise<AdminContent> {
+export async function getSanityContent(mode: SanityReadMode = "fresh"): Promise<AdminContent> {
   if (!isSanityConfigured()) {
     return createSeedAdminContent();
   }
 
   const { dataset, token } = getSanityConfig();
   const query = encodeURIComponent(`*[_id == "${contentDocumentId}"][0].content`);
+  const requestOptions: RequestInit & { next?: { revalidate?: number; tags?: string[] } } = {
+    headers: { Authorization: `Bearer ${token}` }
+  };
+
+  if (mode === "cached") {
+    requestOptions.next = { revalidate: 300, tags: [siteContentCacheTag] };
+  } else {
+    requestOptions.cache = "no-store";
+  }
+
   const response = await fetch(`${sanityBaseUrl()}/data/query/${dataset}?query=${query}`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: "no-store"
+    ...requestOptions
   });
 
   if (!response.ok) {
@@ -68,6 +80,7 @@ export async function saveSanityContent(content: AdminContent) {
     throw new Error("Unable to save Sanity content.");
   }
 
+  revalidateTag(siteContentCacheTag);
   return { mode: "sanity" as const };
 }
 

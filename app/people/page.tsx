@@ -2,8 +2,6 @@ import { PeopleGrid } from "@/components/people-grid";
 import { Reveal } from "@/components/reveal";
 import { adminPersonToTeamMember, getLiveContent } from "@/lib/live-content";
 
-export const dynamic = "force-dynamic";
-
 export default async function PeoplePage() {
   const content = await getLiveContent();
   const team = content.people.map(adminPersonToTeamMember);

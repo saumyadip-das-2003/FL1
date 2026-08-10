@@ -2,8 +2,6 @@ import Image from "next/image";
 import { Reveal } from "@/components/reveal";
 import { getLiveContent, parseAboutMessages } from "@/lib/live-content";
 
-export const dynamic = "force-dynamic";
-
 export default async function AboutPage() {
   const content = await getLiveContent();
   const messages = parseAboutMessages(content);

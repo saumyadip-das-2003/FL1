@@ -352,13 +352,10 @@ export function AdminPanel() {
   const [content, setContentState] = useState<AdminContent>(() => createSeedAdminContent());
   const contentRef = useRef(content);
   const setContent = useCallback((next: SetStateAction<AdminContent>) => {
-    setContentState((current) => {
-      const base = contentRef.current ?? current;
-      const resolved =
-        typeof next === "function" ? (next as (current: AdminContent) => AdminContent)(base) : next;
-      contentRef.current = resolved;
-      return resolved;
-    });
+    const base = contentRef.current;
+    const resolved = typeof next === "function" ? (next as (current: AdminContent) => AdminContent)(base) : next;
+    contentRef.current = resolved;
+    setContentState(resolved);
   }, []);
   const [tab, setTab] = useState<Tab>("general");
   const [selectedId, setSelectedId] = useState<string>("");

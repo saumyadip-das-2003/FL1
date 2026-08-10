@@ -27,8 +27,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const companyName = content.settings.companyName || "Modern Age Studio";
   const tagline = content.settings.tagline || "Architecture Studio";
   const logoUrl = content.settings.logoUrl;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.modernagestudio.com";
 
   return {
+    metadataBase: new URL(siteUrl),
     title: `${companyName} | ${tagline}`,
     description: content.settings.homeTagline || "A polished architecture firm portfolio.",
     icons: logoUrl

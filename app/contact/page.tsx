@@ -6,8 +6,6 @@ import { ContactSocialSections } from "@/components/contact-social-sections";
 import { mapEmbedUrl, mapOpenUrl } from "@/lib/map-links";
 import { parseSocialLinks } from "@/lib/social-platforms";
 
-export const dynamic = "force-dynamic";
-
 export default async function ContactPage() {
   const content = await getLiveContent();
   const offices = content.settings.offices.split(/\n+/).map((office) => office.trim()).filter(Boolean);

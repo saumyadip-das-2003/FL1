@@ -8,9 +8,6 @@ import { Reveal } from "@/components/reveal";
 import { adminProjectToProject, getLiveContent } from "@/lib/live-content";
 import { getYouTubeId } from "@/lib/youtube";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 export default async function ProjectDetailPage({ params }: { params: { slug: string } }) {
   const content = await getLiveContent();
   const projects = content.projects.map(adminProjectToProject);

@@ -6,8 +6,6 @@ import { adminServiceTags, getLiveContent, parseLinkItems, parseTextItems } from
 import { selectedSocialLinks } from "@/lib/social-platforms";
 import type { AdminLinkItem, AdminSocialLink } from "@/lib/admin-demo-data";
 
-export const dynamic = "force-dynamic";
-
 function isShown(value?: string) {
   return value !== "false";
 }

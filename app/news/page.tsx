@@ -3,8 +3,6 @@ import Link from "next/link";
 import { Reveal } from "@/components/reveal";
 import { adminNewsToNewsItem, getLiveContent } from "@/lib/live-content";
 
-export const dynamic = "force-dynamic";
-
 export default async function NewsPage() {
   const content = await getLiveContent();
   const newsItems = content.news.map(adminNewsToNewsItem);

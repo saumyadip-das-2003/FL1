@@ -9,17 +9,18 @@ import {
   type AdminService,
   type AdminTextItem
 } from "@/lib/admin-demo-data";
+import { cache } from "react";
 import { getSanityContent } from "@/lib/sanity-http";
 import type { Project, ProjectCategory, ProjectSection } from "@/lib/data";
 import type { NewsItem } from "@/lib/news";
 
-export async function getLiveContent(): Promise<AdminContent> {
+export const getLiveContent = cache(async (): Promise<AdminContent> => {
   try {
-    return await getSanityContent();
+    return await getSanityContent("cached");
   } catch {
     return createSeedAdminContent();
   }
-}
+});
 
 function categoryFromSection(section: string): ProjectCategory {
   if (section === "Interiors") {

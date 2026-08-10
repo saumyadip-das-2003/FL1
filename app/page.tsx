@@ -7,8 +7,6 @@ import { Hero } from "@/components/hero";
 import { HomeIntro } from "@/components/home-intro";
 import { getLiveContent } from "@/lib/live-content";
 
-export const dynamic = "force-dynamic";
-
 export default async function Home() {
   const content = await getLiveContent();
   const stats = [

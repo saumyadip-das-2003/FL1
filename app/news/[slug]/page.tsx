@@ -5,9 +5,6 @@ import { ArrowLeft } from "lucide-react";
 import { Reveal } from "@/components/reveal";
 import { adminNewsToNewsItem, getLiveContent } from "@/lib/live-content";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 export default async function NewsDetailPage({ params }: { params: { slug: string } }) {
   const content = await getLiveContent();
   const newsItems = content.news.map(adminNewsToNewsItem);
