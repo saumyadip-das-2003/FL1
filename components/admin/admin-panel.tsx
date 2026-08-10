@@ -370,6 +370,7 @@ export function AdminPanel() {
   const { theme, setTheme } = useTheme();
   const [content, setContentState] = useState<AdminContent>(() => createSeedAdminContent());
   const contentRef = useRef(content);
+  const userEditedRef = useRef(false);
   const setContent = useCallback((next: SetStateAction<AdminContent>) => {
     const base = contentRef.current;
     const resolved = typeof next === "function" ? (next as (current: AdminContent) => AdminContent)(base) : next;
@@ -377,6 +378,10 @@ export function AdminPanel() {
     setContentState(resolved);
     return resolved;
   }, []);
+  const updateDraft = useCallback((next: SetStateAction<AdminContent>) => {
+    userEditedRef.current = true;
+    return setContent(next);
+  }, [setContent]);
   const [tab, setTab] = useState<Tab>("general");
   const [selectedId, setSelectedId] = useState<string>("");
   const [savedAt, setSavedAt] = useState("");
@@ -441,6 +446,7 @@ export function AdminPanel() {
     async function loadRemoteContent() {
       try {
         const response = await fetch("/api/admin/content", {
+          cache: "no-store",
           headers: storedToken ? { Authorization: `Bearer ${storedToken}` } : undefined
         });
 
@@ -450,9 +456,11 @@ export function AdminPanel() {
 
         const payload = (await response.json()) as { content: AdminContent };
         const normalized = normalizeContent(payload.content);
-        setContent(normalized);
-        window.localStorage.setItem(adminStorageKey, JSON.stringify(normalized));
-        setStatus("Connected to Sanity content.");
+        if (!userEditedRef.current) {
+          setContent(normalized);
+          window.localStorage.setItem(adminStorageKey, JSON.stringify(normalized));
+          setStatus("Connected to Sanity content.");
+        }
       } catch {
         setStatus("Using local demo content until Sanity/Firebase keys are available.");
       } finally {
@@ -521,12 +529,13 @@ export function AdminPanel() {
 
     const normalizedNext = normalizeContent(sourceContent);
     setBusy(true);
-    setContent(normalizedNext);
+    updateDraft(normalizedNext);
     window.localStorage.setItem(adminStorageKey, JSON.stringify(normalizedNext));
 
     try {
       const response = await fetch("/api/admin/content", {
         method: "PUT",
+        cache: "no-store",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -549,7 +558,7 @@ export function AdminPanel() {
   }
 
   function updateSettings(key: keyof AdminContent["settings"], value: string) {
-    setContent((current) => ({
+    updateDraft((current) => ({
       ...current,
       settings: { ...current.settings, [key]: value }
     }));
@@ -692,7 +701,7 @@ export function AdminPanel() {
   }
 
   function updateItem(key: CollectionKey, id: string, field: string, value: string) {
-    setContent((current) => ({
+    updateDraft((current) => ({
       ...current,
       [key]: current[key].map((item) => (item.id === id ? { ...item, [field]: value } : item))
     }));
@@ -771,7 +780,7 @@ export function AdminPanel() {
     const uploadedUrl = await uploadImageFile(file);
 
     if (uploadedUrl) {
-      setContent((current) => ({
+      updateDraft((current) => ({
         ...current,
         news: current.news.map((item) => {
           if (item.id !== newsId) {
@@ -790,7 +799,7 @@ export function AdminPanel() {
   }
 
   function appendNewsGalleryImage(newsId: string, imageUrl: string) {
-    setContent((current) => ({
+    updateDraft((current) => ({
       ...current,
       news: current.news.map((item) =>
         item.id === newsId
@@ -1033,7 +1042,7 @@ export function AdminPanel() {
   }
 
   function updateProjectMedia(projectId: string, mediaId: string, field: keyof AdminMedia, value: string) {
-    setContent((current) => ({
+    updateDraft((current) => ({
       ...current,
       projects: current.projects.map((project) =>
         project.id === projectId
@@ -1063,7 +1072,7 @@ export function AdminPanel() {
       caption: ""
     };
 
-    setContent((current) => ({
+    updateDraft((current) => ({
       ...current,
       projects: current.projects.map((project) => {
         if (project.id !== projectId) {
@@ -1079,7 +1088,7 @@ export function AdminPanel() {
   }
 
   function deleteProjectMedia(projectId: string, mediaId: string) {
-    setContent((current) => ({
+    updateDraft((current) => ({
       ...current,
       projects: current.projects.map((project) =>
         project.id === projectId ? { ...project, media: project.media.filter((media) => media.id !== mediaId) } : project
@@ -1088,7 +1097,7 @@ export function AdminPanel() {
   }
 
   function moveProjectMedia(projectId: string, mediaId: string, direction: -1 | 1) {
-    setContent((current) => ({
+    updateDraft((current) => ({
       ...current,
       projects: current.projects.map((project) => {
         if (project.id !== projectId) {
@@ -1101,7 +1110,7 @@ export function AdminPanel() {
   }
 
   function reorderProjectMedia(projectId: string, fromId: string, toId: string) {
-    setContent((current) => ({
+    updateDraft((current) => ({
       ...current,
       projects: current.projects.map((project) => {
         if (project.id !== projectId) {
@@ -1144,14 +1153,14 @@ export function AdminPanel() {
   }
 
   function moveItem(key: CollectionKey, id: string, direction: -1 | 1) {
-    setContent((current) => ({
+    updateDraft((current) => ({
       ...current,
       [key]: moveById(current[key] as EditableItem[], id, direction) as never
     }));
   }
 
   function reorderItem(key: CollectionKey, fromId: string, toId: string) {
-    setContent((current) => ({
+    updateDraft((current) => ({
       ...current,
       [key]: moveToId(current[key] as EditableItem[], fromId, toId) as never
     }));
@@ -1161,12 +1170,12 @@ export function AdminPanel() {
     const base = emptyItem[key];
     const id = makeId("title" in base ? base.title : "item");
     const nextItem = { ...base, id } as EditableItem;
-    setContent((current) => ({ ...current, [key]: [nextItem, ...current[key]] as never }));
+    updateDraft((current) => ({ ...current, [key]: [nextItem, ...current[key]] as never }));
     setSelectedId(id);
   }
 
   function deleteItem(key: CollectionKey, id: string) {
-    const nextContent = setContent((current) => ({
+    const nextContent = updateDraft((current) => ({
       ...current,
       [key]: current[key].filter((item) => item.id !== id) as never
     }));
