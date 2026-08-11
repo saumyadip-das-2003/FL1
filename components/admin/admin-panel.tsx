@@ -550,12 +550,16 @@ export function AdminPanel() {
         body: JSON.stringify(normalizedNext)
       });
 
-      const result = await readAdminApiResponse<{ mode?: string }>(response);
+      const result = await readAdminApiResponse<{ mode?: string; documents?: number }>(response);
       if (!response.ok) {
         throw new Error(result.error || `Remote save failed with status ${response.status}.`);
       }
 
-      setStatus(result.mode === "sanity" ? "Saved to Sanity." : "Saved locally. Add Sanity keys for production storage.");
+      setStatus(
+        result.mode === "sanity"
+          ? `Saved to Sanity${typeof result.documents === "number" ? ` as ${result.documents} split documents` : ""}.`
+          : "Saved locally. Add Sanity keys for production storage."
+      );
     } catch (error) {
       setStatus(`Saved locally only. ${error instanceof Error ? error.message : "Check Firebase/Sanity environment keys."}`);
     } finally {
@@ -1206,7 +1210,7 @@ export function AdminPanel() {
           headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined
         }
       );
-      const result = await readAdminApiResponse<{ mode?: string; content?: AdminContent }>(response);
+      const result = await readAdminApiResponse<{ mode?: string; content?: AdminContent; documents?: number }>(response);
 
       if (!response.ok || !result.content) {
         throw new Error(result.error || `Delete failed with status ${response.status}.`);
@@ -1218,7 +1222,11 @@ export function AdminPanel() {
       window.localStorage.setItem(adminStorageKey, JSON.stringify(normalized));
       setSelectedId("");
       setDeletePrompt(null);
-      setStatus(result.mode === "sanity" ? "Deleted from Sanity." : "Deleted locally. Add Sanity keys for production storage.");
+      setStatus(
+        result.mode === "sanity"
+          ? `Deleted from Sanity${typeof result.documents === "number" ? `; ${result.documents} split documents remain` : ""}.`
+          : "Deleted locally. Add Sanity keys for production storage."
+      );
     } catch (error) {
       setStatus(`Delete failed. ${error instanceof Error ? error.message : "Please check Firebase/Sanity settings."}`);
     } finally {

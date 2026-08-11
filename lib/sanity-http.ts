@@ -169,6 +169,11 @@ async function hasSplitContent() {
   return count > 0;
 }
 
+export async function getSanitySplitDocumentCount() {
+  const query = `count(*[_id == "${settingsDocumentId}" || _type in ["${Object.values(collectionTypes).join('","')}"]])`;
+  return sanityQuery<number>(query, "fresh");
+}
+
 export async function saveSanityContent(content: AdminContent) {
   if (!isSanityConfigured()) {
     return { mode: "demo" as const };
@@ -208,8 +213,9 @@ export async function saveSanityContent(content: AdminContent) {
     });
 
   await sanityMutate(mutations);
+  const documents = await getSanitySplitDocumentCount();
   revalidateTag(siteContentCacheTag);
-  return { mode: "sanity" as const };
+  return { mode: "sanity" as const, documents };
 }
 
 export async function deleteSanityContentItem(key: CollectionKey, id: string): Promise<AdminContent> {
