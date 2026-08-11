@@ -33,15 +33,18 @@ async function isProtectedUser(uid: string) {
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { uid: string } }) {
+type UserRouteContext = { params: { uid: string } | Promise<{ uid: string }> };
+
+export async function PATCH(request: NextRequest, { params }: UserRouteContext) {
   try {
     const blocked = await guard(request);
     if (blocked) {
       return blocked;
     }
 
+    const { uid } = await Promise.resolve(params);
     const body = (await request.json()) as { email?: string; password?: string; disabled?: boolean };
-    const protectedUser = await isProtectedUser(params.uid);
+    const protectedUser = await isProtectedUser(uid);
     const update: { email?: string; password?: string; disabled?: boolean } = {};
 
     if (body.email?.trim()) {
@@ -69,7 +72,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { uid: s
       return NextResponse.json({ error: "No user changes provided." }, { status: 400 });
     }
 
-    const user = await getFirebaseAdminAuth().updateUser(params.uid, update);
+    const user = await getFirebaseAdminAuth().updateUser(uid, update);
     return NextResponse.json({
       user: {
         uid: user.uid,
@@ -85,18 +88,19 @@ export async function PATCH(request: NextRequest, { params }: { params: { uid: s
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { uid: string } }) {
+export async function DELETE(request: NextRequest, { params }: UserRouteContext) {
   try {
     const blocked = await guard(request);
     if (blocked) {
       return blocked;
     }
 
-    if (await isProtectedUser(params.uid)) {
+    const { uid } = await Promise.resolve(params);
+    if (await isProtectedUser(uid)) {
       return NextResponse.json({ error: "Protected owner account cannot be deleted." }, { status: 403 });
     }
 
-    await getFirebaseAdminAuth().deleteUser(params.uid);
+    await getFirebaseAdminAuth().deleteUser(uid);
     return NextResponse.json({ ok: true });
   } catch (error) {
     return errorResponse(error, "Unable to delete admin user.");

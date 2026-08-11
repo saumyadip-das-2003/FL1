@@ -1,11 +1,14 @@
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
+const nextMajor = Number(require("next/package.json").version.split(".")[0]);
+
+const pdfTracingConfig = {
+  "/admin/catalogue.pdf": ["./node_modules/pdfkit/js/data/**/*"]
+};
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ["pdfkit"],
-    outputFileTracingIncludes: {
-      "/admin/catalogue.pdf": ["./node_modules/pdfkit/js/data/**/*"]
-    }
-  },
   images: {
     remotePatterns: [
       {
@@ -23,5 +26,15 @@ const nextConfig = {
     ]
   }
 };
+
+if (nextMajor >= 15) {
+  nextConfig.serverExternalPackages = ["pdfkit"];
+  nextConfig.outputFileTracingIncludes = pdfTracingConfig;
+} else {
+  nextConfig.experimental = {
+    serverComponentsExternalPackages: ["pdfkit"],
+    outputFileTracingIncludes: pdfTracingConfig
+  };
+}
 
 export default nextConfig;

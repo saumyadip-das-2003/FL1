@@ -12,6 +12,7 @@ const sanityApiVersion = "2025-02-19";
 const legacyContentDocumentId = "modernAgeStudioContent";
 const settingsDocumentId = "modernAgeStudioSettings";
 export const siteContentCacheTag = "modern-age-studio-content";
+const refreshSiteContentTag = revalidateTag as (tag: string, profile?: string) => void;
 
 type SanityReadMode = "fresh" | "cached";
 type CollectionKey = "projects" | "services" | "news" | "people";
@@ -195,7 +196,7 @@ export async function saveSanityContent(content: AdminContent) {
   await sanityMutate(mutations);
   const documents =
     1 + content.projects.length + content.services.length + content.news.length + content.people.length;
-  revalidateTag(siteContentCacheTag);
+  refreshSiteContentTag(siteContentCacheTag, "max");
   return { mode: "sanity" as const, documents };
 }
 
@@ -206,7 +207,7 @@ export async function deleteSanityContentItem(key: CollectionKey, id: string) {
 
   const documentId = collectionDocId(key, id);
   await sanityMutate([{ delete: { id: documentId } }]);
-  revalidateTag(siteContentCacheTag);
+  refreshSiteContentTag(siteContentCacheTag, "max");
   return { mode: "sanity" as const };
 }
 

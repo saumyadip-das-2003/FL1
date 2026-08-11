@@ -42,9 +42,17 @@ export function HomeIntro({
   }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(enterSite, 1000);
-    return () => window.clearTimeout(timer);
-  });
+    const timer = window.setTimeout(() => {
+      setEntering(true);
+      window.setTimeout(() => setIntroOpen(false), 1040);
+    }, 1000);
+    const fallback = window.setTimeout(() => setIntroOpen(false), 2600);
+
+    return () => {
+      window.clearTimeout(timer);
+      window.clearTimeout(fallback);
+    };
+  }, []);
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 640px)");
