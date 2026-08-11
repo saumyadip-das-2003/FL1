@@ -158,17 +158,6 @@ export async function getSanityContent(mode: SanityReadMode = "fresh"): Promise<
   return result.legacy ?? seed;
 }
 
-async function existingCollectionDocIds() {
-  const query = `*[_type in ["${Object.values(collectionTypes).join('","')}"]]._id`;
-  return sanityQuery<string[]>(query, "fresh");
-}
-
-async function hasSplitContent() {
-  const query = `count(*[_id == "${settingsDocumentId}" || _type in ["${Object.values(collectionTypes).join('","')}"]])`;
-  const count = await sanityQuery<number>(query, "fresh");
-  return count > 0;
-}
-
 export async function getSanitySplitDocumentCount() {
   const query = `count(*[_id == "${settingsDocumentId}" || _type in ["${Object.values(collectionTypes).join('","')}"]])`;
   return sanityQuery<number>(query, "fresh");
@@ -179,7 +168,6 @@ export async function saveSanityContent(content: AdminContent) {
     return { mode: "demo" as const };
   }
 
-  const desiredIds = new Set<string>();
   const mutations: unknown[] = [
     {
       createOrReplace: {
@@ -193,7 +181,6 @@ export async function saveSanityContent(content: AdminContent) {
   (Object.keys(collectionTypes) as CollectionKey[]).forEach((key) => {
     content[key].forEach((item, index) => {
       const _id = collectionDocId(key, item.id);
-      desiredIds.add(_id);
       mutations.push({
         createOrReplace: {
           _id,
@@ -205,48 +192,22 @@ export async function saveSanityContent(content: AdminContent) {
     });
   });
 
-  const existingIds = await existingCollectionDocIds();
-  existingIds
-    .filter((id) => !desiredIds.has(id))
-    .forEach((id) => {
-      mutations.push({ delete: { id } });
-    });
-
   await sanityMutate(mutations);
-  const documents = await getSanitySplitDocumentCount();
+  const documents =
+    1 + content.projects.length + content.services.length + content.news.length + content.people.length;
   revalidateTag(siteContentCacheTag);
   return { mode: "sanity" as const, documents };
 }
 
-export async function deleteSanityContentItem(key: CollectionKey, id: string): Promise<AdminContent> {
+export async function deleteSanityContentItem(key: CollectionKey, id: string) {
   if (!isSanityConfigured()) {
-    const content = createSeedAdminContent();
-    return {
-      ...content,
-      [key]: content[key].filter((item) => item.id !== id)
-    };
-  }
-
-  const currentContent = await getSanityContent("fresh");
-  const before = currentContent[key].length;
-  const nextContent: AdminContent = {
-    ...currentContent,
-    [key]: currentContent[key].filter((item) => item.id !== id)
-  };
-
-  if (nextContent[key].length === before) {
-    throw new Error("The selected item was not found in Sanity.");
-  }
-
-  if (!(await hasSplitContent())) {
-    await saveSanityContent(nextContent);
-    return getSanityContent("fresh");
+    return { mode: "demo" as const };
   }
 
   const documentId = collectionDocId(key, id);
   await sanityMutate([{ delete: { id: documentId } }]);
   revalidateTag(siteContentCacheTag);
-  return getSanityContent("fresh");
+  return { mode: "sanity" as const };
 }
 
 export async function uploadSanityImage(file: File) {

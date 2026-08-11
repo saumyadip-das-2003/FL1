@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFirebaseApiKey } from "@/lib/admin-auth";
-import { deleteSanityContentItem, getSanityContent, getSanitySplitDocumentCount, saveSanityContent } from "@/lib/sanity-http";
+import { deleteSanityContentItem, getSanityContent, saveSanityContent } from "@/lib/sanity-http";
 import type { AdminContent } from "@/lib/admin-demo-data";
 
 export const dynamic = "force-dynamic";
@@ -81,10 +81,9 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    const content = await deleteSanityContentItem(collection, id);
-    const documents = await getSanitySplitDocumentCount();
+    const result = await deleteSanityContentItem(collection, id);
 
-    return NextResponse.json({ mode: "sanity", content, documents });
+    return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to delete admin content." },

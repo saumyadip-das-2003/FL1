@@ -539,7 +539,7 @@ export function AdminPanel() {
     window.localStorage.setItem(adminStorageKey, JSON.stringify(normalizedNext));
 
     try {
-      const authToken = await getFreshAdminToken();
+      const authToken = token || window.localStorage.getItem(adminTokenStorageKey) || "";
       const response = await fetch("/api/admin/content", {
         method: "PUT",
         cache: "no-store",
@@ -1201,7 +1201,7 @@ export function AdminPanel() {
 
     setBusy(true);
     try {
-      const authToken = await getFreshAdminToken();
+      const authToken = token || window.localStorage.getItem(adminTokenStorageKey) || "";
       const response = await fetch(
         `/api/admin/content?collection=${encodeURIComponent(deletePrompt.key)}&id=${encodeURIComponent(deletePrompt.id)}`,
         {
@@ -1210,13 +1210,18 @@ export function AdminPanel() {
           headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined
         }
       );
-      const result = await readAdminApiResponse<{ mode?: string; content?: AdminContent; documents?: number }>(response);
+      const result = await readAdminApiResponse<{ mode?: string }>(response);
 
-      if (!response.ok || !result.content) {
+      if (!response.ok) {
         throw new Error(result.error || `Delete failed with status ${response.status}.`);
       }
 
-      const normalized = normalizeContent(result.content);
+      const normalized = normalizeContent({
+        ...contentRef.current,
+        [deletePrompt.key]: contentRef.current[deletePrompt.key].filter((item) => item.id !== deletePrompt.id)
+      });
+      const documents =
+        1 + normalized.projects.length + normalized.services.length + normalized.news.length + normalized.people.length;
       userEditedRef.current = false;
       setContent(normalized);
       window.localStorage.setItem(adminStorageKey, JSON.stringify(normalized));
@@ -1224,7 +1229,7 @@ export function AdminPanel() {
       setDeletePrompt(null);
       setStatus(
         result.mode === "sanity"
-          ? `Deleted from Sanity${typeof result.documents === "number" ? `; ${result.documents} split documents remain` : ""}.`
+          ? `Deleted from Sanity; ${documents} split documents remain.`
           : "Deleted locally. Add Sanity keys for production storage."
       );
     } catch (error) {
