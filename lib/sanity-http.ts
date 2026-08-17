@@ -65,7 +65,7 @@ function requestOptions(mode: SanityReadMode): RequestInit & { next?: { revalida
   };
 
   if (mode === "cached") {
-    options.next = { revalidate: 300, tags: [siteContentCacheTag] };
+    options.next = { revalidate: 60, tags: [siteContentCacheTag] };
   } else {
     options.cache = "no-store";
   }
@@ -73,10 +73,30 @@ function requestOptions(mode: SanityReadMode): RequestInit & { next?: { revalida
   return options;
 }
 
+function sanityReadTimeoutMs() {
+  return process.env.NEXT_PHASE === "phase-production-build" ? 2500 : 8000;
+}
+
 async function sanityQuery<T>(query: string, mode: SanityReadMode): Promise<T> {
   const { dataset } = getSanityConfig();
   const baseUrl = sanityBaseUrl(mode !== "cached");
-  const response = await fetch(`${baseUrl}/data/query/${dataset}?query=${encodeURIComponent(query)}`, requestOptions(mode));
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), sanityReadTimeoutMs());
+
+  let response: Response;
+  try {
+    response = await fetch(`${baseUrl}/data/query/${dataset}?query=${encodeURIComponent(query)}`, {
+      ...requestOptions(mode),
+      signal: controller.signal
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("Sanity content request timed out.");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
 
   if (!response.ok) {
     const details = await response.text();

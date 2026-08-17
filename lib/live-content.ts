@@ -16,7 +16,7 @@ import type { NewsItem } from "@/lib/news";
 
 export const getLiveContent = cache(async (): Promise<AdminContent> => {
   try {
-    return await getSanityContent("fresh");
+    return await getSanityContent("cached");
   } catch {
     return createSeedAdminContent();
   }

@@ -4,7 +4,6 @@ import {
   ArrowDown,
   ArrowUp,
   ChevronUp,
-  Download,
   Eye,
   EyeOff,
   GripVertical,
@@ -2311,13 +2310,6 @@ export function AdminPanel() {
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <Link
-                href="/admin/catalogue.pdf"
-                target="_blank"
-                className="inline-flex items-center gap-2 rounded-md border border-black/10 px-4 py-3 text-xs uppercase tracking-[0.14em] dark:border-white/10"
-              >
-                <Download size={15} /> Export Catalogue
-              </Link>
-              <Link
                 href="/"
                 target="_blank"
                 className="inline-flex items-center gap-2 rounded-md border border-black/10 px-4 py-3 text-xs uppercase tracking-[0.14em] dark:border-white/10"
@@ -3104,14 +3096,6 @@ export function AdminPanel() {
             <button onClick={() => saveContent()} disabled={busy} className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-xs uppercase tracking-[0.14em] text-paper disabled:opacity-60 dark:bg-paper dark:text-ink">
               <Save size={15} /> {busy ? "Saving" : "Save"}
             </button>
-            <Link
-              href="/admin/catalogue.pdf"
-              target="_blank"
-              title="Download a complete PDF company catalogue."
-              className="hidden items-center gap-2 rounded-md border border-black/10 px-4 py-2 text-xs uppercase tracking-[0.14em] dark:border-white/10 md:inline-flex"
-            >
-              <Download size={15} /> Export Catalogue
-            </Link>
             <button onClick={logout} className="inline-flex items-center gap-2 rounded-md border border-black/10 px-4 py-2 text-xs uppercase tracking-[0.14em] dark:border-white/10">
               <LogOut size={15} /> Logout
             </button>
